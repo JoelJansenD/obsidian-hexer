@@ -3,7 +3,7 @@
     "compilerOptions": {
         "types": [
             "@wdio/globals/types",
-            "@wdio/mocha-framework",
+            "@wdio/cucumber-framework",
             "wdio-obsidian-service"
         ]
     },

@@ -1,9 +1,12 @@
 import path from 'path';
+import { globSync } from 'node:fs';
+
+const stepDefinitions = globSync('test/e2e/steps/**/*.ts').map((f) => path.resolve(f));
 
 export const config: WebdriverIO.Config = {
     runner: 'local',
-    framework: 'mocha',
-    specs: ['./test/e2e/**/*.e2e.ts'],
+    framework: 'cucumber',
+    specs: ['./test/e2e/**/*.feature'],
     maxInstances: 1,
 
     capabilities: [{
@@ -20,8 +23,8 @@ export const config: WebdriverIO.Config = {
     reporters: ['obsidian'],
 
     cacheDir: path.resolve('.obsidian-cache'),
-    mochaOpts: {
-        ui: 'bdd',
+    cucumberOpts: {
+        import: stepDefinitions,
         timeout: 60000,
     },
     logLevel: 'warn',
