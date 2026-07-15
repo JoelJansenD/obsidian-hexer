@@ -128,6 +128,16 @@ dist
 # pnpm
 .pnpm-store
 
+# Obsidian plugin build output
+main.js
+*.js.map
+
+# Test artifacts
+test-results/
+.wdio-obsidian/
+.obsidian-cache/
+
+
 # yarn v3
 .pnp.*
 .yarn/*

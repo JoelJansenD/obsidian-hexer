@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "types": [
+            "@wdio/globals/types",
+            "@wdio/cucumber-framework",
+            "wdio-obsidian-service"
+        ]
+    },
+    "include": ["wdio.conf.ts", "test/**/*.ts"]
+}
