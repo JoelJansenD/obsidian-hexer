@@ -18,3 +18,12 @@
     flex: 0 0 20%;
     background: lightblue;
 }
+
+.hexer-tools {
+    position: absolute;
+    right: var(--size-4-3);
+    bottom: var(--size-4-3);
+    height: 100px;
+    width: 50px;
+    background: lime;
+}
