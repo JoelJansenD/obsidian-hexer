@@ -4,12 +4,14 @@ import type { RainbowHexState } from '../logic/RainbowHex';
 import type { Viewport } from '../view/rendering/Viewport';
 import { renderHex } from '../view/rendering/renderHex';
 import { paint } from '../view/rendering/paint';
+import Editor from '../view/editor/Editor';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
 export class HexerView extends ItemView {
     private state: RainbowHexState;
     private canvas!: HTMLCanvasElement;
+    private editor?: Editor;
 
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
@@ -31,32 +33,36 @@ export class HexerView extends ItemView {
     async onOpen(): Promise<void> {
         this.contentEl.empty();
 
-        this.canvas = this.contentEl.createEl('canvas');
-        this.canvas.width = 400;
-        this.canvas.height = 400;
-        this.canvas.style.cursor = 'pointer';
-        this.canvas.setAttribute('data-color-index', String(this.state.colorIndex));
+        if (!this.editor) {
+            this.editor = new Editor(this.contentEl);
+        }
 
-        this.registerDomEvent(this.canvas, 'click', () => {
-            this.state = cycle(this.state);
-            this.canvas.setAttribute('data-color-index', String(this.state.colorIndex));
-            this.draw();
-        });
+        // this.canvas = this.contentEl.createEl('canvas');
+        // this.canvas.width = 400;
+        // this.canvas.height = 400;
+        // this.canvas.style.cursor = 'pointer';
+        // this.canvas.setAttribute('data-color-index', String(this.state.colorIndex));
 
-        this.draw();
+        // this.registerDomEvent(this.canvas, 'click', () => {
+        //     this.state = cycle(this.state);
+        //     this.canvas.setAttribute('data-color-index', String(this.state.colorIndex));
+        //     this.draw();
+        // });
+
+        // this.draw();
     }
 
     async onClose(): Promise<void> {
         // canvas and event listeners are cleaned up by Obsidian
     }
 
-    private draw(): void {
-        const ctx = this.canvas.getContext('2d');
-        if (!ctx) return;
+    // private draw(): void {
+    //     const ctx = this.canvas.getContext('2d');
+    //     if (!ctx) return;
 
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    //     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        const viewport: Viewport = { width: this.canvas.width, height: this.canvas.height };
-        paint(ctx, renderHex(this.state, viewport));
-    }
+    //     const viewport: Viewport = { width: this.canvas.width, height: this.canvas.height };
+    //     paint(ctx, renderHex(this.state, viewport));
+    // }
 }
