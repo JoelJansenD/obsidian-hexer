@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createHexState, cycle } from '../logic/RainbowHex';
+import { createHexState, cycle } from '../../logic/RainbowHex';
 import { RAINBOW_COLORS } from './colors';
 import { renderHex } from './renderHex';
 

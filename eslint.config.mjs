@@ -16,7 +16,7 @@ export default tseslint.config(
             'boundaries/root-path': __dirname,
             'boundaries/elements': [
                 { type: 'logic',     pattern: 'src/logic',     partialMatch: false },
-                { type: 'rendering', pattern: 'src/rendering', partialMatch: false },
+                { type: 'rendering', pattern: 'src/view/rendering', partialMatch: false },
                 { type: 'obsidian',  pattern: 'src/obsidian',  partialMatch: false },
             ],
             'import/resolver': {

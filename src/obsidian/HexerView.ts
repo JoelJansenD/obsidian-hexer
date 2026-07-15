@@ -1,9 +1,9 @@
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import { createHexState, cycle } from '../logic/RainbowHex';
 import type { RainbowHexState } from '../logic/RainbowHex';
-import type { Viewport } from '../rendering/Viewport';
-import { renderHex } from '../rendering/renderHex';
-import { paint } from '../rendering/paint';
+import type { Viewport } from '../view/rendering/Viewport';
+import { renderHex } from '../view/rendering/renderHex';
+import { paint } from '../view/rendering/paint';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 

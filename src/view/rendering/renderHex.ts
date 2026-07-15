@@ -1,4 +1,4 @@
-import type { RainbowHexState } from '../logic/RainbowHex';
+import type { RainbowHexState } from '../../logic/RainbowHex';
 import type { DrawCommand } from './DrawCommand';
 import type { Viewport } from './Viewport';
 import { RAINBOW_COLORS } from './colors';
