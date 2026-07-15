@@ -1,5 +1,6 @@
 import { Mountain, Shapes } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
+import ColourPalette from "./ColourPalette";
 
 export type Layer = 'terrain' | 'icon';
 
@@ -14,12 +15,7 @@ export default class EditorSidebar {
     private build() {
         const sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
-        const terrainSection = new EditorSidebarSection(sidebarEl, {
-            icon: Mountain,
-            label: 'Terrain',
-            onSelect: () => this.select('terrain'),
-        });
-        terrainSection.contentEl.createEl('div', { text: 'Terrain layers go here' });
+        const terrainSection = this.buildTerrain(sidebarEl);
 
         const iconSection = new EditorSidebarSection(sidebarEl, {
             icon: Shapes,
@@ -30,6 +26,17 @@ export default class EditorSidebar {
 
         this._sections.set('terrain', terrainSection);
         this._sections.set('icon', iconSection);
+    }
+
+    private buildTerrain(sidebarEl: HTMLElement) {
+        const terrainSection = new EditorSidebarSection(sidebarEl, {
+            icon: Mountain,
+            label: 'Terrain',
+            onSelect: () => this.select('terrain'),
+        });
+        
+        new ColourPalette(terrainSection.contentEl);
+        return terrainSection;
     }
 
     /** Expands the section for the given layer and collapses all others. Selecting the active layer collapses it. */
