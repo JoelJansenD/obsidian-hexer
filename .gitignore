@@ -131,6 +131,7 @@ dist
 
 # Obsidian plugin build output
 main.js
+/styles.css
 *.js.map
 
 # Test artifacts
