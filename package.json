@@ -1,0 +1,19 @@
+{
+  "name": "obsidian-hexer",
+  "version": "0.1.0",
+  "description": "A hex map editor plugin for Obsidian.",
+  "homepage": "https://github.com/JoelJansenD/obsidian-hexer#readme",
+  "bugs": {
+    "url": "https://github.com/JoelJansenD/obsidian-hexer/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoelJansenD/obsidian-hexer.git"
+  },
+  "license": "GPL-3.0",
+  "author": "JoelJansenD",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
