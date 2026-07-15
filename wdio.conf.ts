@@ -1,3 +1,5 @@
+/// <reference types="@wdio/types" />
+/// <reference types="wdio-obsidian-service" />
 import path from 'path';
 import { globSync } from 'node:fs';
 
