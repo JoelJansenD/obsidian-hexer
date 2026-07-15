@@ -135,6 +135,7 @@ main.js
 # Test artifacts
 test-results/
 .wdio-obsidian/
+.obsidian-cache/
 
 
 # yarn v3

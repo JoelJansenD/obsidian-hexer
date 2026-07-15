@@ -18,10 +18,15 @@
     "build": "tsc --noEmit && node esbuild.config.mjs production",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "e2e2": "wdio run ./wdio.conf.ts tsConfigPath=./tsconfig.e2e.json"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^26.1.1",
+    "@wdio/cli": "^9.29.1",
+    "@wdio/local-runner": "^9.29.1",
+    "@wdio/mocha-framework": "^9.29.1",
     "builtin-modules": "^5.3.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.7.0",
@@ -30,6 +35,8 @@
     "tslib": "^2.8.1",
     "typescript": "~5.8",
     "typescript-eslint": "^8.64.0",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wdio-obsidian-reporter": "^3.1.1",
+    "wdio-obsidian-service": "^3.1.1"
   }
 }
