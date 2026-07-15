@@ -19,6 +19,9 @@ export default tseslint.config(
                 { type: 'rendering', pattern: 'src/rendering', partialMatch: false },
                 { type: 'obsidian',  pattern: 'src/obsidian',  partialMatch: false },
             ],
+            'import/resolver': {
+                typescript: { alwaysTryTypes: true },
+            },
         },
         rules: {
             'boundaries/dependencies': ['error', {

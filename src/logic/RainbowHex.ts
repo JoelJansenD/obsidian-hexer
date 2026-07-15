@@ -11,13 +11,3 @@ export function createHexState(): RainbowHexState {
 export function cycle(state: RainbowHexState): RainbowHexState {
     return { colorIndex: (state.colorIndex + 1) % RAINBOW_LENGTH };
 }
-
-
-
-
-
-
-
-
-
-
