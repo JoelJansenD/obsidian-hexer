@@ -1,6 +1,6 @@
 import { Mountain, Shapes } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
-import ColourPalette from "./ColourPalette";
+import ColourPalette from "../../components/ColourPalette";
 
 export type Layer = 'terrain' | 'icon';
 
