@@ -17,32 +17,34 @@
 
 .hexer-sidebar {
     flex: 0 0 20%;
-
-    background: lightblue;
+    color: var(--text-normal);
+    font-size: var(--font-smaller);
+    font-weight: var(--font-semibold);
 }
 
-.hexer-sidebar-section {
+.hexer-sidebar-section-header {
+    align-items: center;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    padding: 8px 12px;
     width: 100%;
-
-    background: yellow;
+    
+    &:hover {
+        background: var(--background-modifier-hover);
+        cursor: pointer;
+    }
 }
 
-.hexer-sidebar-section-icon {
-    background: green;
+.hexer-sidebar-section-icon,
+.hexer-sidebar-section-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hexer-sidebar-section-label {
     text-align: center;
-
-    background: orange;
-}
-
-.hexer-sidebar-section-chevron {
-    background: pink;
 }
 
 .hexer-tools {
@@ -52,5 +54,4 @@
 
     height: 100px;
     width: 50px;
-    background: lime;
 }
