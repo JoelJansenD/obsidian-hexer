@@ -3,22 +3,27 @@ import { ChevronDown, createElement, type IconNode } from 'lucide';
 interface EditorSidebarSectionOptions {
     icon?: IconNode;
     label?: string;
-    expanded?: boolean;
+    onSelect?: () => void;
 }
 
 export default class EditorSidebarSection {
     private _sectionEl!: HTMLElement;
     private _contentEl!: HTMLElement;
-    private _expanded: boolean;
+    private _expanded = false;
 
     constructor(private _parentEl: HTMLElement, private _options?: EditorSidebarSectionOptions) {
-        this._expanded = _options?.expanded ?? false;
         this.build();
     }
 
     /** Container for the section's collapsible content. Append children here. */
     get contentEl(): HTMLElement {
         return this._contentEl;
+    }
+
+    /** Controls whether the section is expanded. Managed by the parent sidebar. */
+    setExpanded(expanded: boolean): void {
+        this._expanded = expanded;
+        this._sectionEl.classList.toggle('is-expanded', expanded);
     }
 
     private build() {
@@ -42,16 +47,7 @@ export default class EditorSidebarSection {
         const contentEl = this._sectionEl.createEl('div', { cls: 'hexer-sidebar-section-content' });
         this._contentEl = contentEl.createEl('div', { cls: 'hexer-sidebar-section-content-inner' });
 
-        sectionHeaderEl.addEventListener('click', () => this.toggle());
+        sectionHeaderEl.addEventListener('click', () => this._options?.onSelect?.());
         this.setExpanded(this._expanded);
-    }
-
-    private toggle(): void {
-        this.setExpanded(!this._expanded);
-    }
-
-    private setExpanded(expanded: boolean): void {
-        this._expanded = expanded;
-        this._sectionEl.classList.toggle('is-expanded', expanded);
     }
 }

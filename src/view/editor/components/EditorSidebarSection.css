@@ -30,13 +30,13 @@
 }
 
 .hexer-sidebar-section-chevron {
-    transition: transform 150ms ease;
+    transition: transform 250ms ease;
 }
 
 .hexer-sidebar-section-content {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 200ms ease;
+    transition: grid-template-rows 300ms ease;
 }
 
 .hexer-sidebar-section.is-expanded .hexer-sidebar-section-content {
@@ -47,7 +47,7 @@
     overflow: hidden;
     min-height: 0;
     padding: 0 12px;
-    transition: padding 200ms ease;
+    transition: padding 300ms ease;
 }
 
 .hexer-sidebar-section.is-expanded .hexer-sidebar-section-content-inner {
