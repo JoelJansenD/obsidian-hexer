@@ -1,0 +1,7 @@
+.hexer-canvas-area {
+    flex: 1 1 0;
+    position: relative;
+    overflow: hidden;
+
+    background: red;
+}
