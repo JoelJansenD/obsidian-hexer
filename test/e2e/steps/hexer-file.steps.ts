@@ -1,5 +1,5 @@
 import { Then, When } from '@cucumber/cucumber';
-import { fileExplorer, openContextMenu } from '../support/obsidian.page';
+import { fileExplorer, openContextMenu, workspace } from '../support/obsidian.page';
 
 const HEXER_EXT = '.hexer.md';
 
@@ -23,5 +23,5 @@ Then('will have a valid datetime format', async () => {
 });
 
 Then('the Hexer view will be opened for the new file', async () => {
-    await fileExplorer.fileByExtension(HEXER_EXT).waitForExist({ timeout: 5000 });
+    await workspace.leafByType('hexer-view').waitForExist({ timeout: 5000 });
 });

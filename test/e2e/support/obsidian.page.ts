@@ -4,6 +4,10 @@ export const fileExplorer = {
     menuItem: (title: string) => browser.$('.menu-item-title=' + title),
 };
 
+export const workspace = {
+    leafByType: (type: string) => browser.$(`.workspace-leaf-content[data-type="${type}"]`),
+};
+
 export async function openContextMenu(target: ReturnType<typeof browser.$>): Promise<void> {
     await target.click({ button: 'right' });
 }
