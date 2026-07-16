@@ -1,5 +1,5 @@
 @import "./view/components/ColourPalette.css";
-@import "./view/editor/components/Editor.css";
+@import "./view/editor/Editor.css";
 @import "./view/editor/components/EditorCanvas.css";
 @import "./view/editor/components/EditorSidebar.css";
 @import "./view/editor/components/EditorSidebarSection.css";

@@ -1,5 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 import { fileExplorer, openContextMenu, workspace } from '../support/obsidian.page';
+import { CURRENT_VERSION } from '../../../src/logic/HexerData';
 
 const HEXER_EXT = '.hexer.md';
 
@@ -12,7 +13,7 @@ Then('a new Hexer file will be created', async () => {
     await fileExplorer.fileByExtension(HEXER_EXT).waitForExist({ timeout: 5000 });
 });
 
-Then('will have a valid datetime format', async () => {
+Then('the file will have a valid datetime format', async () => {
     const filePath = await fileExplorer.fileByExtension(HEXER_EXT).getAttribute('data-path');
     const fileName = filePath?.split('/').pop() ?? '';
     const regex = /^\d{14}\.hexer\.md$/;
@@ -22,6 +23,22 @@ Then('will have a valid datetime format', async () => {
     }
 });
 
+Then('the file will have the most recent version', async () => {
+    const filePath = await fileExplorer.fileByExtension(HEXER_EXT).getAttribute('data-path');
+    const version = await browser.execute((path) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const obsidian = (window as any).app;
+        const file = obsidian.vault.getFileByPath(path!);
+        if (!file) return null;
+        return obsidian.metadataCache.getFileCache(file)?.frontmatter?.hexer?.version ?? null;
+    }, filePath);
+
+    if (version !== CURRENT_VERSION) {
+        throw new Error(`Expected version "${CURRENT_VERSION}" but got "${version}"`);
+    }
+});
+
 Then('the Hexer view will be opened for the new file', async () => {
     await workspace.leafByType('hexer-view').waitForExist({ timeout: 5000 });
 });
+

@@ -47,3 +47,13 @@ export function toFrontmatter(data: HexerData) {
 export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
     return new HexerData(frontmatter.hexer);
 }
+
+export const initialFileContent =
+`---
+hexer:
+  version: "1.0"
+  hexes: {}
+---
+`;
+
+export const CURRENT_VERSION = '1.0';

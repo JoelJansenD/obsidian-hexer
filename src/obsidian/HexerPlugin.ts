@@ -1,5 +1,6 @@
 import { Plugin, TAbstractFile, TFolder } from 'obsidian';
 import { HexerView, VIEW_TYPE_HEXER } from './HexerView';
+import { initialFileContent } from '../logic/HexerData';
 
 export class HexerPlugin extends Plugin {
     async onload(): Promise<void> {
@@ -38,7 +39,7 @@ export class HexerPlugin extends Plugin {
         const pad = (n: number): string => String(n).padStart(2, '0');
         const datetime = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
         const path = `${folder.path}/${datetime}.hexer.md`.replace(/^\//, '');
-        await this.app.vault.create(path, '');
+        await this.app.vault.create(path, initialFileContent);
         await this.activateView();
     }
 
