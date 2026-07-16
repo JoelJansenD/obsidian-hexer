@@ -1,4 +1,4 @@
-import { Brush, createElement, Eraser, MousePointer, PaintBucket } from "lucide";
+import { Brush, createElement, Eraser, MousePointer2, PaintBucket } from "lucide";
 
 export default class EditorTools {
     constructor(private _parentEl: HTMLElement) {
@@ -8,8 +8,8 @@ export default class EditorTools {
     private build() {
         const toolsEl = this._parentEl.createEl('div', { cls: 'hexer-tools' });
 
-        const selectButton = toolsEl.createEl('div', { cls: 'hexer-tools-button' });
-        selectButton.appendChild(createElement(MousePointer, { width: 18, height: 18 }));
+        const selectButton = toolsEl.createEl('div', { cls: 'hexer-tools-button active' });
+        selectButton.appendChild(createElement(MousePointer2, { width: 18, height: 18 }));
 
         const brushButton = toolsEl.createEl('div', { cls: 'hexer-tools-button' });
         brushButton.appendChild(createElement(Brush, { width: 18, height: 18 }));
