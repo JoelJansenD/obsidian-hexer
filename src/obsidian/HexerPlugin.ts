@@ -1,4 +1,4 @@
-import { Plugin, TAbstractFile, TFolder } from 'obsidian';
+import { MarkdownView, Plugin, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import { HexerView, VIEW_TYPE_HEXER } from './HexerView';
 import { initialFileContent } from '../logic/HexerData';
 
@@ -31,16 +31,29 @@ export class HexerPlugin extends Plugin {
         this.registerEvent(
             this.app.workspace.on('file-open', async (file) => {
                 if(!file?.path || !file.path.endsWith('.hexer.md')) return;
-                await new Promise(resolve => setTimeout(resolve, 10));
+                // await new Promise(resolve => setTimeout(resolve, 10));
                 const leaves = this.app.workspace.getLeavesOfType('markdown');
                 for(const leaf of leaves) {
                     if(leaf.view.getState().file === file.path) {
-                        await leaf.setViewState({ type: VIEW_TYPE_HEXER, active: true, state: { file: file.path } });
+                        await this.setViewState(leaf, file);
                         return;
                     }
                 }
             }),
         );
+
+        this.registerEvent(
+            this.app.workspace.on('active-leaf-change', async (leaf) => {
+                if(!leaf || leaf.view.getViewType() !== 'markdown') return;
+                const view = leaf.view as MarkdownView;
+                if(!view.file || !view.file.path.endsWith('.hexer.md')) return;
+                await this.setViewState(leaf, view.file);
+            }),
+        );
+    }
+
+    private async setViewState(leaf: WorkspaceLeaf, file: TFile) {
+        await leaf.setViewState({ type: VIEW_TYPE_HEXER, active: true, state: { file: file.path } });
     }
 
     onunload(): void {
