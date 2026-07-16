@@ -8,7 +8,8 @@
         "noImplicitAny": true,
         "isolatedModules": true,
         "importHelpers": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "types": ["vitest/globals"]
     },
     "include": ["src/"]
 }
