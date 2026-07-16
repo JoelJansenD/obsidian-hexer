@@ -1,8 +1,10 @@
 import { ChevronDown, createElement, type IconNode } from 'lucide';
+import { Layer } from './EditorSidebar';
 
 interface EditorSidebarSectionOptions {
     icon?: IconNode;
-    label?: string;
+    label: string;
+    layer: Layer;
     onSelect?: () => void;
 }
 
@@ -11,7 +13,7 @@ export default class EditorSidebarSection {
     private _contentEl!: HTMLElement;
     private _expanded = false;
 
-    constructor(private _parentEl: HTMLElement, private _options?: EditorSidebarSectionOptions) {
+    constructor(private _parentEl: HTMLElement, private _options: EditorSidebarSectionOptions) {
         this.build();
     }
 
@@ -29,15 +31,22 @@ export default class EditorSidebarSection {
     private build() {
         this._sectionEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar-section' });
 
-        const sectionHeaderEl = this._sectionEl.createEl('div', { cls: 'hexer-sidebar-section-header' });
+        const sectionHeaderEl = this._sectionEl.createEl(
+            'div',
+            { 
+                cls: 'hexer-sidebar-section-header',
+                attr: { 
+                    'data-hexer-layer': this._options.layer
+                }
+            });
 
         const iconEl = sectionHeaderEl.createEl('div', { cls: 'hexer-sidebar-section-icon' });
-        if(this._options?.icon) {
+        if(this._options.icon) {
             iconEl.appendChild(createElement(this._options.icon));
         }
 
         const labelEl = sectionHeaderEl.createEl('div', { cls: 'hexer-sidebar-section-label' });
-        if(this._options?.label) {
+        if(this._options.label) {
             labelEl.setText(this._options.label);
         }
 
@@ -47,7 +56,7 @@ export default class EditorSidebarSection {
         const contentEl = this._sectionEl.createEl('div', { cls: 'hexer-sidebar-section-content' });
         this._contentEl = contentEl.createEl('div', { cls: 'hexer-sidebar-section-content-inner' });
 
-        sectionHeaderEl.addEventListener('click', () => this._options?.onSelect?.());
+        sectionHeaderEl.addEventListener('click', () => this._options.onSelect?.());
         this.setExpanded(this._expanded);
     }
 }

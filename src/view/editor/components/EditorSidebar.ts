@@ -19,6 +19,7 @@ export default class EditorSidebar {
 
         const iconSection = new EditorSidebarSection(sidebarEl, {
             icon: Shapes,
+            layer: 'icon',
             label: 'Icons',
             onSelect: () => this.select('icon'),
         });
@@ -31,6 +32,7 @@ export default class EditorSidebar {
     private buildTerrain(sidebarEl: HTMLElement) {
         const terrainSection = new EditorSidebarSection(sidebarEl, {
             icon: Mountain,
+            layer: 'terrain',
             label: 'Terrain',
             onSelect: () => this.select('terrain'),
         });

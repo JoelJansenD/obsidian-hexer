@@ -1,11 +1,12 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
+import { selectLayer } from '../support/editor.page';
 
 Given('I have selected the brush tool', async function () {
     return 'pending';
 });
 
 Given('I have selected the terrain layer', async function () {
-    return 'pending';
+    await selectLayer('terrain');
 });
 
 Given('my selected colour is blue', async function () {
