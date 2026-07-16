@@ -1,5 +1,5 @@
 import { ItemView, WorkspaceLeaf } from 'obsidian';
-import Editor from '../view/editor/components/Editor';
+import Editor from '../view/editor/Editor';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 

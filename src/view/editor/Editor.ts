@@ -1,5 +1,5 @@
-import EditorCanvas from "./EditorCanvas";
-import EditorSidebar from "./EditorSidebar";
+import EditorCanvas from "./components/EditorCanvas";
+import EditorSidebar from "./components/EditorSidebar";
 
 export default class Editor {
     
