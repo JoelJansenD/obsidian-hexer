@@ -1,13 +1,6 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
 import { browser, expect } from '@wdio/globals';
 
-const COMMAND_ID = 'obsidian-hexer:open-hexer-view';
-
-Given('the Hexer view is open', async function () {
-    await browser.reloadObsidian({ vault: './test/vault' });
-    await browser.executeObsidianCommand(COMMAND_ID);
-});
-
 When('I click the hex', async function () {
     const canvas = await browser.$('canvas[data-color-index]');
     await canvas.click();
