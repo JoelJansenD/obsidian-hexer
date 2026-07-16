@@ -7,9 +7,19 @@ export interface HexData extends RadialCoordinates {
     terrainColor: string | null;
 };
 
-export class HexerData {
-    private _hexes = new Map<string, HexData>();
-    private readonly _version = "1.0";
+export interface HexerState {
+    version: string;
+    hexes: Map<string, HexData>;
+}
+
+export class HexerData implements HexerState {
+    public hexes: Map<string, HexData>;
+    public readonly version: string;
+
+    constructor(state: HexerState) {
+        this.version = state.version;
+        this.hexes = new Map(state.hexes);
+    }
 
     private static key(q: number, r: number): string {
         return `${q},${r}`;
@@ -17,17 +27,17 @@ export class HexerData {
 
     public getHex(q: number, r: number): HexData | undefined {
         const key = HexerData.key(q, r);
-        return this._hexes.get(key) || undefined;
+        return this.hexes.get(key) || undefined;
     }
 
     public setHex(hex: HexData): void {
         const key = HexerData.key(hex.q, hex.r);
-        this._hexes.set(key, hex);
+        this.hexes.set(key, hex);
     }
 }
 
 export interface HexerFrontmatter {
-    hexer: HexerData
+    hexer: HexerState
 }
 
 export function toFrontmatter(data: HexerData) {
@@ -35,9 +45,5 @@ export function toFrontmatter(data: HexerData) {
 }
 
 export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
-    const data = new HexerData();
-    for (const hex of frontmatter.hexer['_hexes'].values()) {
-        data.setHex(hex);
-    }
-    return data;
+    return new HexerData(frontmatter.hexer);
 }
