@@ -1,8 +1,24 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { fileExplorer, openContextMenu, workspace } from '../support/obsidian.page';
 import { CURRENT_VERSION } from '../../../src/logic/HexerData';
+import { obsidianPage } from 'wdio-obsidian-service';
 
 const HEXER_EXT = '.hexer.md';
+
+Given('a Hexer file exists', async () => {
+    await obsidianPage.write(`test${HEXER_EXT}`, `---\nhexer:\n  version: ${CURRENT_VERSION}\n  hexes: {}\n---\n`);
+});
+
+Given('I have no open views', async () => {
+    await browser.executeObsidian(async ({app}) => {
+        app.workspace.iterateRootLeaves((leaf) => leaf.detach());
+    });
+});
+
+
+When('I open the Hexer file', async () => {
+    await fileExplorer.fileByExtension(HEXER_EXT).click();
+});
 
 When('I create a new Hexer file', async function () {
     await openContextMenu(fileExplorer.container());
@@ -38,7 +54,7 @@ Then('the file will have the most recent version', async () => {
     }
 });
 
-Then('the Hexer view will be opened for the new file', async () => {
+Then('the Hexer view will be opened for the file', async () => {
     await workspace.leafByType('hexer-view').waitForExist({ timeout: 5000 });
 });
 

@@ -6,3 +6,7 @@ Given('the Hexer view is open', async function () {
     await browser.reloadObsidian({ vault: './test/vault' });
     await browser.executeObsidianCommand(COMMAND_ID);
 });
+
+Given('Obsidian is open', async function () {
+    await browser.reloadObsidian({ vault: './test/vault' });
+});
