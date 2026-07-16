@@ -27,6 +27,20 @@ export class HexerPlugin extends Plugin {
                 });
             }),
         );
+
+        this.registerEvent(
+            this.app.workspace.on('file-open', async (file) => {
+                if(!file?.path || !file.path.endsWith('.hexer.md')) return;
+                await new Promise(resolve => setTimeout(resolve, 10));
+                const leaves = this.app.workspace.getLeavesOfType('markdown');
+                for(const leaf of leaves) {
+                    if(leaf.view.getState().file === file.path) {
+                        await leaf.setViewState({ type: VIEW_TYPE_HEXER, active: true, state: { file: file.path } });
+                        return;
+                    }
+                }
+            }),
+        );
     }
 
     onunload(): void {
@@ -39,8 +53,8 @@ export class HexerPlugin extends Plugin {
         const pad = (n: number): string => String(n).padStart(2, '0');
         const datetime = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
         const path = `${folder.path}/${datetime}.hexer.md`.replace(/^\//, '');
-        await this.app.vault.create(path, initialFileContent);
-        await this.activateView();
+        const newFile = await this.app.vault.create(path, initialFileContent);
+        await this.app.workspace.getLeaf(false).openFile(newFile);
     }
 
     private async activateView(): Promise<void> {
