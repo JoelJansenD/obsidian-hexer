@@ -20,6 +20,11 @@ When('I open the Hexer file', async () => {
     await fileExplorer.fileByExtension(HEXER_EXT).click();
 });
 
+When('I open the Hexer file in Markdown mode', async () => {
+    await openContextMenu(fileExplorer.fileByExtension(HEXER_EXT));
+    await fileExplorer.menuItem('Open as Markdown').click();
+});
+
 When('I create a new Hexer file', async function () {
     await openContextMenu(fileExplorer.container());
     await fileExplorer.menuItem('New Hexer file').click();
@@ -58,3 +63,10 @@ Then('the Hexer view will be opened for the file', async () => {
     await workspace.leafByType('hexer-view').waitForExist({ timeout: 5000 });
 });
 
+Then('the Hexer file will be opened in Markdown mode', async () => {
+    await workspace.leafByType('markdown').waitForExist({ timeout: 5000 });
+
+    if (await workspace.leafByType('hexer-view').isExisting()) {
+        throw new Error('Expected the Hexer view not to be opened, but it was');
+    }
+});

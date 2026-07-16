@@ -16,3 +16,9 @@ Feature: Hexer File
     And I have no open views
     When I open the Hexer file
     Then the Hexer view will be opened for the file
+  
+  Scenario: Opening a Hexer file in Markdown mode
+    Given a Hexer file exists
+    And I have no open views
+    When I open the Hexer file in Markdown mode
+    Then the Hexer file will be opened in Markdown mode
