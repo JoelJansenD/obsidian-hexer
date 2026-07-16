@@ -2,7 +2,8 @@ Feature: Painting Terrain
   Terrains are the backdrop of hexes and can be painted in any solid colour.
 
   Background:
-    Given I have selected the brush tool
+    Given the Hexer view is open
+    And I have selected the brush tool
     And I have selected the terrain layer
     And my selected colour is blue
 
