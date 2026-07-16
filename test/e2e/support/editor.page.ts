@@ -1,12 +1,19 @@
 import type { Layer } from "../../../src/view/editor/components/EditorSidebar";
 import type { PaintTool } from "../../../src/view/editor/components/EditorTools";
 
+export const terrainLayer = {
+    colourPicker: () => browser.$(`[data-hexer-colour-field-target="terrain"]`)
+};
+
 export async function selectLayer(layer: Layer) {
-    const sectionHeader = browser.$(`[data-hexer-layer="${layer}"]`);
-    sectionHeader.click();
+    await selectAndClick(`[data-hexer-layer="${layer}"]`);
 }
 
 export async function selectPaintTool(paintTool: PaintTool) {
-    const button = browser.$(`[data-hexer-paint-tool="${paintTool}"]`);
-    button.click();
+    await selectAndClick(`[data-hexer-paint-tool="${paintTool}"]`)
+}
+
+async function selectAndClick(selector: string) {
+    const element = browser.$(selector);
+    await element.click();
 }

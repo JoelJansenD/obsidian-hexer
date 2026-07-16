@@ -37,7 +37,7 @@ export default class EditorSidebar {
             onSelect: () => this.select('terrain'),
         });
         
-        new ColourPalette(terrainSection.contentEl);
+        new ColourPalette(terrainSection.contentEl, { dataField: 'terrain' });
         return terrainSection;
     }
 
