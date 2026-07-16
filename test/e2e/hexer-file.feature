@@ -4,7 +4,6 @@ Feature: Hexer File
   Background:
     Given the Hexer view is open
 
-  @ignore
   Scenario: Creating a new Hexer file
     When I create a new Hexer file
     Then a new Hexer file will be created
