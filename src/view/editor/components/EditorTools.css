@@ -1,8 +1,33 @@
 .hexer-tools {
+    display: flex;
+    flex-direction: column;
     position: absolute;
-    right: var(--size-4-3);
-    bottom: var(--size-4-3);
+    right: 16px;
+    bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--background-modifier-border);
+}
 
-    height: 100px;
-    width: 50px;
+.hexer-tools-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-top: 1px solid var(--background-modifier-border);
+    width: 40px;
+    height: 48px;
+    gap: 2px;
+
+    &.active {
+        background-color: var(--interactive-accent);
+        border-color: var(--interactive-accent);
+        color: var(--text-accent);
+    }
+
+    &:hover {
+        background-color: var(--background-modifier-hover);
+        color: var(--text-normal);
+    }
 }

@@ -4,5 +4,9 @@
 
     height: 100%;
     width: 100%;
-    color: purple;
+    border-top: 1px solid var(--divider-color);
+}
+
+.view-content:has(.hexer-editor) {
+    padding: 0;
 }
