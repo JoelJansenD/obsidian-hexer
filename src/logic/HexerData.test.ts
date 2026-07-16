@@ -5,7 +5,7 @@ const emptyState = (): HexerState => ({ version: '1.0', hexes: new Map() });
 describe('HexerData', () => {
     it('constructor applies the provided state', () => {
         // Arrange
-        const state: HexerState = {
+        const initial: HexerState = {
             version: '1.0',
             hexes: new Map([
                 ['0,0', { q: 0, r: 0, terrainColor: '#ff0000' }],
@@ -14,10 +14,10 @@ describe('HexerData', () => {
         };
 
         // Act
-        const data = new HexerData(state);
+        const result = new HexerData(initial);
 
         // Assert
-        expect({ version: data.version, hexes: data.hexes }).toEqual(state);
+        expect(result).toEqual(initial);
     });
 
     it('getHex returns the correct hex data', () => {
