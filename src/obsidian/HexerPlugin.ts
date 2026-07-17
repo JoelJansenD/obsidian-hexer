@@ -1,8 +1,12 @@
-import { Plugin, TAbstractFile, TFolder, ViewState, WorkspaceLeaf } from 'obsidian';
+import { Plugin, TAbstractFile, TFile, TFolder, ViewState, WorkspaceLeaf } from 'obsidian';
 import { HexerView, VIEW_TYPE_HEXER } from './HexerView';
 import { initialFileContent } from '../logic/HexerData';
 
+const HEXER_EXTENSION = '.hexer.md';
+
 export class HexerPlugin extends Plugin {
+    private openingAsMarkdown = false;
+
     async onload(): Promise<void> {
         this.registerView(VIEW_TYPE_HEXER, (leaf) => new HexerView(leaf));
 
@@ -25,6 +29,14 @@ export class HexerPlugin extends Plugin {
                         .setIcon('hexagon')
                         .onClick(() => { void this.createHexerFile(file); });
                 });
+
+                if (file instanceof TFile && file.path.endsWith(HEXER_EXTENSION)) {
+                    menu.addItem((item) => {
+                        item.setTitle('Open as Markdown')
+                            .setIcon('file-text')
+                            .onClick(() => { void this.openAsMarkdown(file); });
+                    });
+                }
             }),
         );
 
@@ -37,8 +49,9 @@ export class HexerPlugin extends Plugin {
      * avoiding the brief flash of the markdown view when opening a Hexer file.
      */
     private registerHexerViewRedirect(): void {
+        const plugin = this;
         const isHexerFile = (path?: unknown): boolean =>
-            typeof path === 'string' && path.endsWith('.hexer.md');
+            typeof path === 'string' && path.endsWith(HEXER_EXTENSION);
 
         const original = WorkspaceLeaf.prototype.setViewState;
         WorkspaceLeaf.prototype.setViewState = function (
@@ -46,7 +59,7 @@ export class HexerPlugin extends Plugin {
             state: ViewState,
             eState?: unknown,
         ): Promise<void> {
-            if (state.type === 'markdown' && isHexerFile(state.state?.file)) {
+            if (!plugin.openingAsMarkdown && state.type === 'markdown' && isHexerFile(state.state?.file)) {
                 const hexerState: ViewState = { ...state, type: VIEW_TYPE_HEXER };
                 return original.call(this, hexerState, eState);
             }
@@ -70,6 +83,15 @@ export class HexerPlugin extends Plugin {
         const path = `${folder.path}/${datetime}.hexer.md`.replace(/^\//, '');
         const newFile = await this.app.vault.create(path, initialFileContent);
         await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+
+    private async openAsMarkdown(file: TFile): Promise<void> {
+        this.openingAsMarkdown = true;
+        try {
+            await this.app.workspace.getLeaf(false).openFile(file);
+        } finally {
+            this.openingAsMarkdown = false;
+        }
     }
 
     private async activateView(): Promise<void> {
