@@ -24,13 +24,21 @@ export class HexerPlugin extends Plugin {
 
         this.registerEvent(
             this.app.workspace.on('file-menu', (menu, file) => {
-                menu.addItem((item) => {
-                    item.setTitle('New Hexer file')
-                        .setIcon('hexagon')
-                        .onClick(() => { void this.createHexerFile(file); });
-                });
+                if (file instanceof TFolder) {
+                    menu.addItem((item) => {
+                        item.setTitle('New Hexer file')
+                            .setIcon('hexagon')
+                            .onClick(() => { void this.createHexerFile(file); });
+                    });
+                }
 
                 if (file instanceof TFile && file.path.endsWith(HEXER_EXTENSION)) {
+                    menu.addItem((item) => {
+                        item.setTitle('Open in Hexer')
+                            .setIcon('hexagon')
+                            .onClick(() => { void this.openInHexer(file); });
+                    });
+
                     menu.addItem((item) => {
                         item.setTitle('Open as Markdown')
                             .setIcon('file-text')
@@ -83,6 +91,10 @@ export class HexerPlugin extends Plugin {
         const path = `${folder.path}/${datetime}.hexer.md`.replace(/^\//, '');
         const newFile = await this.app.vault.create(path, initialFileContent);
         await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+
+    private async openInHexer(file: TFile): Promise<void> {
+        await this.app.workspace.getLeaf(false).openFile(file);
     }
 
     private async openAsMarkdown(file: TFile): Promise<void> {
