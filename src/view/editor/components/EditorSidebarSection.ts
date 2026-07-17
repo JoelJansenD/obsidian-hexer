@@ -1,5 +1,5 @@
 import { ChevronDown, createElement, type IconNode } from 'lucide';
-import { Layer } from './EditorSidebar';
+import { Layer } from '../../../logic/EditorState';
 
 interface EditorSidebarSectionOptions {
     icon?: IconNode;
