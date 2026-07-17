@@ -10,6 +10,7 @@ export default class EditorCanvas {
 
     private _canvasEl!: HTMLCanvasElement;
     private _context!: CanvasRenderingContext2D;
+    private _resizeObserver!: ResizeObserver;
     private _listeners = new Map<string, EventListener>();
     
     private _editorState: EditorState = {
@@ -42,6 +43,26 @@ export default class EditorCanvas {
         this._canvasEl = canvasAreaEl.createEl('canvas', { cls: 'hexer-canvas' });
         this._context = this._canvasEl.getContext('2d')!;
         const tools = new EditorTools(canvasAreaEl);
+
+        this._resizeObserver = new ResizeObserver(() => {
+            this.resizeCanvas();
+            this.requestRender();
+        });
+        this._resizeObserver.observe(this._canvasEl);
+    }
+
+    private resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const width = this._canvasEl.clientWidth;
+        const height = this._canvasEl.clientHeight;
+
+        // Match the backing store to the display size in physical pixels.
+        this._canvasEl.width = Math.round(width * dpr);
+        this._canvasEl.height = Math.round(height * dpr);
+
+        // Setting width/height resets the context, so re-apply the DPR scale
+        // so drawing code can keep working in CSS-pixel coordinates.
+        this._context.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     private registerEvents(strategy: ToolStrategy) {
@@ -53,7 +74,10 @@ export default class EditorCanvas {
             const listener = (e: Event) => {
                 const data = this._dataOptions.getData();
                 const hexMap = data.hexes;
-                const clickedHex = pointToRadialCoordinates((e as MouseEvent).clientX, (e as MouseEvent).clientY, 50); // Assuming a hex size of 50
+                const rect = this._canvasEl.getBoundingClientRect();
+                const canvasX = (e as MouseEvent).clientX - rect.left;
+                const canvasY = (e as MouseEvent).clientY - rect.top;
+                const clickedHex = pointToRadialCoordinates(canvasX, canvasY, data.size);
                 event(hexMap, this._editorState, clickedHex);
                 this._dataOptions.setData(data);
                 this.requestRender();
