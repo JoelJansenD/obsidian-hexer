@@ -9,11 +9,13 @@ export interface HexData extends RadialCoordinates {
 
 export interface HexerState {
     version: string;
-    hexes: Map<string, HexData>;
+    hexes: HexMap;
 }
 
+export type HexMap = Map<string, HexData>;
+
 export class HexerData implements HexerState {
-    public hexes: Map<string, HexData>;
+    public hexes: HexMap;
     public readonly version: string;
 
     constructor(state: HexerState) {
