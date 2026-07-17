@@ -1,5 +1,5 @@
-import TerrainPaintStrategy from "../../../logic/strategies/TerrainPaintStrategy";
-import { RegisteredEvents, ToolStrategy } from "../../../logic/strategies/ToolStrategy";
+import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
+import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import EditorTools from "./EditorTools";
 
 export default class EditorCanvas {
