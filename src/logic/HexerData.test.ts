@@ -86,12 +86,16 @@ describe('toFrontmatter', () => {
     it('converts HexerData to frontmatter correctly', () => {
         // Arrange
         const data = new HexerData(emptyState());
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000' });
 
         // Act
         const frontmatter = toFrontmatter(data);
 
         // Assert
-        expect(frontmatter.hexer).toBe(data);
+        expect(frontmatter.hexer).toEqual({
+            version: '1.0',
+            hexes: new Map<string, Hexagon>([['0,0', { q: 0, r: 0, terrainColor: '#ff0000' }]]),
+        });
     });
 });
 

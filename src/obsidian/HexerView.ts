@@ -1,6 +1,6 @@
-import { parseYaml, TextFileView } from 'obsidian';
+import { parseYaml, stringifyYaml, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
-import { fromFrontmatter, HexerData, HexerFrontmatter } from '../logic/HexerData';
+import { fromFrontmatter, HexerData, HexerFrontmatter, toFrontmatter } from '../logic/HexerData';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
@@ -47,9 +47,20 @@ export class HexerView extends TextFileView {
             this.contentEl.empty();
             this.editor = new Editor(this.contentEl, {
                 getData: () => this.hexerData.clone(),
-                setData: (data: HexerData) => this.hexerData = data
+                setData: (data: HexerData) => this.setHexerData(data)
             });
         }
+    }
+
+    private setHexerData(data: HexerData): void {
+        this.hexerData = data;
+
+        const frontmatter = stringifyYaml(toFrontmatter(data)).trim();
+        const match = FRONTMATTER_REGEX.exec(this.data);
+        const body = match ? this.data.slice(match[0].length) : '';
+        this.data = `---\n${frontmatter}\n---${body}`;
+
+        this.requestSave();
     }
 
     private parseHexerData(data: string) {
