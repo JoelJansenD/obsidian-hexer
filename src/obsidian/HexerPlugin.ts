@@ -6,6 +6,7 @@ const HEXER_EXTENSION = '.hexer.md';
 
 export class HexerPlugin extends Plugin {
     private openingAsMarkdown = false;
+    private openingInHexer = false;
 
     async onload(): Promise<void> {
         this.registerView(VIEW_TYPE_HEXER, (leaf) => new HexerView(leaf));
@@ -67,7 +68,18 @@ export class HexerPlugin extends Plugin {
             state: ViewState,
             eState?: unknown,
         ): Promise<void> {
-            if (!plugin.openingAsMarkdown && state.type === 'markdown' && isHexerFile(state.state?.file)) {
+            // Skip the redirect when the leaf is already showing this file as
+            // markdown, so switching modes (source/reading) doesn't bounce back
+            // into the Hexer view.
+            const currentFile = (this.view as { file?: { path?: string } } | undefined)?.file?.path;
+            const alreadyMarkdown = this.view?.getViewType() === 'markdown' && isHexerFile(currentFile);
+
+            if (
+                !plugin.openingAsMarkdown &&
+                (plugin.openingInHexer || !alreadyMarkdown) &&
+                state.type === 'markdown' &&
+                isHexerFile(state.state?.file)
+            ) {
                 const hexerState: ViewState = { ...state, type: VIEW_TYPE_HEXER };
                 return original.call(this, hexerState, eState);
             }
@@ -94,7 +106,12 @@ export class HexerPlugin extends Plugin {
     }
 
     private async openInHexer(file: TFile): Promise<void> {
-        await this.app.workspace.getLeaf(false).openFile(file);
+        this.openingInHexer = true;
+        try {
+            await this.app.workspace.getLeaf(false).openFile(file);
+        } finally {
+            this.openingInHexer = false;
+        }
     }
 
     private async openAsMarkdown(file: TFile): Promise<void> {
