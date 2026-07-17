@@ -1,6 +1,7 @@
+import { Hexagon } from "./hexagon";
 import { fromFrontmatter, HexerData, HexerState, toFrontmatter } from "./HexerData";
 
-const emptyState = (): HexerState => ({ version: '1.0', hexes: new Map() });
+const emptyState = (): HexerState => ({ version: '1.0', hexes: new Map<string, Hexagon>() });
 
 describe('HexerData', () => {
     it('constructor applies the provided state', () => {

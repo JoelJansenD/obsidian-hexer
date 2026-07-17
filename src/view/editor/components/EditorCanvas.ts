@@ -2,6 +2,7 @@ import { EditorState } from "../../../logic/EditorState";
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
 import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
 import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
+import { DataOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
 export default class EditorCanvas {
@@ -14,7 +15,7 @@ export default class EditorCanvas {
         activePaintTool: 'select'
     };
 
-    constructor(private _parentEl: HTMLElement) {
+    constructor(private _parentEl: HTMLElement, private _dataOptions: DataOptions) {
         this.build();
         this.registerEvents(new TerrainPaintStrategy());
     }
@@ -33,9 +34,11 @@ export default class EditorCanvas {
             if(!event) continue;
 
             const listener = (e: Event) => {
-                const hexMap = new Map<string, any>(); // Placeholder for actual hexMap
+                const data = this._dataOptions.getData();
+                const hexMap = data.hexes;
                 const clickedHex = pointToRadialCoordinates((e as MouseEvent).clientX, (e as MouseEvent).clientY, 50); // Assuming a hex size of 50
                 event(hexMap, this._editorState, clickedHex);
+                this._dataOptions.setData(data);
             };
             this._canvasEl.addEventListener(eventKey, listener);
             this._listeners.set(eventKey, listener);

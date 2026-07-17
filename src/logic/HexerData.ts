@@ -36,6 +36,14 @@ export class HexerData implements HexerState {
         const key = HexerData.key(hex.q, hex.r);
         this.hexes.set(key, hex);
     }
+
+    public clone(): HexerData {
+        const hexes: HexMap = new Map();
+        for (const [key, hex] of this.hexes) {
+            hexes.set(key, { ...hex });
+        }
+        return new HexerData({ version: this.version, hexes });
+    }
 }
 
 export interface HexerFrontmatter {
