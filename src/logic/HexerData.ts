@@ -14,7 +14,9 @@ export class HexerData implements HexerState {
 
     constructor(state: HexerState) {
         this.version = state.version;
-        this.hexes = new Map(state.hexes);
+        this.hexes = state.hexes instanceof Map 
+            ? state.hexes
+            : new Map(Object.entries(state.hexes));
     }
 
     private static key(q: number, r: number): string {

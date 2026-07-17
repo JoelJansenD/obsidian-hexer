@@ -1,13 +1,14 @@
-import { TextFileView } from 'obsidian';
+import { parseYaml, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
+import { fromFrontmatter, HexerData, HexerFrontmatter } from '../logic/HexerData';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
+
 export class HexerView extends TextFileView {
     private editor?: Editor;
-
-    // Allow opening the view without a bound file (e.g. via the ribbon/command).
-    allowNoFile = true;
+    private hexerData!: HexerData;
 
     getViewType(): string {
         return VIEW_TYPE_HEXER;
@@ -32,6 +33,7 @@ export class HexerView extends TextFileView {
             this.clear();
         }
 
+        this.hexerData = this.parseHexerData(this.data);
         this.renderEditor();
     }
 
@@ -45,6 +47,17 @@ export class HexerView extends TextFileView {
             this.contentEl.empty();
             this.editor = new Editor(this.contentEl);
         }
+    }
+
+    private parseHexerData(data: string) {
+        const match = FRONTMATTER_REGEX.exec(data);
+        if(!match) {
+            // TODO: Display warning and go to markdown view
+            throw new Error('Invalid Hexer file: Missing frontmatter');
+        }
+
+        const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
+        return fromFrontmatter(frontmatter);
     }
 
     async onClose(): Promise<void> {
