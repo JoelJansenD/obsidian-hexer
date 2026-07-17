@@ -1,3 +1,4 @@
+import { pointToRadialCoordinates } from "../../../logic/hexagon";
 import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
 import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import EditorTools from "./EditorTools";
@@ -23,13 +24,11 @@ export default class EditorCanvas {
         const events = strategy.getEvents();
         for(const eventKey in events) {
             const event = events[eventKey as keyof RegisteredEvents];
-            console.log(event);
             if(!event) continue;
 
             const listener = (e: Event) => {
-                console.log(e)
                 const hexMap = new Map<string, any>(); // Placeholder for actual hexMap
-                const clickedHex = { q: 0, r: 0, terrainColor: null }; // Placeholder for actual clickedHex
+                const clickedHex = pointToRadialCoordinates((e as MouseEvent).clientX, (e as MouseEvent).clientY, 50); // Assuming a hex size of 50
                 event(hexMap, clickedHex);
             };
             this._canvasEl.addEventListener(eventKey, listener);
