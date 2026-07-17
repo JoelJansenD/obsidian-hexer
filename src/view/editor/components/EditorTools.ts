@@ -1,6 +1,5 @@
 import { Brush, createElement, Eraser, IconNode, MousePointer2, PaintBucket } from "lucide";
-
-export type PaintTool = 'select' | 'brush' | 'bucket' | 'erase';
+import { PaintTool } from "../../../logic/EditorState";
 
 export default class EditorTools {
     constructor(private _parentEl: HTMLElement) {

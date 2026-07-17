@@ -1,8 +1,7 @@
 import { Mountain, Shapes } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../components/ColourPalette";
-
-export type Layer = 'terrain' | 'icon';
+import { Layer } from "../../../logic/EditorState";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
