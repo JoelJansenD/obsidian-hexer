@@ -2,13 +2,16 @@ import { EditorState } from "../../../logic/EditorState";
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
 import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
 import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
+import render from "../../render";
 import { DataOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
 export default class EditorCanvas {
 
     private _canvasEl!: HTMLCanvasElement;
+    private _context!: CanvasRenderingContext2D;
     private _listeners = new Map<string, EventListener>();
+    
     private _editorState: EditorState = {
         activeColour: '#000000',
         activeLayer: 'terrain',
@@ -22,10 +25,6 @@ export default class EditorCanvas {
         this.registerEvents(new TerrainPaintStrategy());
     }
 
-    private render() {
-        console.log('rendering');
-    }
-
     private requestRender() {
         if(this._renderRequested) {
             return false;
@@ -34,14 +33,14 @@ export default class EditorCanvas {
         this._renderRequested = true;
         requestAnimationFrame(() => {
             this._renderRequested = false;
-            this.render();
+            render(this._context, this._dataOptions.getData());
         });
     }
 
     private build() {
         const canvasAreaEl = this._parentEl.createEl('div', { cls: 'hexer-canvas-area' });
         this._canvasEl = canvasAreaEl.createEl('canvas', { cls: 'hexer-canvas' });
-        
+        this._context = this._canvasEl.getContext('2d')!;
         const tools = new EditorTools(canvasAreaEl);
     }
 

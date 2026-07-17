@@ -4,6 +4,7 @@ import { Hexagon, RadialCoordinates } from "./hexagon";
 export interface HexerState {
     version: string;
     hexes: HexMap;
+    size: number;
 }
 
 export type HexMap = Map<string, Hexagon>;
@@ -11,12 +12,14 @@ export type HexMap = Map<string, Hexagon>;
 export class HexerData implements HexerState {
     public hexes: HexMap;
     public readonly version: string;
+    public size: number;
 
     constructor(state: HexerState) {
         this.version = state.version;
         this.hexes = state.hexes instanceof Map 
             ? state.hexes
             : new Map(Object.entries(state.hexes));
+        this.size = state.size;
     }
 
     private static key(q: number, r: number): string {
@@ -42,7 +45,7 @@ export class HexerData implements HexerState {
         for (const [key, hex] of this.hexes) {
             hexes.set(key, { ...hex });
         }
-        return new HexerData({ version: this.version, hexes });
+        return new HexerData({ ...this, hexes });
     }
 }
 

@@ -1,3 +1,5 @@
+import { Point } from "obsidian";
+
 export interface RadialCoordinates {
     q: number;
     r: number;
@@ -15,6 +17,12 @@ export function pointToRadialCoordinates(x: number, y: number, size: number) {
     const r = (-1 / 3) * scaledX + (Math.sqrt(3) / 3) * scaledY;
 
     return roundRadialCoordinates(q, r);
+}
+
+export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: number) : Point {
+    const x = size * ((3 / 2) * coordinate.q);
+    const y = size * (((Math.sqrt(3) / 2) * coordinate.q) + (Math.sqrt(3) * coordinate.r));
+    return { x, y };
 }
 
 export function roundRadialCoordinates(coordinates: RadialCoordinates) : RadialCoordinates;

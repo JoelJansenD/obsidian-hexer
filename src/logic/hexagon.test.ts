@@ -1,4 +1,4 @@
-import { pointToRadialCoordinates, roundRadialCoordinates } from "./hexagon";
+import { pointToRadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
 
 describe('roundRadialCoordinates', () => {
     it.for([
@@ -63,5 +63,36 @@ describe('pointToRadialCoordinates', () => {
         // Assert
         expect(result.q).toBe(2);
         expect(result.r).toBe(0);
+    });
+});
+
+describe('radialCoordinatesToPoint', () => {
+    it.for([
+        [ 0, 0, 0, 0 ],
+        [ 10, 0, 15, 8.660254 ],
+        [ 0, 10, 0, 17.320508 ],
+        [ -10, 10, -15, 8.660254 ],
+    ])('converts radial coordinates (%d, %d) to point (%d, %d)', ([ q, r, expectedX, expectedY ]) => {
+        // Arrange
+        const size = 1;
+
+        // Act
+        const result = radialCoordinatesToPoint({ q, r }, size);
+
+        // Assert
+        expect(result.x).toBeCloseTo(expectedX);
+        expect(result.y).toBeCloseTo(expectedY);
+    });
+
+    it('scales after converting', () => {
+        // Arrange
+        const size = 5;
+
+        // Act
+        const result = radialCoordinatesToPoint({ q: 0, r: 10 }, size);
+
+        // Assert
+        expect(result.x).toBeCloseTo(0);
+        expect(result.y).toBeCloseTo(86.60254);
     });
 });
