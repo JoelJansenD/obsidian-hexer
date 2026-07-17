@@ -15,9 +15,27 @@ export default class EditorCanvas {
         activePaintTool: 'select'
     };
 
+    private _renderRequested = false;
+
     constructor(private _parentEl: HTMLElement, private _dataOptions: DataOptions) {
         this.build();
         this.registerEvents(new TerrainPaintStrategy());
+    }
+
+    private render() {
+        console.log('rendering');
+    }
+
+    private requestRender() {
+        if(this._renderRequested) {
+            return false;
+        }
+
+        this._renderRequested = true;
+        requestAnimationFrame(() => {
+            this._renderRequested = false;
+            this.render();
+        });
     }
 
     private build() {
@@ -39,6 +57,7 @@ export default class EditorCanvas {
                 const clickedHex = pointToRadialCoordinates((e as MouseEvent).clientX, (e as MouseEvent).clientY, 50); // Assuming a hex size of 50
                 event(hexMap, this._editorState, clickedHex);
                 this._dataOptions.setData(data);
+                this.requestRender();
             };
             this._canvasEl.addEventListener(eventKey, listener);
             this._listeners.set(eventKey, listener);
