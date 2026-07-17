@@ -32,6 +32,18 @@ describe('HexerData', () => {
         expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#ff0000' });
     });
 
+    it('getHex returns the correct hex data when provided with coordinates', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000' });
+
+        // Act
+        const hex = data.getHex({ q: 0, r: 0 });
+
+        // Assert
+        expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#ff0000' });
+    });
+
     it('getHex returns undefined for non-existent hex', () => {
         // Arrange
         const data = new HexerData(emptyState());

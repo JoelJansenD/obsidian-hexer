@@ -1,7 +1,8 @@
-import { HexData, HexMap } from "../HexerData";
+import { Hexagon } from "../hexagon";
+import { HexMap } from "../HexerData";
 
 export type RegisteredEvents = {
-    'click'?: (hexMap: HexMap, clickedHex: HexData) => void;
+    'click'?: (hexMap: HexMap, clickedHex: Hexagon) => void;
 }
 
 export interface ToolStrategy {

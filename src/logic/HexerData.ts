@@ -1,18 +1,12 @@
-export interface RadialCoordinates {
-    q: number;
-    r: number;
-}
+import { Hexagon, RadialCoordinates } from "./hexagon";
 
-export interface HexData extends RadialCoordinates {
-    terrainColor: string | null;
-};
 
 export interface HexerState {
     version: string;
     hexes: HexMap;
 }
 
-export type HexMap = Map<string, HexData>;
+export type HexMap = Map<string, Hexagon>;
 
 export class HexerData implements HexerState {
     public hexes: HexMap;
@@ -27,12 +21,16 @@ export class HexerData implements HexerState {
         return `${q},${r}`;
     }
 
-    public getHex(q: number, r: number): HexData | undefined {
+    public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
+    public getHex(q: number, r: number): Hexagon | undefined;
+    public getHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
+        const q = typeof arg1 === 'object' ? arg1.q : arg1;
+        const r = typeof arg1 === 'object' ? arg1.r : arg2!; 
         const key = HexerData.key(q, r);
         return this.hexes.get(key) || undefined;
     }
 
-    public setHex(hex: HexData): void {
+    public setHex(hex: Hexagon): void {
         const key = HexerData.key(hex.q, hex.r);
         this.hexes.set(key, hex);
     }
