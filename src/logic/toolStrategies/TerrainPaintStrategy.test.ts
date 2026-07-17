@@ -31,7 +31,6 @@ describe('TerrainPaintStrategy', () => {
         const expectedColour = '#00ff00';
         const editorState = {...defaultEditorState, activeColour: expectedColour};
         
-
         // Act
         strategyToTest.onClick(hexMap, editorState, { q: 1, r: 1 });
 
