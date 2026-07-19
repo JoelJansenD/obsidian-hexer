@@ -1,5 +1,7 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
-import { selectLayer, selectPaintTool, terrainLayer } from '../support/editor.page';
+import { clickHex, selectLayer, selectPaintTool, terrainLayer } from '../support/editor.page';
+
+const EMPTY_HEX = { q: 1, r: 1 };
 
 Given('I have selected the brush tool', async function () {
     await selectPaintTool('brush');
@@ -14,7 +16,7 @@ Given('my selected colour is blue', async function () {
 });
 
 When('I click an empty hex', async function () {
-    return 'pending';
+    await clickHex(EMPTY_HEX);
 });
 
 Then('the hex terrain will be painted blue', async function () {
