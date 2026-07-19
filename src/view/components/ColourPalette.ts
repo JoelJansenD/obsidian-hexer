@@ -1,6 +1,7 @@
 interface ColourPaletteOptions {
-    onUpdate?: () => void;
+    onUpdate?: (newColour: string) => void;
     dataField: string;
+    value?: string;
 }
 
 export default class ColourPalette {
@@ -15,13 +16,13 @@ export default class ColourPalette {
             { 
                 cls: 'hexer-colour-picker',
                 type: 'color',
-                value: '#ff0000',
+                value: this._options?.value || '#FF0000',
                 attr: {
                     'data-hexer-colour-field-target': this._options?.dataField || null
                 }
             });
         colourPickerEl.addEventListener('input', () => {
-            this._options?.onUpdate?.();
+            this._options?.onUpdate?.(colourPickerEl.value);
         });
     }
 }

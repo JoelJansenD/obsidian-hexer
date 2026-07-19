@@ -1,8 +1,9 @@
 import { Brush, createElement, Eraser, IconNode, MousePointer2, PaintBucket } from "lucide";
 import { PaintTool } from "../../../logic/EditorState";
+import { ComponentOptions } from "../Editor";
 
 export default class EditorTools {
-    constructor(private _parentEl: HTMLElement) {
+    constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
     }
 
@@ -29,6 +30,11 @@ export default class EditorTools {
         button.appendChild(createElement(icon, { width: 18, height: 18 }));
         button.addEventListener('click', () => {
             toolsEl.querySelectorAll('.hexer-tools-button').forEach((b) => b.classList.remove('active'));
+            
+            const state = this._componentOptions.getEditorState();
+            state.activePaintTool = paintTool;
+            this._componentOptions.setEditorState(state);
+
             button.classList.add('active');
         });
         return button;

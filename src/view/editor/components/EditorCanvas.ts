@@ -1,9 +1,8 @@
-import { EditorState } from "../../../logic/EditorState";
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
 import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
 import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
-import { DataOptions } from "../Editor";
+import { ComponentOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
 export default class EditorCanvas {
@@ -13,15 +12,10 @@ export default class EditorCanvas {
     private _resizeObserver!: ResizeObserver;
     private _listeners = new Map<string, EventListener>();
     
-    private _editorState: EditorState = {
-        activeColour: '#000000',
-        activeLayer: 'terrain',
-        activePaintTool: 'select'
-    };
 
     private _renderRequested = false;
 
-    constructor(private _parentEl: HTMLElement, private _dataOptions: DataOptions) {
+    constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
         this.registerEvents(new TerrainPaintStrategy());
     }
@@ -42,7 +36,8 @@ export default class EditorCanvas {
         const canvasAreaEl = this._parentEl.createEl('div', { cls: 'hexer-canvas-area' });
         this._canvasEl = canvasAreaEl.createEl('canvas', { cls: 'hexer-canvas' });
         this._context = this._canvasEl.getContext('2d')!;
-        const tools = new EditorTools(canvasAreaEl);
+        
+        const tools = new EditorTools(canvasAreaEl, this._dataOptions);
 
         this._resizeObserver = new ResizeObserver(() => {
             this.resizeCanvas();
@@ -78,8 +73,11 @@ export default class EditorCanvas {
                 const canvasX = (e as MouseEvent).clientX - rect.left;
                 const canvasY = (e as MouseEvent).clientY - rect.top;
                 const clickedHex = pointToRadialCoordinates(canvasX, canvasY, data.size);
-                event(hexMap, this._editorState, clickedHex);
+
+                const editorState = this._dataOptions.getEditorState();
+                event(hexMap, editorState, clickedHex);
                 this._dataOptions.setData(data);
+                this._dataOptions.setEditorState(editorState);
                 this.requestRender();
             };
             this._canvasEl.addEventListener(eventKey, listener);

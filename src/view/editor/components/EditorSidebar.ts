@@ -2,12 +2,13 @@ import { Mountain, Shapes } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../components/ColourPalette";
 import { Layer } from "../../../logic/EditorState";
+import { ComponentOptions } from "../Editor";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
-    private _activeLayer: Layer | null = null;
+    private _activeLayer: Layer = 'terrain';
 
-    constructor(private _parentEl: HTMLElement) {
+    constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
     }
 
@@ -15,6 +16,7 @@ export default class EditorSidebar {
         const sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
         const terrainSection = this.buildTerrain(sidebarEl);
+        terrainSection.setExpanded(true);
 
         const iconSection = new EditorSidebarSection(sidebarEl, {
             icon: Shapes,
@@ -36,15 +38,29 @@ export default class EditorSidebar {
             onSelect: () => this.select('terrain'),
         });
         
-        new ColourPalette(terrainSection.contentEl, { dataField: 'terrain' });
+        const editorState = this._componentOptions.getEditorState();
+        new ColourPalette(
+            terrainSection.contentEl,
+            {
+                dataField: 'terrain',
+                value: editorState.activeColour,
+                onUpdate: (newColour: string) => {
+                    const state = this._componentOptions.getEditorState();
+                    state.activeColour = newColour;
+                    this._componentOptions.setEditorState(state);
+                }
+            });
         return terrainSection;
     }
 
-    /** Expands the section for the given layer and collapses all others. Selecting the active layer collapses it. */
     private select(layer: Layer): void {
-        this._activeLayer = this._activeLayer === layer ? null : layer;
+        this._activeLayer = layer;
         for (const [l, section] of this._sections) {
             section.setExpanded(l === this._activeLayer);
         }
+
+        const state = this._componentOptions.getEditorState();
+        state.activeLayer = this._activeLayer;
+        this._componentOptions.setEditorState(state);
     }
 }

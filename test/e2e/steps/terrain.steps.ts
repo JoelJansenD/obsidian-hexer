@@ -1,6 +1,6 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
-import { clickHex, getHex, selectLayer, selectPaintTool, terrainLayer } from '../support/editor.page';
+import { clickHex, getHex, selectLayer, selectPaintTool, setTerrainColour } from '../support/editor.page';
 
 const EMPTY_HEX = { q: 1, r: 1 };
 
@@ -13,7 +13,7 @@ Given('I have selected the terrain layer', async function () {
 });
 
 Given('my selected colour is blue', async function () {
-    await terrainLayer.colourPicker().setValue('#0000ff');
+    await setTerrainColour('#0000ff');
 });
 
 When('I click an empty hex', async function () {

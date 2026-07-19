@@ -1,10 +1,25 @@
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
 import { Hexagon, RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
+const TERRAIN_COLOUR_SELECTOR = '[data-hexer-colour-field-target="terrain"]';
 
 export const terrainLayer = {
-    colourPicker: () => browser.$(`[data-hexer-colour-field-target="terrain"]`)
+    colourPicker: () => browser.$(TERRAIN_COLOUR_SELECTOR)
 };
+
+export async function setTerrainColour(value: string) {
+    await terrainLayer.colourPicker().waitForExist();
+
+    // A `<input type="color">` doesn't accept typed input, and setting its value
+    // programmatically doesn't fire the `input` event the palette listens for,
+    // so set the value and dispatch the event manually.
+    await browser.execute((selector, colour) => {
+        const input = document.querySelector(selector) as HTMLInputElement | null;
+        if (!input) return;
+        input.value = colour;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    }, TERRAIN_COLOUR_SELECTOR, value);
+}
 
 export const canvas = () => browser.$('.hexer-canvas');
 
