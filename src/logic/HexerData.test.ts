@@ -1,13 +1,14 @@
 import { Hexagon } from "./hexagon";
-import { fromFrontmatter, HexerData, HexerState, toFrontmatter } from "./HexerData";
+import { HexerData, HexerState } from "./HexerData";
 
-const emptyState = (): HexerState => ({ version: '1.0', hexes: new Map<string, Hexagon>() });
+const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>() });
 
 describe('HexerData', () => {
     it('constructor applies the provided state', () => {
         // Arrange
         const initial: HexerState = {
             version: '1.0',
+            size: 50,
             hexes: new Map([
                 ['0,0', { q: 0, r: 0, terrainColor: '#ff0000' }],
                 ['1,1', { q: 1, r: 1, terrainColor: '#0000ff' }],
@@ -79,37 +80,5 @@ describe('HexerData', () => {
 
         // Assert
         expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#00ff00' });
-    });
-});
-
-describe('toFrontmatter', () => {
-    it('converts HexerData to frontmatter correctly', () => {
-        // Arrange
-        const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000' });
-
-        // Act
-        const frontmatter = toFrontmatter(data);
-
-        // Assert
-        expect(frontmatter.hexer).toEqual({
-            version: '1.0',
-            hexes: new Map<string, Hexagon>([['0,0', { q: 0, r: 0, terrainColor: '#ff0000' }]]),
-        });
-    });
-});
-
-describe('fromFrontmatter', () => {
-    it('converts frontmatter to HexerData correctly', () => {
-        // Arrange
-        const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000' });
-        const frontmatter = toFrontmatter(data);
-
-        // Act
-        const newData = fromFrontmatter(frontmatter);
-
-        // Assert
-        expect(newData.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000' });
     });
 });

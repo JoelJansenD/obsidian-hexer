@@ -49,22 +49,11 @@ export class HexerData implements HexerState {
     }
 }
 
-export interface HexerFrontmatter {
-    hexer: HexerState
-}
-
-export function toFrontmatter(data: HexerData) {
-    return { hexer: data };
-}
-
-export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
-    return new HexerData(frontmatter.hexer);
-}
-
 export const initialFileContent =
 `---
 hexer:
   version: "1.0"
+  size: 50
   hexes: {}
 ---
 `;
