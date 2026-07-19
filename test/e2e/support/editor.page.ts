@@ -1,5 +1,5 @@
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
-import { RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
+import { Hexagon, RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
 
 export const terrainLayer = {
@@ -28,6 +28,16 @@ async function getHexSize(): Promise<number> {
         const view = leaf?.view as unknown as { hexerData?: { size?: number } } | undefined;
         return view?.hexerData?.size ?? 50;
     });
+}
+
+export async function getHex(coordinates: RadialCoordinates): Promise<Hexagon | null> {
+    return browser.executeObsidian(({ app }, coords) => {
+        const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+        const view = leaf?.view as unknown as {
+            hexerData?: { getHex?: (q: number, r: number) => Hexagon | undefined };
+        } | undefined;
+        return view?.hexerData?.getHex?.(coords.q, coords.r) ?? null;
+    }, coordinates);
 }
 
 export async function selectLayer(layer: Layer) {
