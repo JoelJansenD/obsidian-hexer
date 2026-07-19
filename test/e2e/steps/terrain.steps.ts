@@ -1,4 +1,5 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
+import { expect } from '@wdio/globals';
 import { clickHex, getHex, selectLayer, selectPaintTool, terrainLayer } from '../support/editor.page';
 
 const EMPTY_HEX = { q: 1, r: 1 };
@@ -21,7 +22,5 @@ When('I click an empty hex', async function () {
 
 Then('the hex terrain will be painted blue', async function () {
     const hex = await getHex(EMPTY_HEX);
-    if (!hex || hex.terrainColor !== '#0000ff') {
-        throw new Error(`Expected hex ${EMPTY_HEX.q},${EMPTY_HEX.r} to be painted blue (#0000ff) but got "${hex?.terrainColor}"`);
-    }
+    expect(hex?.terrainColor).toBe('#0000ff');
 });
