@@ -122,14 +122,16 @@ dist
 # TernJS port file
 .tern-port
 
-# Stores VSCode versions used for testing VSCode extensions
+# VSCode files
 .vscode-test
+.vscode/
 
 # pnpm
 .pnpm-store
 
 # Obsidian plugin build output
 main.js
+/styles.css
 *.js.map
 
 # Test artifacts

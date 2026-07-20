@@ -1,0 +1,11 @@
+.hexer-canvas-area {
+    flex: 1 1 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hexer-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}

@@ -1,0 +1,8 @@
+.hexer-sidebar {
+    flex: 0 0 20%;
+    color: var(--text-normal);
+    font-size: var(--font-smaller);
+    font-weight: var(--font-semibold);
+    border-left: 1px solid var(--divider-color);
+    background-color: var(--background-secondary);
+}

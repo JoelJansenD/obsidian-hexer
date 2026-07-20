@@ -1,62 +1,81 @@
-import { ItemView, WorkspaceLeaf } from 'obsidian';
-import { createHexState, cycle } from '../logic/RainbowHex';
-import type { RainbowHexState } from '../logic/RainbowHex';
-import type { Viewport } from '../rendering/Viewport';
-import { renderHex } from '../rendering/renderHex';
-import { paint } from '../rendering/paint';
+import { parseYaml, stringifyYaml, TextFileView } from 'obsidian';
+import Editor from '../view/editor/Editor';
+import { HexerData } from '../logic/HexerData';
+import { fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
-export class HexerView extends ItemView {
-    private state: RainbowHexState;
-    private canvas!: HTMLCanvasElement;
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 
-    constructor(leaf: WorkspaceLeaf) {
-        super(leaf);
-        this.state = createHexState();
-    }
+export class HexerView extends TextFileView {
+    private editor?: Editor;
+    private hexerData!: HexerData;
 
     getViewType(): string {
         return VIEW_TYPE_HEXER;
     }
 
     getDisplayText(): string {
-        return 'Hexer';
+        return this.file?.basename ?? 'Hexer';
     }
 
     getIcon(): string {
         return 'hexagon';
     }
 
-    async onOpen(): Promise<void> {
+    getViewData(): string {
+        return this.data;
+    }
+
+    setViewData(data: string, clear: boolean): void {
+        this.data = data;
+
+        if (clear) {
+            this.clear();
+        }
+
+        this.hexerData = this.parseHexerData(this.data);
+        this.renderEditor();
+    }
+
+    clear(): void {
+        this.editor = undefined;
         this.contentEl.empty();
+    }
 
-        this.canvas = this.contentEl.createEl('canvas');
-        this.canvas.width = 400;
-        this.canvas.height = 400;
-        this.canvas.style.cursor = 'pointer';
-        this.canvas.setAttribute('data-color-index', String(this.state.colorIndex));
+    private renderEditor(): void {
+        if (!this.editor) {
+            this.contentEl.empty();
+            this.editor = new Editor(this.contentEl, {
+                getData: () => this.hexerData.clone(),
+                setData: (data: HexerData) => this.setHexerData(data)
+            });
+        }
+    }
 
-        this.registerDomEvent(this.canvas, 'click', () => {
-            this.state = cycle(this.state);
-            this.canvas.setAttribute('data-color-index', String(this.state.colorIndex));
-            this.draw();
-        });
+    private setHexerData(data: HexerData): void {
+        this.hexerData = data;
 
-        this.draw();
+        const frontmatter = stringifyYaml(toFrontmatter(data)).trim();
+        const match = FRONTMATTER_REGEX.exec(this.data);
+        const body = match ? this.data.slice(match[0].length) : '';
+        this.data = `---\n${frontmatter}\n---${body}`;
+
+        this.requestSave();
+    }
+
+    private parseHexerData(data: string) {
+        const match = FRONTMATTER_REGEX.exec(data);
+        if(!match) {
+            // TODO: Display warning and go to markdown view
+            throw new Error('Invalid Hexer file: Missing frontmatter');
+        }
+
+        const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
+        return fromFrontmatter(frontmatter);
     }
 
     async onClose(): Promise<void> {
-        // canvas and event listeners are cleaned up by Obsidian
-    }
-
-    private draw(): void {
-        const ctx = this.canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        const viewport: Viewport = { width: this.canvas.width, height: this.canvas.height };
-        paint(ctx, renderHex(this.state, viewport));
+        this.contentEl.empty();
     }
 }

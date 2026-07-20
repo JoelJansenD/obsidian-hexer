@@ -1,0 +1,59 @@
+.hexer-sidebar-section {
+    &.is-expanded .hexer-sidebar-section-content {
+        display:block;
+    }
+
+    &:not(.is-expanded) .hexer-sidebar-section-chevron {
+        transform: rotate(-90deg);
+    }
+}
+
+.hexer-sidebar-section-header {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 8px 12px;
+    width: 100%;
+    
+    &:hover {
+        background: var(--background-modifier-hover);
+        cursor: pointer;
+    }
+}
+
+.hexer-sidebar-section-icon,
+.hexer-sidebar-section-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hexer-sidebar-section-chevron {
+    transition: transform 250ms ease;
+}
+
+.hexer-sidebar-section-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 300ms ease;
+}
+
+.hexer-sidebar-section.is-expanded .hexer-sidebar-section-content {
+    grid-template-rows: 1fr;
+}
+
+.hexer-sidebar-section-content-inner {
+    overflow: hidden;
+    min-height: 0;
+    padding: 0 12px;
+    transition: padding 300ms ease;
+}
+
+.hexer-sidebar-section.is-expanded .hexer-sidebar-section-content-inner {
+    padding: 8px 12px;
+}
+
+.hexer-sidebar-section-label {
+    text-align: center;
+}

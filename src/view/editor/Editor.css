@@ -1,0 +1,12 @@
+.hexer-editor {
+    display: flex;
+    flex-direction: row;
+
+    height: 100%;
+    width: 100%;
+    border-top: 1px solid var(--divider-color);
+}
+
+.view-content:has(.hexer-editor) {
+    padding: 0;
+}
