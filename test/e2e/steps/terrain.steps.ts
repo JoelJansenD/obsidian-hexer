@@ -68,3 +68,12 @@ Then('every hovered hex terrain will be erased', async function () {
         expect(result).toBeNull();
     }
 });
+
+Then('every connected hex with the same terrain colour will be painted blue', async function () {
+    const connectedHexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }, { q: 3, r: 1 }];
+    for (const hex of connectedHexes) {
+        const result = await getHex(hex);
+        console.debug('[hexer-e2e] assert bucket fill hex', JSON.stringify({ hex, terrainColor: result?.terrainColor }));
+        expect(result?.terrainColor).toBe('#0000ff');
+    }
+});

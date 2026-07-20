@@ -30,3 +30,8 @@ Feature: Terrain
     Given I have selected the eraser tool
     When I click and drag across multiple hexes
     Then every hovered hex terrain will be erased
+
+  Scenario: Filling a hex with a terrain colour
+    Given I have selected the bucket tool
+    When I click a hex with coloured terrain
+    Then every connected hex with the same terrain colour will be painted blue
