@@ -14,7 +14,7 @@ export default class EditorTools {
 
         this.createButton(toolsEl, Brush, 'brush');
         this.createButton(toolsEl, PaintBucket, 'bucket');
-        this.createButton(toolsEl, Eraser, 'erase');
+        this.createButton(toolsEl, Eraser, 'eraser');
     }
 
     private createButton(toolsEl: HTMLElement, icon: IconNode, paintTool: PaintTool) {

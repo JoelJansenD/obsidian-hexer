@@ -12,6 +12,10 @@ export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
 };
 
+export function hexagonIsEmpty(hexagon: Hexagon) {
+    return hexagon.terrainColor === null;
+}
+
 export function pointToRadialCoordinates(x: number, y: number, size: number) {
     const scaledX = x / size;
     const scaledY = y / size;
