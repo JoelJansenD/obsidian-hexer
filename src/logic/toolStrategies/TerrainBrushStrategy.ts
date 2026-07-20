@@ -29,8 +29,8 @@ export default class TerrainBrushStrategy implements ToolStrategy {
     
     public getEvents(): RegisteredEvents {
         return {
-            onLeftClick: this.onLeftClick,
-            onLeftDrag: this.onLeftDrag
+            onLeftClick: this.onLeftClick.bind(this),
+            onLeftDrag: this.onLeftDrag.bind(this)
         };
     }
 
