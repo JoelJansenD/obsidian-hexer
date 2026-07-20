@@ -1,13 +1,13 @@
 import defaultEditorState from "../../__test/defaultEditorState";
 import { HexMap } from "../HexerData";
 import { Hexagon } from "../hexagon";
-import TerrainPaintStrategy from "./TerrainPaintStrategy";
+import TerrainBrushStrategy from "./TerrainBrushStrategy";
 
 describe('onLeftClick', () => {
 
-    let strategyToTest: TerrainPaintStrategy;
+    let strategyToTest: TerrainBrushStrategy;
     beforeEach(() => {
-        strategyToTest = new TerrainPaintStrategy();
+        strategyToTest = new TerrainBrushStrategy();
     });
 
     it('paints over an existing terrain tile with a new terrain tile', () => {
@@ -42,9 +42,9 @@ describe('onLeftClick', () => {
 
 describe('onLeftDrag', () => {
 
-    let strategyToTest: TerrainPaintStrategy;
+    let strategyToTest: TerrainBrushStrategy;
     beforeEach(() => {
-        strategyToTest = new TerrainPaintStrategy();
+        strategyToTest = new TerrainBrushStrategy();
     });
 
     it('paints over existing terrain tiles as the mouse moves across them', () => {

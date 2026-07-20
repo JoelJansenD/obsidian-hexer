@@ -1,5 +1,5 @@
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
-import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
+import TerrainBrushStrategy from "../../../logic/toolStrategies/TerrainBrushStrategy";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { ComponentOptions } from "../Editor";
@@ -25,7 +25,7 @@ export default class EditorCanvas {
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
-        this.registerEvents(new TerrainPaintStrategy());
+        this.registerEvents(new TerrainBrushStrategy());
     }
 
     private requestRender() {

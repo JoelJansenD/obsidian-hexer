@@ -1,9 +1,12 @@
-import { EditorState } from "../EditorState";
+import { EditorState, Layer, PaintTool } from "../EditorState";
 import { Hexagon, RadialCoordinates } from "../hexagon";
 import { HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
-export default class TerrainPaintStrategy implements ToolStrategy {
+export default class TerrainBrushStrategy implements ToolStrategy {
+    public canBeApplied (layer: Layer, tool: PaintTool) {
+        return layer === 'terrain' && tool === 'brush';
+    }
 
     public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         const hexagon: Hexagon = hexMap.get(`${radialCoordinates.q},${radialCoordinates.r}`) || {
