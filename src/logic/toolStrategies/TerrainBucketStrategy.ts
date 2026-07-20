@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
-import { HexMap } from "../HexerData";
+import { getArea, RadialCoordinates } from "../hexagon";
+import { hexKey, HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainBucketStrategy implements ToolStrategy {
@@ -8,8 +8,26 @@ export default class TerrainBucketStrategy implements ToolStrategy {
         return layer === 'terrain' && tool === 'bucket';
     }
 
-    public onLeftClick(_hexMap: HexMap, _editorState: EditorState, _radialCoordinates: RadialCoordinates) {
-        // TODO: implement flood fill of connected same-colour terrain hexes
+    public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        console.log('[TerrainBucketStrategy] onLeftClick', JSON.stringify({ radialCoordinates, activeColour: editorState.activeColour }));
+        const clickedHex = hexMap.get(hexKey(radialCoordinates.q, radialCoordinates.r));
+        if(!clickedHex) {
+            return;
+        }
+
+        const area = getArea(radialCoordinates, (hex) => {
+            const existing = hexMap.get(hexKey(hex.q, hex.r));
+            return existing !== undefined && existing.terrainColor === clickedHex.terrainColor;
+        });
+
+        area.forEach((hex) => {
+            const key = hexKey(hex.q, hex.r);
+            const hexagon = hexMap.get(key);
+            if(hexagon) {
+                hexagon.terrainColor = editorState.activeColour;
+                hexMap.set(key, hexagon);
+            }
+        });
     }
 
     public getEvents(): RegisteredEvents {
