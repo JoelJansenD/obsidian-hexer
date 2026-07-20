@@ -1,4 +1,71 @@
-import { getNeighbours, pointToRadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
+import { getArea, getNeighbours, Hexagon, pointToRadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
+
+describe('getArea', () => {
+    const key = (q: number, r: number) => `${q},${r}`;
+    const matchesColour = (hexMap: Map<string, Hexagon>, colour: string | null) =>
+        (hex: Hexagon) => {
+            const found = hexMap.get(key(hex.q, hex.r));
+            return found !== undefined && found.terrainColor === colour;
+        };
+
+    it('returns all connected hexes sharing the same terrain colour', () => {
+        // Arrange
+        const hexMap = new Map<string, Hexagon>([
+            [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000' }],
+            [key(0, 1), { q: 0, r: 1, terrainColor: '#ff0000' }],
+            [key(1, 0), { q: 1, r: 0, terrainColor: '#ff0000' }],
+            [key(2, 0), { q: 2, r: 0, terrainColor: '#ff0000' }],
+        ]);
+
+        // Act
+        const result = getArea({ q: 0, r: 0 }, matchesColour(hexMap, '#ff0000'));
+
+        // Assert
+        expect(result).toHaveLength(4);
+        expect(result).toEqual(expect.arrayContaining([
+            { q: 0, r: 0 },
+            { q: 0, r: 1 },
+            { q: 1, r: 0 },
+            { q: 2, r: 0 },
+        ]));
+    });
+
+    it('returns all connected hexes sharing a null terrain colour', () => {
+        // Arrange
+        const hexMap = new Map<string, Hexagon>([
+            [key(0, 0), { q: 0, r: 0, terrainColor: null }],
+            [key(0, 1), { q: 0, r: 1, terrainColor: null }],
+            [key(1, 0), { q: 1, r: 0, terrainColor: null }],
+        ]);
+
+        // Act
+        const result = getArea({ q: 0, r: 0 }, matchesColour(hexMap, null));
+
+        // Assert
+        expect(result).toHaveLength(3);
+        expect(result).toEqual(expect.arrayContaining([
+            { q: 0, r: 0 },
+            { q: 0, r: 1 },
+            { q: 1, r: 0 },
+        ]));
+    });
+
+    it('returns only the clicked hex when no neighbours match', () => {
+        // Arrange
+        const hexMap = new Map<string, Hexagon>([
+            [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000' }],
+            // A neighbour with a different terrain colour is not included.
+            [key(0, 1), { q: 0, r: 1, terrainColor: '#0000ff' }],
+            // The remaining neighbours are missing from the map entirely.
+        ]);
+
+        // Act
+        const result = getArea({ q: 0, r: 0 }, matchesColour(hexMap, '#ff0000'));
+
+        // Assert
+        expect(result).toEqual([{ q: 0, r: 0 }]);
+    });
+});
 
 describe('getNeighbours', () => {
     it('returns the correct neighbours for a given hex', () => {

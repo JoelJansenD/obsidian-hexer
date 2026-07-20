@@ -12,6 +12,33 @@ export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
 };
 
+export function getArea(coordinates: RadialCoordinates, predicate: (hex: Hexagon) => boolean) {
+    const result: RadialCoordinates[] = [];
+    const visited = new Set<string>();
+    const stack: RadialCoordinates[] = [coordinates];
+
+    while(true) {
+        const current = stack.pop();
+        if(!current) {
+            break;
+        }
+
+        if(visited.has(`${current.q},${current.r}`)) {
+            continue;
+        }
+
+        visited.add(`${current.q},${current.r}`);
+
+        if(predicate(current as Hexagon)) {
+            result.push(current);
+            const neighbours = getNeighbours(current);
+            stack.push(...neighbours);
+        }
+    }
+
+    return result;
+}
+
 export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates[] {
     const modifiers = [
         { q: 0, r: 1 }, // North
