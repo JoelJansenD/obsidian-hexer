@@ -2,6 +2,7 @@ import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
 import { HexMap } from "../HexerData";
 import TerrainBrushStrategy from "./TerrainBrushStrategy";
+import TerrainBucketStrategy from "./TerrainBucketStrategy";
 import TerrainEraserStrategy from "./TerrainEraserStrategy";
 
 export type ToolEventHandler = (hexMap: HexMap, editorState: EditorState, coordinates: RadialCoordinates) => void;
@@ -18,6 +19,7 @@ export interface ToolStrategy {
 
 const toolStrategies: ToolStrategy[] = [
     new TerrainBrushStrategy(),
+    new TerrainBucketStrategy(),
     new TerrainEraserStrategy()
 ];
 

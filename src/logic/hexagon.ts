@@ -1,3 +1,5 @@
+import { hexKey } from "./HexerData";
+
 export interface RadialCoordinates {
     q: number;
     r: number;
@@ -11,6 +13,44 @@ export interface Point {
 export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
 };
+
+export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {
+    const result: RadialCoordinates[] = [];
+    const visited = new Set<string>();
+    const stack: RadialCoordinates[] = [coordinates];
+
+    while(stack.length > 0) {
+        const current = stack.pop()!;
+        const key = hexKey(current.q, current.r);
+        if(visited.has(key)) {
+            continue;
+        }
+
+        visited.add(key);
+
+        if(predicate(current)) {
+            result.push(current);
+            const neighbours = getNeighbours(current);
+            stack.push(...neighbours);
+        }
+    }
+
+    return result;
+}
+
+export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates[] {
+    const modifiers = [
+        { q: 0, r: 1 }, // North
+        { q: 1, r: 0 }, // North-East
+        { q: 1, r: -1 }, // South-East
+        { q: 0, r: -1 }, // South
+        { q: -1, r: 0 }, // South-West
+        { q: -1, r: 1 }  // North-West
+    ];
+
+    const add = (coord: RadialCoordinates, mod: RadialCoordinates): RadialCoordinates => ({ q: coord.q + mod.q, r: coord.r + mod.r });
+    return modifiers.map(mod => add(coordinates, mod));
+}
 
 export function hexagonIsEmpty(hexagon: Hexagon) {
     return hexagon.terrainColor === null;
