@@ -5,9 +5,13 @@ import render from "../../render";
 import { ComponentOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
-const LEFT_MOUSE_BUTTON = 0;
-const MIDDLE_MOUSE_BUTTON = 1;
-const RIGHT_MOUSE_BUTTON = 2;
+const LEFT_MOUSE_BUTTON_CLICK = 0;
+const MIDDLE_MOUSE_BUTTON_CLICK = 1;
+const RIGHT_MOUSE_BUTTON_CLICK = 2;
+
+const LEFT_MOUSE_BUTTON_DRAG = 1;
+const RIGHT_MOUSE_BUTTON_DRAG = 2;
+const MIDDLE_MOUSE_BUTTON_DRAG = 4;
 
 export default class EditorCanvas {
 
@@ -68,18 +72,28 @@ export default class EditorCanvas {
         const handlers = strategy.getEvents();
 
         if (handlers.onLeftClick) {
-            const handler = handlers.onLeftClick;
-            const listener: EventListener = (e) => this.invokeMouseHandler(handler, e as MouseEvent, LEFT_MOUSE_BUTTON);
+            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
             this._canvasEl.addEventListener('mousedown', listener);
             this._listeners.set('mousedown', listener);
         }
+
+        if(handlers.onLeftDrag) {
+            const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
+            this._canvasEl.addEventListener('mousemove', listener);
+            this._listeners.set('mousemove', listener);
+        }
     }
 
-    private invokeMouseHandler(handler: ToolEventHandler, e: MouseEvent, mouseButton: number) {
-        if(e.button !== mouseButton) {
-            return;
+    private invokeMouseClickHandler(handler: ToolEventHandler, e: MouseEvent, mouseButton: number) {
+        if(e.button === mouseButton) {
+            this.invokeHandler(handler, e);
         }
-        this.invokeHandler(handler, e);
+    }
+
+    private invokeMouseDragHandler(handler: ToolEventHandler, e: MouseEvent, mouseButton: number) {
+        if(e.buttons & mouseButton) {
+            this.invokeHandler(handler, e);
+        }
     }
 
     private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {

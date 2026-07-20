@@ -6,6 +6,7 @@ export type ToolEventHandler = (hexMap: HexMap, editorState: EditorState, coordi
 
 export type RegisteredEvents = {
     onLeftClick?: ToolEventHandler;
+    onLeftDrag?: ToolEventHandler;
 }
 
 export interface ToolStrategy {
