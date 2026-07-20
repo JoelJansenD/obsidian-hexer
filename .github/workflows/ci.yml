@@ -61,7 +61,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: main.js
+          path: |
+            main.js
+            styles.css
           if-no-files-found: error
 
   unit:
