@@ -1,17 +1,12 @@
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
-import TerrainBrushStrategy from "../../../logic/toolStrategies/TerrainBrushStrategy";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { ComponentOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
 const LEFT_MOUSE_BUTTON_CLICK = 0;
-const MIDDLE_MOUSE_BUTTON_CLICK = 1;
-const RIGHT_MOUSE_BUTTON_CLICK = 2;
 
 const LEFT_MOUSE_BUTTON_DRAG = 1;
-const RIGHT_MOUSE_BUTTON_DRAG = 2;
-const MIDDLE_MOUSE_BUTTON_DRAG = 4;
 
 export default class EditorCanvas {
 

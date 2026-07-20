@@ -9,6 +9,10 @@ export interface HexerState {
 
 export type HexMap = Map<string, Hexagon>;
 
+export function hexKey(q: number, r: number): string {
+    return `${q},${r}`;
+}
+
 export class HexerData implements HexerState {
     public hexes: HexMap;
     public readonly version: string;
@@ -22,21 +26,17 @@ export class HexerData implements HexerState {
         this.size = state.size;
     }
 
-    private static key(q: number, r: number): string {
-        return `${q},${r}`;
-    }
-
     public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
     public getHex(q: number, r: number): Hexagon | undefined;
     public getHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
         const q = typeof arg1 === 'object' ? arg1.q : arg1;
         const r = typeof arg1 === 'object' ? arg1.r : arg2!; 
-        const key = HexerData.key(q, r);
+        const key = hexKey(q, r);
         return this.hexes.get(key) || undefined;
     }
 
     public setHex(hex: Hexagon): void {
-        const key = HexerData.key(hex.q, hex.r);
+        const key = hexKey(hex.q, hex.r);
         this.hexes.set(key, hex);
     }
 
