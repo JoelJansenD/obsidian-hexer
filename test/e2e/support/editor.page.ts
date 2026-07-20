@@ -55,6 +55,30 @@ export async function getHex(coordinates: RadialCoordinates): Promise<Hexagon | 
     }, coordinates);
 }
 
+export async function dragAcrossHexes(hexes: RadialCoordinates[]) {
+    const canvasEl = canvas();
+    const size = await getHexSize();
+    const { width, height } = await canvasEl.getSize();
+
+    const points = hexes.map(hex => {
+        const { x, y } = radialCoordinatesToPoint(hex, size);
+        return {
+            x: Math.round(x - width / 2),
+            y: Math.round(y - height / 2),
+        };
+    });
+
+    let builder = browser.action('pointer', { parameters: { pointerType: 'mouse' } })
+        .move({ origin: canvasEl, x: points[0].x, y: points[0].y })
+        .down({ button: 0 });
+
+    for (const point of points.slice(1)) {
+        builder = builder.move({ origin: canvasEl, x: point.x, y: point.y, duration: 50 });
+    }
+
+    await builder.up({ button: 0 }).perform();
+}
+
 export async function selectLayer(layer: Layer) {
     await selectAndClick(`[data-hexer-layer="${layer}"]`);
 }
