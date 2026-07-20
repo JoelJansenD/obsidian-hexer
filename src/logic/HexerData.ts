@@ -49,13 +49,12 @@ export class HexerData implements HexerState {
     }
 }
 
+export const CURRENT_VERSION = '1.0';
 export const initialFileContent =
 `---
 hexer:
-  version: "1.0"
+  version: "${CURRENT_VERSION}"
   size: 50
   hexes: {}
 ---
 `;
-
-export const CURRENT_VERSION = '1.0';

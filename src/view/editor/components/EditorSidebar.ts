@@ -6,7 +6,6 @@ import { ComponentOptions } from "../Editor";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
-    private _activeLayer: Layer = 'terrain';
 
     constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
@@ -54,13 +53,12 @@ export default class EditorSidebar {
     }
 
     private select(layer: Layer): void {
-        this._activeLayer = layer;
         for (const [l, section] of this._sections) {
-            section.setExpanded(l === this._activeLayer);
+            section.setExpanded(l === layer);
         }
 
         const state = this._componentOptions.getEditorState();
-        state.activeLayer = this._activeLayer;
+        state.activeLayer = layer;
         this._componentOptions.setEditorState(state);
     }
 }
