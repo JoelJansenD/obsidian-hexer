@@ -56,15 +56,15 @@ Then('the hex terrain will be painted blue', async function () {
 
 Then('the hex terrain will be erased', async function () {
     expect(lastClickedHex).not.toBeNull();
-    const hex = await getHex(lastClickedHex!);
-    console.debug('[hexer-e2e] assert clicked hex erased', JSON.stringify({ lastClickedHex, terrainColor: hex?.terrainColor }));
-    expect(hex?.terrainColor).toBeNull();
+    const result = await getHex(lastClickedHex!);
+    console.debug('[hexer-e2e] assert clicked hex erased', JSON.stringify({ lastClickedHex, terrainColor: result?.terrainColor }));
+    expect(result).toBeNull();
 });
 
 Then('every hovered hex terrain will be erased', async function () {
     for (const hex of lastDraggedHexes) {
         const result = await getHex(hex);
         console.debug('[hexer-e2e] assert drag hex erased', JSON.stringify({ hex, terrainColor: result?.terrainColor }));
-        expect(result?.terrainColor).toBeNull();
+        expect(result).toBeNull();
     }
 });

@@ -9,20 +9,7 @@ describe('onLeftClick', () => {
     beforeEach(() => {
         strategyToTest = new TerrainEraserStrategy();
     });
-
-    it('erases an existing terrain tile when clicking on it', () => {
-        // Arrange
-        const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000' });
-
-        // Act
-        strategyToTest.onLeftClick(hexMap, defaultEditorState, { q: 0, r: 0 });
-
-        // Assert
-        const result = hexMap.get('0,0')!;
-        expect(result.terrainColor).toBeNull();
-    });
-
+    
     it('removes the hexagon from the map if it is empty after erasing', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
@@ -57,9 +44,9 @@ describe('onLeftDrag', () => {
         strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 2, r: 0 });
 
         // Assert
-        expect(hexMap.get('0,0')!.terrainColor).toBeNull();
-        expect(hexMap.get('1,0')!.terrainColor).toBeNull();
-        expect(hexMap.get('2,0')!.terrainColor).toBeNull();
+        expect(hexMap.get('0,0')).toBeUndefined();
+        expect(hexMap.get('1,0')).toBeUndefined();
+        expect(hexMap.get('2,0')).toBeUndefined();
     });
 
 });
