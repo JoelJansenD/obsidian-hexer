@@ -29,7 +29,7 @@ When('I click a hex with coloured terrain', async function () {
 });
 
 When('I click and drag across multiple hexes', async function () {
-    const DRAG_HEXES = [{ q: 0, r: 0 }, { q: 1, r: 0 }, { q: 2, r: 0 }];
+    const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
     await dragAcrossHexes(DRAG_HEXES);
     lastDraggedHexes = DRAG_HEXES;
 });

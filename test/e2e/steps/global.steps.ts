@@ -5,8 +5,20 @@ import { CURRENT_VERSION } from '../../../src/logic/HexerData';
 
 const HEXER_EXT = '.hexer.md';
 
+// CI runs Obsidian in a smaller window than a typical local setup, which shrinks
+// the canvas so hexes further from the origin fall outside it and can't be
+// clicked. `browser.maximizeWindow()` isn't supported by Obsidian's Electron
+// automation, so resize the window through Electron's remote API instead.
+async function maximizeObsidianWindow() {
+    await browser.executeObsidian(({ require }) => {
+        const win = require('electron').remote.getCurrentWindow();
+        win.maximize();
+    });
+}
+
 Given('I have opened a Hexer file', async function () {
     await browser.reloadObsidian({ vault: './test/vault' });
+    await maximizeObsidianWindow();
 
     const fileContent = [
         '---',
@@ -28,4 +40,5 @@ Given('I have opened a Hexer file', async function () {
 
 Given('Obsidian is open', async function () {
     await browser.reloadObsidian({ vault: './test/vault' });
+    await maximizeObsidianWindow();
 });
