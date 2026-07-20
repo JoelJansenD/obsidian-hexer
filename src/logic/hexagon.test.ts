@@ -1,9 +1,9 @@
-import { getArea, getNeighbours, Hexagon, pointToRadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
+import { getArea, getNeighbours, Hexagon, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
 
 describe('getArea', () => {
     const key = (q: number, r: number) => `${q},${r}`;
     const matchesColour = (hexMap: Map<string, Hexagon>, colour: string | null) =>
-        (hex: Hexagon) => {
+        (hex: RadialCoordinates) => {
             const found = hexMap.get(key(hex.q, hex.r));
             return found !== undefined && found.terrainColor === colour;
         };

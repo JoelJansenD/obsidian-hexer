@@ -9,7 +9,6 @@ export default class TerrainBucketStrategy implements ToolStrategy {
     }
 
     public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        console.log('[TerrainBucketStrategy] onLeftClick', JSON.stringify({ radialCoordinates, activeColour: editorState.activeColour }));
         const clickedHex = hexMap.get(hexKey(radialCoordinates.q, radialCoordinates.r));
         if(!clickedHex) {
             return;

@@ -9,12 +9,10 @@ let lastDraggedHexes: { q: number, r: number }[] = [];
 
 Given('I have selected the {word} tool', async function (tool: PaintTool) {
     await selectPaintTool(tool);
-    console.debug(`[hexer-e2e] selected ${tool} tool`);
 });
 
 Given('I have selected the terrain layer', async function () {
     await selectLayer('terrain');
-    console.debug('[hexer-e2e] selected terrain layer');
 });
 
 Given('my selected colour is blue', async function () {
@@ -42,7 +40,6 @@ When('I click and drag across multiple hexes', async function () {
 Then('every hovered hex terrain will be painted blue', async function () {
     for (const hex of lastDraggedHexes) {
         const result = await getHex(hex);
-        console.debug('[hexer-e2e] assert drag hex', JSON.stringify({ hex, terrainColor: result?.terrainColor }));
         expect(result?.terrainColor).toBe('#0000ff');
     }
 });
@@ -50,21 +47,18 @@ Then('every hovered hex terrain will be painted blue', async function () {
 Then('the hex terrain will be painted blue', async function () {
     expect(lastClickedHex).not.toBeNull();
     const hex = await getHex(lastClickedHex!);
-    console.debug('[hexer-e2e] assert clicked hex', JSON.stringify({ lastClickedHex, terrainColor: hex?.terrainColor }));
     expect(hex?.terrainColor).toBe('#0000ff');
 });
 
 Then('the hex terrain will be erased', async function () {
     expect(lastClickedHex).not.toBeNull();
     const result = await getHex(lastClickedHex!);
-    console.debug('[hexer-e2e] assert clicked hex erased', JSON.stringify({ lastClickedHex, terrainColor: result?.terrainColor }));
     expect(result).toBeNull();
 });
 
 Then('every hovered hex terrain will be erased', async function () {
     for (const hex of lastDraggedHexes) {
         const result = await getHex(hex);
-        console.debug('[hexer-e2e] assert drag hex erased', JSON.stringify({ hex, terrainColor: result?.terrainColor }));
         expect(result).toBeNull();
     }
 });
@@ -73,7 +67,6 @@ Then('every connected hex with the same terrain colour will be painted blue', as
     const connectedHexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }, { q: 3, r: 1 }];
     for (const hex of connectedHexes) {
         const result = await getHex(hex);
-        console.debug('[hexer-e2e] assert bucket fill hex', JSON.stringify({ hex, terrainColor: result?.terrainColor }));
         expect(result?.terrainColor).toBe('#0000ff');
     }
 });
