@@ -105,7 +105,6 @@ export default class EditorCanvas {
         const editorState = this._dataOptions.getEditorState();
         handler(data.hexes, editorState, clickedHex);
         this._dataOptions.setData(data);
-        this._dataOptions.setEditorState(editorState);
         this.requestRender();
     }
 }
