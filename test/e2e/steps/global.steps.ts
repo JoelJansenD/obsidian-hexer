@@ -36,6 +36,15 @@ Given('I have opened a Hexer file', async function () {
 
     await obsidianPage.write(`test${HEXER_EXT}`, fileContent);
     await fileExplorer.fileByExtension(HEXER_EXT).click();
+
+    const canvasSize = await browser.executeObsidian(({ app }) => {
+        const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+        const canvas = leaf?.view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
+        return canvas
+            ? { clientWidth: canvas.clientWidth, clientHeight: canvas.clientHeight, dpr: window.devicePixelRatio }
+            : null;
+    });
+    console.debug('[hexer-e2e] opened Hexer file', JSON.stringify({ canvasSize, fileContent }));
 });
 
 Given('Obsidian is open', async function () {

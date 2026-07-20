@@ -1,6 +1,6 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
-import { clickHex, dragAcrossHexes, getHex, selectLayer, selectPaintTool, setTerrainColour } from '../support/editor.page';
+import { clickHex, dragAcrossHexes, getHex, logHexerState, selectLayer, selectPaintTool, setTerrainColour } from '../support/editor.page';
 
 const EMPTY_HEX = { q: 1, r: 1 };
 let lastClickedHex: { q: number, r: number } | null = null;
@@ -8,14 +8,18 @@ let lastDraggedHexes: { q: number, r: number }[] = [];
 
 Given('I have selected the brush tool', async function () {
     await selectPaintTool('brush');
+    console.debug('[hexer-e2e] selected brush tool');
 });
 
 Given('I have selected the terrain layer', async function () {
     await selectLayer('terrain');
+    console.debug('[hexer-e2e] selected terrain layer');
 });
 
 Given('my selected colour is blue', async function () {
     await setTerrainColour('#0000ff');
+    console.debug('[hexer-e2e] set terrain colour to #0000ff');
+    await logHexerState('initial (colour selected)');
 });
 
 When('I click an empty hex', async function () {
@@ -37,6 +41,7 @@ When('I click and drag across multiple hexes', async function () {
 Then('every hovered hex terrain will be painted blue', async function () {
     for (const hex of lastDraggedHexes) {
         const result = await getHex(hex);
+        console.debug('[hexer-e2e] assert drag hex', JSON.stringify({ hex, terrainColor: result?.terrainColor }));
         expect(result?.terrainColor).toBe('#0000ff');
     }
 });
@@ -44,5 +49,6 @@ Then('every hovered hex terrain will be painted blue', async function () {
 Then('the hex terrain will be painted blue', async function () {
     expect(lastClickedHex).not.toBeNull();
     const hex = await getHex(lastClickedHex!);
+    console.debug('[hexer-e2e] assert clicked hex', JSON.stringify({ lastClickedHex, terrainColor: hex?.terrainColor }));
     expect(hex?.terrainColor).toBe('#0000ff');
 });

@@ -29,12 +29,19 @@ export async function clickHex(coordinates: RadialCoordinates) {
     const { x, y } = radialCoordinatesToPoint(coordinates, size);
     const { width, height } = await canvasEl.getSize();
 
+    const offset = { x: Math.round(x - width / 2), y: Math.round(y - height / 2) };
+    console.debug('[hexer-e2e] clickHex', JSON.stringify({
+        coordinates, size, canvas: { width, height }, absolutePoint: { x, y }, offsetFromCentre: offset,
+    }));
+
     // WebdriverIO click offsets are relative to the element's centre, whereas
     // the canvas maps clicks from its top-left corner, so re-base the point.
     await canvasEl.click({
-        x: Math.round(x - width / 2),
-        y: Math.round(y - height / 2),
+        x: offset.x,
+        y: offset.y,
     });
+
+    await logHexerState('after clickHex');
 }
 
 async function getHexSize(): Promise<number> {
@@ -46,13 +53,32 @@ async function getHexSize(): Promise<number> {
 }
 
 export async function getHex(coordinates: RadialCoordinates): Promise<Hexagon | null> {
-    return browser.executeObsidian(({ app }, coords) => {
+    const hex = await browser.executeObsidian(({ app }, coords) => {
         const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
         const view = leaf?.view as unknown as {
             hexerData?: { getHex?: (q: number, r: number) => Hexagon | undefined };
         } | undefined;
         return view?.hexerData?.getHex?.(coords.q, coords.r) ?? null;
     }, coordinates);
+    console.debug('[hexer-e2e] getHex', JSON.stringify({ coordinates, hex }));
+    return hex;
+}
+
+// Dumps the full hex map so we can see exactly what was painted and where.
+export async function logHexerState(label: string) {
+    const state = await browser.executeObsidian(({ app }) => {
+        const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+        const view = leaf?.view as unknown as {
+            hexerData?: { size?: number; hexes?: Map<string, unknown> };
+        } | undefined;
+        const data = view?.hexerData;
+        return {
+            hasView: !!leaf,
+            size: data?.size ?? null,
+            hexes: data?.hexes ? Array.from(data.hexes.entries()) : null,
+        };
+    });
+    console.debug(`[hexer-e2e] state (${label})`, JSON.stringify(state));
 }
 
 export async function dragAcrossHexes(hexes: RadialCoordinates[]) {
@@ -68,6 +94,10 @@ export async function dragAcrossHexes(hexes: RadialCoordinates[]) {
         };
     });
 
+    console.debug('[hexer-e2e] dragAcrossHexes', JSON.stringify({
+        hexes, size, canvas: { width, height }, offsetsFromCentre: points,
+    }));
+
     let builder = browser.action('pointer', { parameters: { pointerType: 'mouse' } })
         .move({ origin: canvasEl, x: points[0].x, y: points[0].y })
         .down({ button: 0 });
@@ -77,6 +107,8 @@ export async function dragAcrossHexes(hexes: RadialCoordinates[]) {
     }
 
     await builder.up({ button: 0 }).perform();
+
+    await logHexerState('after dragAcrossHexes');
 }
 
 export async function selectLayer(layer: Layer) {
