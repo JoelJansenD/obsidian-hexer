@@ -1,9 +1,13 @@
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
 import TerrainPaintStrategy from "../../../logic/toolStrategies/TerrainPaintStrategy";
-import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
+import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { ComponentOptions } from "../Editor";
 import EditorTools from "./EditorTools";
+
+const LEFT_MOUSE_BUTTON = 0;
+const MIDDLE_MOUSE_BUTTON = 1;
+const RIGHT_MOUSE_BUTTON = 2;
 
 export default class EditorCanvas {
 
@@ -61,38 +65,40 @@ export default class EditorCanvas {
     }
 
     private registerEvents(strategy: ToolStrategy) {
-        const events = strategy.getEvents();
-        for(const eventKey in events) {
-            const event = events[eventKey as keyof RegisteredEvents];
-            if(!event) continue;
+        const handlers = strategy.getEvents();
 
-            const listener = (e: Event) => {
-                const data = this._dataOptions.getData();
-                const hexMap = data.hexes;
-                const rect = this._canvasEl.getBoundingClientRect();
-                const canvasX = (e as MouseEvent).clientX - rect.left;
-                const canvasY = (e as MouseEvent).clientY - rect.top;
-                const clickedHex = pointToRadialCoordinates(canvasX, canvasY, data.size);
-
-                const editorState = this._dataOptions.getEditorState();
-                event(hexMap, editorState, clickedHex);
-                this._dataOptions.setData(data);
-                this._dataOptions.setEditorState(editorState);
-                this.requestRender();
-            };
-            this._canvasEl.addEventListener(eventKey, listener);
-            this._listeners.set(eventKey, listener);
+        if (handlers.onLeftClick) {
+            const handler = handlers.onLeftClick;
+            const listener: EventListener = (e) => this.invokeMouseHandler(handler, e as MouseEvent, LEFT_MOUSE_BUTTON);
+            this._canvasEl.addEventListener('mousedown', listener);
+            this._listeners.set('mousedown', listener);
         }
     }
 
-    private unregisterEvents(registeredEvents: RegisteredEvents) {
-        const events = Object.keys(registeredEvents);
-        for (const event of events) {
-            const listener = this._listeners.get(event);
-            if(!listener) continue;
-
-            this._canvasEl.removeEventListener(event, listener);
-            this._listeners.delete(event);
+    private invokeMouseHandler(handler: ToolEventHandler, e: MouseEvent, mouseButton: number) {
+        if(e.button !== mouseButton) {
+            return;
         }
+        this.invokeHandler(handler, e);
+    }
+
+    private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {
+        const data = this._dataOptions.getData();
+        const rect = this._canvasEl.getBoundingClientRect();
+        const canvasX = e.clientX - rect.left;
+        const canvasY = e.clientY - rect.top;
+        const clickedHex = pointToRadialCoordinates(canvasX, canvasY, data.size);
+        const editorState = this._dataOptions.getEditorState();
+        handler(data.hexes, editorState, clickedHex);
+        this._dataOptions.setData(data);
+        this._dataOptions.setEditorState(editorState);
+        this.requestRender();
+    }
+
+    private unregisterEvents() {
+        for (const [event, listener] of this._listeners) {
+            this._canvasEl.removeEventListener(event, listener);
+        }
+        this._listeners.clear();
     }
 }

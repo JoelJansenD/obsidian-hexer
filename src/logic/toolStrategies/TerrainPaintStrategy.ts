@@ -1,7 +1,7 @@
 import { EditorState } from "../EditorState";
 import { Hexagon, RadialCoordinates } from "../hexagon";
 import { HexMap } from "../HexerData";
-import { ToolStrategy } from "./ToolStrategy";
+import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainPaintStrategy implements ToolStrategy {
 
@@ -15,9 +15,9 @@ export default class TerrainPaintStrategy implements ToolStrategy {
         hexMap.set(`${radialCoordinates.q},${radialCoordinates.r}`, hexagon);
     }
     
-    public getEvents() {
+    public getEvents(): RegisteredEvents {
         return {
-            click: this.onClick
+            onLeftClick: this.onClick.bind(this),
         };
     }
 

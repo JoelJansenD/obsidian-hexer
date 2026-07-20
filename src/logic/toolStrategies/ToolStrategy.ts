@@ -1,9 +1,11 @@
 import { EditorState } from "../EditorState";
-import { Hexagon, RadialCoordinates } from "../hexagon";
+import { RadialCoordinates } from "../hexagon";
 import { HexMap } from "../HexerData";
 
+export type ToolEventHandler = (hexMap: HexMap, editorState: EditorState, coordinates: RadialCoordinates) => void;
+
 export type RegisteredEvents = {
-    'click'?: (hexMap: HexMap, editorState: EditorState, clickedCoordinates: RadialCoordinates) => void;
+    onLeftClick?: ToolEventHandler;
 }
 
 export interface ToolStrategy {
