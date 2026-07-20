@@ -20,12 +20,33 @@ export default class EditorCanvas {
     private _resizeObserver!: ResizeObserver;
     private _listeners = new Map<string, EventListener>();
     
-
     private _renderRequested = false;
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
-        this.registerEvents(new TerrainBrushStrategy());
+    }
+
+    public registerEvents(strategy: ToolStrategy) {
+        const handlers = strategy.getEvents();
+
+        if (handlers.onLeftClick) {
+            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
+            this._canvasEl.addEventListener('mousedown', listener);
+            this._listeners.set('mousedown', listener);
+        }
+
+        if(handlers.onLeftDrag) {
+            const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
+            this._canvasEl.addEventListener('mousemove', listener);
+            this._listeners.set('mousemove', listener);
+        }
+    }
+
+    public unregisterEvents() {
+        for (const [event, listener] of this._listeners) {
+            this._canvasEl.removeEventListener(event, listener);
+        }
+        this._listeners.clear();
     }
 
     private requestRender() {
@@ -68,22 +89,6 @@ export default class EditorCanvas {
         this._context.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    private registerEvents(strategy: ToolStrategy) {
-        const handlers = strategy.getEvents();
-
-        if (handlers.onLeftClick) {
-            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
-            this._canvasEl.addEventListener('mousedown', listener);
-            this._listeners.set('mousedown', listener);
-        }
-
-        if(handlers.onLeftDrag) {
-            const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
-            this._canvasEl.addEventListener('mousemove', listener);
-            this._listeners.set('mousemove', listener);
-        }
-    }
-
     private invokeMouseClickHandler(handler: ToolEventHandler, e: MouseEvent, mouseButton: number) {
         if(e.button === mouseButton) {
             this.invokeHandler(handler, e);
@@ -107,12 +112,5 @@ export default class EditorCanvas {
         this._dataOptions.setData(data);
         this._dataOptions.setEditorState(editorState);
         this.requestRender();
-    }
-
-    private unregisterEvents() {
-        for (const [event, listener] of this._listeners) {
-            this._canvasEl.removeEventListener(event, listener);
-        }
-        this._listeners.clear();
     }
 }
