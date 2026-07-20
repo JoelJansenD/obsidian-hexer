@@ -1,35 +1,21 @@
-import { pointToRadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
+import { getNeighbours, pointToRadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
 
-describe('roundRadialCoordinates', () => {
-    it.for([
-        [ 1.6, 2.1, 2, 2 ],
-        [ 2.1, 1.6, 2, 2 ],
-        [ 2.1, 2.1, 2, 2 ]
-    ])('rounds (%d, %d) to (%i, %i)', ([ q, r, expectedQ, expectedR ]) => {
+describe('getNeighbours', () => {
+    it('returns the correct neighbours for a given hex', () => {
+        // Arrange
+        const coordinates = { q: 12, r: 21 };
         // Act
-        const result = roundRadialCoordinates(q, r);
+        const result = getNeighbours(coordinates);
 
         // Assert
-        expect(result.q).toBe(expectedQ);
-        expect(result.r).toBe(expectedR);
-    });
-
-    it('rounds negative values correctly', () => {
-        // Act
-        const result = roundRadialCoordinates(-1.6, -2.1);
-
-        // Assert
-        expect(result.q).toBe(-2);
-        expect(result.r).toBe(-2);
-    });
-
-    it('rounds negative values close to zero to zero', () => {
-        // Act
-        const result = roundRadialCoordinates(-1e-9, -1e-9);
-
-        // Assert
-        expect(result.q).toBe(0);
-        expect(result.r).toBe(0);
+        expect(result).toEqual([
+            { q: 12, r: 22 }, // North
+            { q: 13, r: 21 }, // North-East
+            { q: 13, r: 20 }, // South-East
+            { q: 12, r: 20 }, // South
+            { q: 11, r: 21 }, // South-West
+            { q: 11, r: 22 }  // North-West
+        ]);
     });
 });
 
@@ -94,5 +80,38 @@ describe('radialCoordinatesToPoint', () => {
         // Assert
         expect(result.x).toBeCloseTo(0);
         expect(result.y).toBeCloseTo(86.60254);
+    });
+});
+
+describe('roundRadialCoordinates', () => {
+    it.for([
+        [ 1.6, 2.1, 2, 2 ],
+        [ 2.1, 1.6, 2, 2 ],
+        [ 2.1, 2.1, 2, 2 ]
+    ])('rounds (%d, %d) to (%i, %i)', ([ q, r, expectedQ, expectedR ]) => {
+        // Act
+        const result = roundRadialCoordinates(q, r);
+
+        // Assert
+        expect(result.q).toBe(expectedQ);
+        expect(result.r).toBe(expectedR);
+    });
+
+    it('rounds negative values correctly', () => {
+        // Act
+        const result = roundRadialCoordinates(-1.6, -2.1);
+
+        // Assert
+        expect(result.q).toBe(-2);
+        expect(result.r).toBe(-2);
+    });
+
+    it('rounds negative values close to zero to zero', () => {
+        // Act
+        const result = roundRadialCoordinates(-1e-9, -1e-9);
+
+        // Assert
+        expect(result.q).toBe(0);
+        expect(result.r).toBe(0);
     });
 });

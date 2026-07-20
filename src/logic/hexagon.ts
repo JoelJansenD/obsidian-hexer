@@ -12,6 +12,20 @@ export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
 };
 
+export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates[] {
+    const modifiers = [
+        { q: 0, r: 1 }, // North
+        { q: 1, r: 0 }, // North-East
+        { q: 1, r: -1 }, // South-East
+        { q: 0, r: -1 }, // South
+        { q: -1, r: 0 }, // South-West
+        { q: -1, r: 1 }  // North-West
+    ];
+
+    const add = (coord: RadialCoordinates, mod: RadialCoordinates): RadialCoordinates => ({ q: coord.q + mod.q, r: coord.r + mod.r });
+    return modifiers.map(mod => add(coordinates, mod));
+}
+
 export function hexagonIsEmpty(hexagon: Hexagon) {
     return hexagon.terrainColor === null;
 }
