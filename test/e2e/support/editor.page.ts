@@ -89,5 +89,6 @@ export async function selectPaintTool(paintTool: PaintTool) {
 
 async function selectAndClick(selector: string) {
     const element = browser.$(selector);
+    await element.waitForExist();
     await element.click();
 }
