@@ -1,8 +1,11 @@
-import { Point } from "obsidian";
-
 export interface RadialCoordinates {
     q: number;
     r: number;
+}
+
+export interface Point {
+    x: number;
+    y: number;
 }
 
 export interface Hexagon extends RadialCoordinates {
