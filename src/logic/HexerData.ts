@@ -32,7 +32,7 @@ export class HexerData implements HexerState {
         const q = typeof arg1 === 'object' ? arg1.q : arg1;
         const r = typeof arg1 === 'object' ? arg1.r : arg2!; 
         const key = hexKey(q, r);
-        return this.hexes.get(key) || undefined;
+        return this.hexes.get(key);
     }
 
     public setHex(hex: Hexagon): void {
