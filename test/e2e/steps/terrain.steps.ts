@@ -3,7 +3,7 @@ import { expect } from '@wdio/globals';
 import { PaintTool } from '../../../src/logic/EditorState';
 import { clickHex, dragAcrossHexes, getHex, logHexerState, selectLayer, selectPaintTool, setTerrainColour } from '../support/editor.page';
 
-const EMPTY_HEX = { q: 1, r: 1 };
+const EMPTY_HEX = { q: 5, r: 5 };
 let lastClickedHex: { q: number, r: number } | null = null;
 let lastDraggedHexes: { q: number, r: number }[] = [];
 
