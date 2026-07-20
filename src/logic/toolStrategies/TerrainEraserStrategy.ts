@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { hexagonIsEmpty, RadialCoordinates } from "../hexagon";
 import { hexKey, HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
@@ -24,7 +24,12 @@ export default class TerrainEraserStrategy implements ToolStrategy {
         }
 
         hexagon.terrainColor = null;
-        hexMap.set(key, hexagon);
+        if(hexagonIsEmpty(hexagon)) {
+            hexMap.delete(key);
+        }
+        else {
+            hexMap.set(key, hexagon);
+        }
     }
 
     public getEvents(): RegisteredEvents {

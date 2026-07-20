@@ -23,6 +23,18 @@ describe('onLeftClick', () => {
         expect(result.terrainColor).toBeNull();
     });
 
+    it('removes the hexagon from the map if it is empty after erasing', () => {
+        // Arrange
+        const hexMap: HexMap = new Map<string, Hexagon>();
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000' });
+       
+        // Act
+        strategyToTest.onLeftClick(hexMap, defaultEditorState, { q: 0, r: 0 });
+
+        // Assert
+        expect(hexMap.has('0,0')).toBe(false);
+    });
+
 });
 
 describe('onLeftDrag', () => {
