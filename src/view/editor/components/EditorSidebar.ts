@@ -24,7 +24,6 @@ export default class EditorSidebar {
         this._sections.set('terrain', terrainSection);
         this._sections.set('icon', iconSection);
 
-        const editorState = this._componentOptions.getEditorState();
         this.updateIconElements();
     }
 
@@ -66,7 +65,7 @@ export default class EditorSidebar {
             iconSectionContent,
             {
                 dataField: 'icon',
-                value: editorState.activeColour,
+                value: editorState.activeIcon.color,
                 onUpdate: (newColour: string) => {
                     const state = this._componentOptions.getEditorState();
                     state.activeIcon.color = newColour;
@@ -93,16 +92,6 @@ export default class EditorSidebar {
         }
 
         return iconSection;
-    }
-
-    private selectIcon(iconName: string, iconWrappers: Map<string, HTMLElement>) {
-        const state = this._componentOptions.getEditorState();
-        state.activeIcon = { name: iconName, color: state.activeIcon.color };
-        this._componentOptions.setEditorState(state);
-
-        for(const [name, wrapper] of iconWrappers) {
-            wrapper.toggleClass('active', name === iconName);
-        }
     }
 
     private updateIconElements() {

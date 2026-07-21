@@ -55,7 +55,8 @@ export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates
 }
 
 export function hexagonIsEmpty(hexagon: Hexagon) {
-    return hexagon.terrainColor === null;
+    return hexagon.terrainColor === null
+        && hexagon.icon === null;
 }
 
 export function pointToRadialCoordinates(x: number, y: number, size: number) {
