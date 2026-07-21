@@ -21,6 +21,10 @@ export default class Editor {
 
     private _editorState: EditorState = {
         activeColour: '#000000',
+        activeIcon: {
+            color: '#000000',
+            name: 'default'
+        },
         activeLayer: 'terrain',
         activePaintTool: 'select'
     };
