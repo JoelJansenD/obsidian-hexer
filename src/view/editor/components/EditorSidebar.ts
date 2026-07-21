@@ -7,21 +7,25 @@ import { HEXER_ICONS } from "../../../logic/icon";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
+    private _sidebarEl!: HTMLDivElement;
 
     constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
     }
 
     private build() {
-        const sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
+        this._sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
-        const terrainSection = this.buildTerrain(sidebarEl);
+        const terrainSection = this.buildTerrain(this._sidebarEl);
         terrainSection.setExpanded(true);
 
-        const iconSection = this.buildIcon(sidebarEl);
+        const iconSection = this.buildIcon(this._sidebarEl);
 
         this._sections.set('terrain', terrainSection);
         this._sections.set('icon', iconSection);
+        
+        const editorState = this._componentOptions.getEditorState();
+        this.colourIcons(editorState.activeColour);
     }
 
     private buildTerrain(sidebarEl: HTMLElement) {
@@ -67,6 +71,7 @@ export default class EditorSidebar {
                     const state = this._componentOptions.getEditorState();
                     state.activeIcon.color = newColour;
                     this._componentOptions.setEditorState(state);
+                    this.colourIcons(state.activeIcon.color);
                 }
             });
 
@@ -85,6 +90,16 @@ export default class EditorSidebar {
         }
 
         return iconSection;
+    }
+
+    private colourIcons(colour: string) {
+        const iconSection = this._sections.get('icon');
+        if(!iconSection) return;
+
+        const iconEls = iconSection.contentEl.querySelectorAll('.hexer-sidebar-icon-item');
+        iconEls.forEach(iconEl => {
+            (iconEl as HTMLElement).style.color = colour;
+        });
     }
 
     private select(layer: Layer): void {

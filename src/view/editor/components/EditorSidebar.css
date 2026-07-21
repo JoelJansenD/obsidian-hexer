@@ -37,4 +37,9 @@
     &.active {
         background-color: var(--interactive-hover);
     }
+
+    & svg,
+    & svg * {
+        fill: currentColor;
+    }
 }
