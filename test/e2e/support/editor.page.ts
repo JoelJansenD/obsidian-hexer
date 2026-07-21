@@ -2,6 +2,7 @@ import { Layer, PaintTool } from "../../../src/logic/EditorState";
 import { Hexagon, RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
 const TERRAIN_COLOUR_SELECTOR = '[data-hexer-colour-field-target="terrain"]';
+const ICON_COLOUR_SELECTOR = '[data-hexer-colour-field-target="icon"]';
 
 export const terrainLayer = {
     colourPicker: () => browser.$(TERRAIN_COLOUR_SELECTOR)
@@ -19,6 +20,27 @@ export async function setTerrainColour(value: string) {
         input.value = colour;
         input.dispatchEvent(new Event('input', { bubbles: true }));
     }, TERRAIN_COLOUR_SELECTOR, value);
+}
+
+export async function setIcon(icon: string) {
+    const ICON_SELECTOR = `[data-hexer-icon="${icon}"]`;
+    const element = await browser.$(ICON_SELECTOR);
+    await element.waitForExist();
+    await element.click();
+}
+
+export async function setIconColour(value: string) {
+    await browser.$(ICON_COLOUR_SELECTOR).waitForExist();
+
+    // A `<input type="color">` doesn't accept typed input, and setting its value
+    // programmatically doesn't fire the `input` event the palette listens for,
+    // so set the value and dispatch the event manually.
+    await browser.execute((selector, colour) => {
+        const input = document.querySelector(selector) as HTMLInputElement | null;
+        if (!input) return;
+        input.value = colour;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    }, ICON_COLOUR_SELECTOR, value);
 }
 
 export const canvas = () => browser.$('.hexer-canvas');

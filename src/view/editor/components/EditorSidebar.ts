@@ -89,7 +89,7 @@ export default class EditorSidebar {
                 this._componentOptions.setEditorState(editorState);
                 this.updateIconElements();
             });
-            iconWrapper.dataset.iconName = iconName;
+            iconWrapper.dataset.hexerIcon = iconName;
         }
 
         return iconSection;
@@ -117,7 +117,7 @@ export default class EditorSidebar {
         iconEls.forEach(iconEl => {
             const element = iconEl as HTMLElement;
             element.style.color = colour;
-            element.toggleClass('active', element.dataset.iconName === activeIconName);
+            element.toggleClass('active', element.dataset.hexerIcon === activeIconName);
         });
     }
 

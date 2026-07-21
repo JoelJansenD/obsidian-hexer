@@ -3,14 +3,15 @@ import { expect } from '@wdio/globals';
 import { PaintTool } from '../../../src/logic/EditorState';
 import { clickHex, dragAcrossHexes, getHex, logHexerState, selectLayer, selectPaintTool, setTerrainColour } from '../support/editor.page';
 import { TestContext } from '../support/TestContext';
+import { colourToHex } from '../support/colours';
 
 Given('I have selected the {word} tool', async function (tool: PaintTool) {
     await selectPaintTool(tool);
 });
 
 Given('my selected colour is blue', async function () {
-    await setTerrainColour('#0000ff');
-    console.debug('[hexer-e2e] set terrain colour to #0000ff');
+    await setTerrainColour(colourToHex('blue'));
+    console.debug(`[hexer-e2e] set terrain colour to ${colourToHex('blue')}`);
     await logHexerState('initial (colour selected)');
 });
 
