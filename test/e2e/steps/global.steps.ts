@@ -42,6 +42,9 @@ Given('I have opened a Hexer file', async function () {
         '      q: 2',
         '      r: 2',
         '      terrainColor: "#ff0000"',
+        '      icon:',
+        '        name: "castle"',
+        '        color: "#00ff00"',
         '    "3,1":',
         '      q: 3',
         '      r: 1',
@@ -75,4 +78,10 @@ Given('Obsidian is open', async function () {
 When('I click an empty hex', async function (this: TestContext) {
     await editorPage.clickHex(EMPTY_HEX);
     this.lastClickedHex = EMPTY_HEX;
+});
+
+When('I click and drag across multiple hexes', async function (this: TestContext) {
+    const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
+    await editorPage.dragAcrossHexes(DRAG_HEXES);
+    this.lastDraggedHexes = DRAG_HEXES;
 });

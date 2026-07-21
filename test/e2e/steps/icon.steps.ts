@@ -16,7 +16,8 @@ Given('I have selected a {word} icon colour', async function (this: TestContext,
 });
 
 When('I click a hex with an icon', async function (this: TestContext) {
-    return 'pending';
+    await editorPage.clickHex({ q: 2, r: 2 });
+    this.lastClickedHex = { q: 2, r: 2 };
 });
 
 Then('the hex will have a {word} {word} icon', async function (this: TestContext, colour: string, icon: string) {
@@ -26,6 +27,12 @@ Then('the hex will have a {word} {word} icon', async function (this: TestContext
     expect(hex!.icon?.color).toBe(colourToHex(colour));
 });
 
-Then('every hovered hex will have a castle icon', async function (this: TestContext) {
-    return 'pending';
+Then('every hovered hex will have a {word} {word} icon', async function (this: TestContext, colour: string, icon: string) {
+    expect(this.lastDraggedHexes).not.toBeUndefined();
+    this.lastDraggedHexes!.forEach(async (hex) => {
+        const result = await editorPage.getHex(hex);
+        expect(result?.icon).not.toBeNull();
+        expect(result!.icon?.name).toBe(icon);
+        expect(result!.icon?.color).toBe(colourToHex(colour));
+    });
 });

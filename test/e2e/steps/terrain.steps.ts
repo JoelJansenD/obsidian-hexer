@@ -21,12 +21,6 @@ When('I click a hex with coloured terrain', async function (this: TestContext) {
     this.lastClickedHex = { q: 2, r: 2 };
 });
 
-When('I click and drag across multiple hexes', async function (this: TestContext) {
-    const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
-    await editorPage.dragAcrossHexes(DRAG_HEXES);
-    this.lastDraggedHexes = DRAG_HEXES;
-});
-
 Then('every hovered hex terrain will be painted blue', async function (this: TestContext) {
     for (const hex of this.lastDraggedHexes || []) {
         const result = await editorPage.getHex(hex);
