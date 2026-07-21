@@ -5,6 +5,6 @@ export interface Icon {
     color: string;
 }
 
-export const HEXER_ICONS: Record<string, string> = {
-    castle,
-};
+export const HEXER_ICONS: Map<string, string> = new Map([
+    ['castle', castle],
+]);
