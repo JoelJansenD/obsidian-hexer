@@ -20,9 +20,9 @@ export default class Editor {
     private _sidebar!: EditorSidebar;
 
     private _editorState: EditorState = {
-        activeColour: '#FF0000',
+        activeColour: '#FFFFFF',
         activeIcon: {
-            color: '#FF0000',
+            color: '#FFFFFF',
             name: 'castle'
         },
         activeLayer: 'terrain',

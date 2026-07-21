@@ -35,7 +35,7 @@
     }
 
     &.active {
-        background-color: var(--interactive-hover);
+        background-color: var(--interactive-accent);
     }
 
     & svg,
