@@ -1,5 +1,5 @@
 import defaultEditorState from "../../__test/defaultEditorState";
-import { Hexagon, Icon } from "../hexagon";
+import { Hexagon } from "../hexagon";
 import { HexMap } from "../HexerData";
 import IconBrushStrategy from "./IconBrushStrategy";
 
@@ -14,7 +14,7 @@ describe('onLeftClick', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
-        const expectedIcon: Icon = {
+        const expectedIcon = {
             name: 'castle',
             color: '#ff0000'
         };
@@ -31,7 +31,7 @@ describe('onLeftClick', () => {
     it('creates a new hexagon with an icon when clicking on an empty hexagon', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        const expectedIcon: Icon = {
+        const expectedIcon = {
             name: 'castle',
             color: '#ff0000'
         };

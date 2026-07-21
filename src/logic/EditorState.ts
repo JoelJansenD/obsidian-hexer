@@ -1,4 +1,4 @@
-import { Icon } from "./hexagon";
+import { Icon } from "./icon";
 
 export type Layer = 'terrain' | 'icon';
 export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser';
