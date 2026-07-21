@@ -2,17 +2,10 @@ import { Given, When, Then } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import { PaintTool } from '../../../src/logic/EditorState';
 import { clickHex, dragAcrossHexes, getHex, logHexerState, selectLayer, selectPaintTool, setTerrainColour } from '../support/editor.page';
-
-const EMPTY_HEX = { q: 5, r: 5 };
-let lastClickedHex: { q: number, r: number } | null = null;
-let lastDraggedHexes: { q: number, r: number }[] = [];
+import { TestContext } from '../support/TestContext';
 
 Given('I have selected the {word} tool', async function (tool: PaintTool) {
     await selectPaintTool(tool);
-});
-
-Given('I have selected the terrain layer', async function () {
-    await selectLayer('terrain');
 });
 
 Given('my selected colour is blue', async function () {
@@ -21,43 +14,38 @@ Given('my selected colour is blue', async function () {
     await logHexerState('initial (colour selected)');
 });
 
-When('I click an empty hex', async function () {
-    await clickHex(EMPTY_HEX);
-    lastClickedHex = EMPTY_HEX;
-});
-
-When('I click a hex with coloured terrain', async function () {
+When('I click a hex with coloured terrain', async function (this: TestContext) {
     await clickHex({ q: 2, r: 2 });
-    lastClickedHex = { q: 2, r: 2 };
+    this.lastClickedHex = { q: 2, r: 2 };
 });
 
-When('I click and drag across multiple hexes', async function () {
+When('I click and drag across multiple hexes', async function (this: TestContext) {
     const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
     await dragAcrossHexes(DRAG_HEXES);
-    lastDraggedHexes = DRAG_HEXES;
+    this.lastDraggedHexes = DRAG_HEXES;
 });
 
-Then('every hovered hex terrain will be painted blue', async function () {
-    for (const hex of lastDraggedHexes) {
+Then('every hovered hex terrain will be painted blue', async function (this: TestContext) {
+    for (const hex of this.lastDraggedHexes || []) {
         const result = await getHex(hex);
         expect(result?.terrainColor).toBe('#0000ff');
     }
 });
 
-Then('the hex terrain will be painted blue', async function () {
-    expect(lastClickedHex).not.toBeNull();
-    const hex = await getHex(lastClickedHex!);
+Then('the hex terrain will be painted blue', async function (this: TestContext) {
+    expect(this.lastClickedHex).not.toBeNull();
+    const hex = await getHex(this.lastClickedHex!);
     expect(hex?.terrainColor).toBe('#0000ff');
 });
 
-Then('the hex terrain will be erased', async function () {
-    expect(lastClickedHex).not.toBeNull();
-    const result = await getHex(lastClickedHex!);
+Then('the hex terrain will be erased', async function (this: TestContext) {
+    expect(this.lastClickedHex).not.toBeNull();
+    const result = await getHex(this.lastClickedHex!);
     expect(result).toBeNull();
 });
 
-Then('every hovered hex terrain will be erased', async function () {
-    for (const hex of lastDraggedHexes) {
+Then('every hovered hex terrain will be erased', async function (this: TestContext) {
+    for (const hex of this.lastDraggedHexes || []) {
         const result = await getHex(hex);
         expect(result).toBeNull();
     }
