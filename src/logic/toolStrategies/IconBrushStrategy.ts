@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
-import { HexMap } from "../HexerData";
+import { hexKey, HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class IconBrushStrategy implements ToolStrategy {
@@ -9,11 +9,24 @@ export default class IconBrushStrategy implements ToolStrategy {
     }
 
     public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        throw new Error("Not implemented");
+        this.paint(hexMap, editorState, radialCoordinates);
     }
 
     public onLeftDrag(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        throw new Error("Not implemented");
+        this.paint(hexMap, editorState, radialCoordinates);
+    }
+
+    private paint(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        const key = hexKey(radialCoordinates.q, radialCoordinates.r);
+        const hex = hexMap.get(key) || {
+            q: radialCoordinates.q,
+            r: radialCoordinates.r,
+            terrainColor: null,
+            icon: null
+        };
+        
+        hex.icon = editorState.activeIcon;
+        hexMap.set(key, hex);
     }
 
     public getEvents(): RegisteredEvents {
