@@ -13,7 +13,7 @@ describe('onLeftClick', () => {
     it('paints over an existing terrain tile with a new terrain tile', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000' });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
         const expectedColour = '#ff0000';
         const editorState = {...defaultEditorState, activeColour: expectedColour};
 
@@ -50,9 +50,9 @@ describe('onLeftDrag', () => {
     it('paints over existing terrain tiles as the mouse moves across them', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000' });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000' });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000' });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
+        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: null });
+        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: null });
         const expectedColour = '#ff0000';
         const editorState = {...defaultEditorState, activeColour: expectedColour};
 

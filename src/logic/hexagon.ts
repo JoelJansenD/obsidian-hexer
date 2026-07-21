@@ -1,4 +1,5 @@
 import { hexKey } from "./HexerData";
+import { Icon } from "./icon";
 
 export interface RadialCoordinates {
     q: number;
@@ -12,6 +13,7 @@ export interface Point {
 
 export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
+    icon: Icon | null;
 };
 
 export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {
@@ -53,7 +55,8 @@ export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates
 }
 
 export function hexagonIsEmpty(hexagon: Hexagon) {
-    return hexagon.terrainColor === null;
+    return hexagon.terrainColor === null
+        && hexagon.icon === null;
 }
 
 export function pointToRadialCoordinates(x: number, y: number, size: number) {

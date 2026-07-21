@@ -1,8 +1,45 @@
 .hexer-sidebar {
     flex: 0 0 20%;
+    max-width: 20%;
     color: var(--text-normal);
     font-size: var(--font-smaller);
     font-weight: var(--font-semibold);
     border-left: 1px solid var(--divider-color);
     background-color: var(--background-secondary);
+}
+
+.hexer-sidebar-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hexer-sidebar-icon-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.hexer-sidebar-icon-item {
+    display: flexbox;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 8px;
+
+    &:hover {
+        background-color: var(--interactive-normal);
+    }
+
+    &.active {
+        background-color: var(--interactive-accent);
+    }
+
+    & svg,
+    & svg * {
+        fill: currentColor;
+    }
 }

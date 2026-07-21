@@ -1,9 +1,13 @@
-import { Given } from "@wdio/cucumber-framework";
+import { Given, When } from "@wdio/cucumber-framework";
 import { obsidianPage } from 'wdio-obsidian-service';
 import { fileExplorer } from '../support/obsidian.page';
 import { CURRENT_VERSION } from '../../../src/logic/HexerData';
+import editorPage from "../support/editor.page";
+import { Layer } from "../../../src/logic/EditorState";
+import { TestContext } from "../support/TestContext";
 
 const HEXER_EXT = '.hexer.md';
+const EMPTY_HEX = { q: 5, r: 5 };
 
 // CI runs Obsidian in a smaller window than a typical local setup, which shrinks
 // the canvas so hexes further from the origin fall outside it and can't be
@@ -30,18 +34,24 @@ Given('I have opened a Hexer file', async function () {
         '      q: 1',
         '      r: 1',
         '      terrainColor: "#ff0000"',
+        '      icon:',
         '    "2,1":',
         '      q: 2',
         '      r: 1',
         '      terrainColor: "#ff0000"',
+        '      icon:',
         '    "2,2":',
         '      q: 2',
         '      r: 2',
         '      terrainColor: "#ff0000"',
+        '      icon:',
+        '        name: "castle"',
+        '        color: "#00ff00"',
         '    "3,1":',
         '      q: 3',
         '      r: 1',
         '      terrainColor: "#ff0000"',
+        '      icon:',
         '---',
         '',
     ].join('\n');
@@ -59,7 +69,22 @@ Given('I have opened a Hexer file', async function () {
     console.debug('[hexer-e2e] opened Hexer file', JSON.stringify({ canvasSize, fileContent }));
 });
 
+Given('I have selected the {word} layer', async function (layer: Layer) {
+    await editorPage.selectLayer(layer);
+});
+
 Given('Obsidian is open', async function () {
     await browser.reloadObsidian({ vault: './test/vault' });
     await maximizeObsidianWindow();
+});
+
+When('I click an empty hex', async function (this: TestContext) {
+    await editorPage.clickHex(EMPTY_HEX);
+    this.lastClickedHex = EMPTY_HEX;
+});
+
+When('I click and drag across multiple hexes', async function (this: TestContext) {
+    const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
+    await editorPage.dragAcrossHexes(DRAG_HEXES);
+    this.lastDraggedHexes = DRAG_HEXES;
 });

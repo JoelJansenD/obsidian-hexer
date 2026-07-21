@@ -1,5 +1,6 @@
 import { Hexagon, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
+import { HEXER_ICONS } from "../logic/icon";
 
 export default function render(context: CanvasRenderingContext2D, data: HexerData) {
     // Clear the full backing store regardless of the current DPR transform.
@@ -10,6 +11,7 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
 
     for(const hex of data.hexes.values()) {
         drawHex(context, hex, data.size);
+        drawIcon(context, hex, data.size);
     }
 }
 
@@ -38,4 +40,38 @@ function drawHex(context: CanvasRenderingContext2D, hex: Hexagon, size: number) 
     }
 
     context.stroke();
+}
+
+function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
+    if(!hex.icon) {
+        return;
+    }
+
+    const icon = HEXER_ICONS.get(hex.icon.name);
+    if(!icon) {
+        // TODO: display warning to user
+        return;
+    }
+
+    const svgEl = new DOMParser().parseFromString(icon, "image/svg+xml").documentElement;
+    const [vbX, vbY, vbWidth, vbHeight] = (svgEl.getAttribute('viewBox') ?? '0 0 512 512')
+        .split(/\s+/)
+        .map(Number);
+    const hexCenter = radialCoordinatesToPoint(hex, size);
+    const iconSize = size * 1.2;
+    const scale = iconSize / Math.max(vbWidth, vbHeight);
+
+    context.save();
+    context.translate(hexCenter.x - (vbWidth * scale) / 2, hexCenter.y - (vbHeight * scale) / 2);
+    context.scale(scale, scale);
+    context.translate(-vbX, -vbY);
+    context.fillStyle = hex.icon.color;
+
+    svgEl.querySelectorAll('path').forEach((pathEl) => {
+        context.save();
+        context.fill(new Path2D(pathEl.getAttribute('d') ?? ''));
+        context.restore();
+    });
+
+    context.restore();
 }
