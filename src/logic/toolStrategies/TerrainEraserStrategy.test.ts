@@ -13,8 +13,8 @@ describe('onLeftClick', () => {
     it('removes the hexagon from the map if it is empty after erasing', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000' });
-       
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: null });
+
         // Act
         strategyToTest.onLeftClick(hexMap, defaultEditorState, { q: 0, r: 0 });
 
@@ -34,9 +34,9 @@ describe('onLeftDrag', () => {
     it('erases existing terrain tiles as the mouse moves across them', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000' });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000' });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000' });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
+        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: null });
+        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: null });
 
         // Act
         strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 0, r: 0 });

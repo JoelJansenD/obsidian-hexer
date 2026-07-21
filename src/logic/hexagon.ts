@@ -12,7 +12,13 @@ export interface Point {
 
 export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
+    icon: Icon | null;
 };
+
+export interface Icon {
+    name: string;
+    color: string;
+}
 
 export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {
     const result: RadialCoordinates[] = [];

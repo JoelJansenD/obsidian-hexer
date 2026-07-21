@@ -21,7 +21,8 @@ export default class TerrainBrushStrategy implements ToolStrategy {
         const hexagon: Hexagon = hexMap.get(key) || {
             q: radialCoordinates.q,
             r: radialCoordinates.r,
-            terrainColor: null
+            terrainColor: null,
+            icon: null
         };
         hexagon.terrainColor = editorState.activeColour;
         hexMap.set(key, hexagon);

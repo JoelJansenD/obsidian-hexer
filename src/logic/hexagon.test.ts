@@ -11,10 +11,10 @@ describe('getArea', () => {
     it('returns all connected hexes sharing the same terrain colour', () => {
         // Arrange
         const hexMap = new Map<string, Hexagon>([
-            [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000' }],
-            [key(0, 1), { q: 0, r: 1, terrainColor: '#ff0000' }],
-            [key(1, 0), { q: 1, r: 0, terrainColor: '#ff0000' }],
-            [key(2, 0), { q: 2, r: 0, terrainColor: '#ff0000' }],
+            [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000', icon: null }],
+            [key(0, 1), { q: 0, r: 1, terrainColor: '#ff0000', icon: null }],
+            [key(1, 0), { q: 1, r: 0, terrainColor: '#ff0000', icon: null }],
+            [key(2, 0), { q: 2, r: 0, terrainColor: '#ff0000', icon: null }],
         ]);
 
         // Act
@@ -33,9 +33,9 @@ describe('getArea', () => {
     it('returns all connected hexes sharing a null terrain colour', () => {
         // Arrange
         const hexMap = new Map<string, Hexagon>([
-            [key(0, 0), { q: 0, r: 0, terrainColor: null }],
-            [key(0, 1), { q: 0, r: 1, terrainColor: null }],
-            [key(1, 0), { q: 1, r: 0, terrainColor: null }],
+            [key(0, 0), { q: 0, r: 0, terrainColor: null, icon: null }],
+            [key(0, 1), { q: 0, r: 1, terrainColor: null, icon: null }],
+            [key(1, 0), { q: 1, r: 0, terrainColor: null, icon: null }],
         ]);
 
         // Act
@@ -53,9 +53,9 @@ describe('getArea', () => {
     it('returns only the clicked hex when no neighbours match', () => {
         // Arrange
         const hexMap = new Map<string, Hexagon>([
-            [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000' }],
+            [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000', icon: null }],
             // A neighbour with a different terrain colour is not included.
-            [key(0, 1), { q: 0, r: 1, terrainColor: '#0000ff' }],
+            [key(0, 1), { q: 0, r: 1, terrainColor: '#0000ff', icon: null }],
             // The remaining neighbours are missing from the map entirely.
         ]);
 
