@@ -23,9 +23,9 @@ export default class EditorSidebar {
 
         this._sections.set('terrain', terrainSection);
         this._sections.set('icon', iconSection);
-        
+
         const editorState = this._componentOptions.getEditorState();
-        this.colourIcons(editorState.activeColour);
+        this.updateIconElements();
     }
 
     private buildTerrain(sidebarEl: HTMLElement) {
@@ -71,7 +71,7 @@ export default class EditorSidebar {
                     const state = this._componentOptions.getEditorState();
                     state.activeIcon.color = newColour;
                     this._componentOptions.setEditorState(state);
-                    this.colourIcons(state.activeIcon.color);
+                    this.updateIconElements();
                 }
             });
 
@@ -83,22 +83,41 @@ export default class EditorSidebar {
 
             const iconWrapper = iconsContainer.createEl('div', { cls: 'hexer-sidebar-icon-item' });
             iconWrapper.appendChild(iconEl);
-
-            if(iconName === editorState.activeIcon.name) {
-                iconWrapper.addClass('active');
-            }
+            iconWrapper.addEventListener('click', () => {
+                const editorState = this._componentOptions.getEditorState();
+                editorState.activeIcon = {...editorState.activeIcon, name: iconName};
+                this._componentOptions.setEditorState(editorState);
+                this.updateIconElements();
+            });
+            iconWrapper.dataset.iconName = iconName;
         }
 
         return iconSection;
     }
 
-    private colourIcons(colour: string) {
+    private selectIcon(iconName: string, iconWrappers: Map<string, HTMLElement>) {
+        const state = this._componentOptions.getEditorState();
+        state.activeIcon = { name: iconName, color: state.activeIcon.color };
+        this._componentOptions.setEditorState(state);
+
+        for(const [name, wrapper] of iconWrappers) {
+            wrapper.toggleClass('active', name === iconName);
+        }
+    }
+
+    private updateIconElements() {
+        const state = this._componentOptions.getEditorState();
+        const colour = state.activeIcon.color;
+        const activeIconName = state.activeIcon.name;
+        
         const iconSection = this._sections.get('icon');
         if(!iconSection) return;
 
         const iconEls = iconSection.contentEl.querySelectorAll('.hexer-sidebar-icon-item');
         iconEls.forEach(iconEl => {
-            (iconEl as HTMLElement).style.color = colour;
+            const element = iconEl as HTMLElement;
+            element.style.color = colour;
+            element.toggleClass('active', element.dataset.iconName === activeIconName);
         });
     }
 
