@@ -20,6 +20,7 @@ const context = await esbuild.context({
     treeShaking: true,
     outfile: 'main.js',
     minify: prod,
+    loader: { '.svg': 'text' },
 });
 
 const cssContext = await esbuild.context({
