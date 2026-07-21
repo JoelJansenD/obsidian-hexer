@@ -25,7 +25,7 @@ export default class IconBrushStrategy implements ToolStrategy {
             icon: null
         };
         
-        hex.icon = editorState.activeIcon;
+        hex.icon = {... editorState.activeIcon};
         hexMap.set(key, hex);
     }
 
