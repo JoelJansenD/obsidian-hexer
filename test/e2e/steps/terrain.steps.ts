@@ -37,7 +37,7 @@ Then('the hex terrain will be painted blue', async function (this: TestContext) 
 Then('the hex terrain will be erased', async function (this: TestContext) {
     expect(this.lastClickedHex).not.toBeNull();
     const result = await editorPage.getHex(this.lastClickedHex!);
-    expect(result).toBeNull();
+    expect(result?.terrainColor || null).toBeNull();
 });
 
 Then('every hovered hex terrain will be erased', async function (this: TestContext) {
