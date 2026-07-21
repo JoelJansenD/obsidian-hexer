@@ -81,9 +81,9 @@ game-icons.net icon shipped with this plugin and its author. All of them are
 used under CC BY 3.0 and some have been modified (recoloured and/or resized) for
 use in Obsidian Hexer.
 
-| Icon | Author | Author page |
-| --- | --- | --- |
-| _(none yet)_ | | |
+| Icon | Author |
+| --- | --- |
+| Castle | [Delapouite](https://delapouite.com/) |
 
 You are free to share and adapt these icons for any purpose, including
 commercially, provided you give appropriate credit, link to the license, and
