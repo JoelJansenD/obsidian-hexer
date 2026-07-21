@@ -2,7 +2,7 @@ import { Given, When } from "@wdio/cucumber-framework";
 import { obsidianPage } from 'wdio-obsidian-service';
 import { fileExplorer } from '../support/obsidian.page';
 import { CURRENT_VERSION } from '../../../src/logic/HexerData';
-import { clickHex, selectLayer } from "../support/editor.page";
+import editorPage from "../support/editor.page";
 import { Layer } from "../../../src/logic/EditorState";
 import { TestContext } from "../support/TestContext";
 
@@ -64,7 +64,7 @@ Given('I have opened a Hexer file', async function () {
 });
 
 Given('I have selected the {word} layer', async function (layer: Layer) {
-    await selectLayer(layer);
+    await editorPage.selectLayer(layer);
 });
 
 Given('Obsidian is open', async function () {
@@ -73,6 +73,6 @@ Given('Obsidian is open', async function () {
 });
 
 When('I click an empty hex', async function (this: TestContext) {
-    await clickHex(EMPTY_HEX);
+    await editorPage.clickHex(EMPTY_HEX);
     this.lastClickedHex = EMPTY_HEX;
 });
