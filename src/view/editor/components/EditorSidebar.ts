@@ -57,7 +57,7 @@ export default class EditorSidebar {
 
         const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon' });
         
-        const editorState = this._componentOptions.getEditorState();
+        const editorState = this._componentOptions.getEditorState();        
         new ColourPalette(
             iconSectionContent,
             {
@@ -65,9 +65,7 @@ export default class EditorSidebar {
                 value: editorState.activeColour,
                 onUpdate: (newColour: string) => {
                     const state = this._componentOptions.getEditorState();
-                    if(state.activeIcon) {
-                        state.activeIcon.color = newColour;
-                    }
+                    state.activeIcon.color = newColour;
                     this._componentOptions.setEditorState(state);
                 }
             });
@@ -77,8 +75,13 @@ export default class EditorSidebar {
         for(let [iconName, iconPath] of HEXER_ICONS) {
             const iconEl = parser.parseFromString(iconPath, 'image/svg+xml').documentElement;
             iconEl.removeAttribute('style');
-            iconEl.classList.add('hexer-sidebar-icon-item');
-            iconsContainer.appendChild(iconEl);
+
+            const iconWrapper = iconsContainer.createEl('div', { cls: 'hexer-sidebar-icon-item' });
+            iconWrapper.appendChild(iconEl);
+
+            if(iconName === editorState.activeIcon.name) {
+                iconWrapper.addClass('active');
+            }
         }
 
         return iconSection;

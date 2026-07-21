@@ -21,7 +21,20 @@
 }
 
 .hexer-sidebar-icon-item {
-    display: block;
+    display: flexbox;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: auto;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 8px;
+
+    &:hover {
+        background-color: var(--interactive-normal);
+    }
+
+    &.active {
+        background-color: var(--interactive-hover);
+    }
 }
