@@ -22,3 +22,13 @@ Feature: Icon
     Given I have selected the brush tool
     When I click and drag across multiple hexes
     Then every hovered hex will have a blue castle icon
+
+  Scenario: Erasing an icon
+    Given I have selected the eraser tool
+    When I click a hex with an icon
+    Then the icon will be erased
+
+  Scenario: Erasing multiple icons by dragging
+    Given I have selected the eraser tool
+    When I click and drag across multiple hexes
+    Then every hovered icon will be erased
