@@ -22,6 +22,10 @@ describe('onLeftClick', () => {
         // A connected hex of a different icon that must not be filled.
         hexMap.set('2,-1', { q: 2, r: -1, terrainColor: null, icon: { name: 'dungeon-gate', color: '#0000ff' } });
 
+        // A connected hex sharing the icon name but a different colour, which
+        // must not be filled since the icon is not identical.
+        hexMap.set('0,1', { q: 0, r: 1, terrainColor: null, icon: { name: 'castle', color: '#0000ff' } });
+
         // A same-icon hex that is disconnected and must not be filled.
         hexMap.set('10,10', { q: 10, r: 10, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
     });
@@ -41,6 +45,7 @@ describe('onLeftClick', () => {
         expect(hexMap.get('3,0')!.icon).toEqual(fillIcon);
         expect(hexMap.get('1,-1')!.icon).toEqual(fillIcon);
         expect(hexMap.get('2,-1')!.icon).toEqual({ name: 'dungeon-gate', color: '#0000ff' });
+        expect(hexMap.get('0,1')!.icon).toEqual({ name: 'castle', color: '#0000ff' });
         expect(hexMap.get('10,10')!.icon).toEqual({ name: 'castle', color: '#ff0000' });
     });
 

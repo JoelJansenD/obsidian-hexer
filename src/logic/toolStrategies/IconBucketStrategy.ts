@@ -16,7 +16,9 @@ export default class IconBucketStrategy implements ToolStrategy {
 
         const area = getArea(radialCoordinates, (hex) => {
             const existing = hexMap.get(hexKey(hex.q, hex.r));
-            return existing !== undefined && existing.icon?.name === clickedHex.icon?.name;
+            return existing !== undefined
+                && existing.icon?.name === clickedHex.icon?.name
+                && existing.icon?.color === clickedHex.icon?.color;
         });
 
         area.forEach((hex) => {
