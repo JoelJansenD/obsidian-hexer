@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
-import { HexMap } from "../HexerData";
+import { hexagonIsEmpty, RadialCoordinates } from "../hexagon";
+import { hexKey, HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class IconEraserStrategy implements ToolStrategy {
@@ -17,7 +17,13 @@ export default class IconEraserStrategy implements ToolStrategy {
     }
 
     private erase(hexMap: HexMap, radialCoordinates: RadialCoordinates) {
-        // TODO: implement
+        const key = hexKey(radialCoordinates.q, radialCoordinates.r);
+        const hex = hexMap.get(key)!;
+        hex.icon = null;
+        
+        if(hexagonIsEmpty(hex)) {
+            hexMap.delete(key);
+        }
     }
 
     public getEvents(): RegisteredEvents {
