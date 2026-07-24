@@ -49,7 +49,7 @@ Given('I have opened a Hexer file', async function () {
         '      r: 2',
         '      terrainColor: "#ff0000"',
         '      icon:',
-        '        name: "castle"',
+        '        name: "dungeon-gate"',
         '        color: "#00ff00"',
         '    "3,1":',
         '      q: 3',
