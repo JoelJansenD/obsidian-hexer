@@ -36,3 +36,17 @@ Then('every hovered hex will have a {word} {word} icon', async function (this: T
         expect(result!.icon?.color).toBe(colourToHex(colour));
     });
 });
+
+Then('the icon will be erased', async function (this: TestContext) {
+    expect(this.lastClickedHex).not.toBeNull();
+    const result = await editorPage.getHex(this.lastClickedHex!);
+    expect(result?.icon || null).toBeNull();
+});
+
+Then('every hovered icon will be erased', async function (this: TestContext) {
+    expect(this.lastDraggedHexes).not.toBeUndefined();
+    for (const hex of this.lastDraggedHexes || []) {
+        const result = await editorPage.getHex(hex);
+        expect(result?.icon || null).toBeNull();
+    }
+});

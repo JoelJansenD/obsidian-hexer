@@ -43,7 +43,7 @@ Then('the hex terrain will be erased', async function (this: TestContext) {
 Then('every hovered hex terrain will be erased', async function (this: TestContext) {
     for (const hex of this.lastDraggedHexes || []) {
         const result = await editorPage.getHex(hex);
-        expect(result).toBeNull();
+        expect(result?.terrainColor).toBeNull();
     }
 });
 
