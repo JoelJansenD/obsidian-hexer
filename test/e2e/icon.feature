@@ -32,3 +32,8 @@ Feature: Icon
     Given I have selected the eraser tool
     When I click and drag across multiple hexes
     Then every hovered icon will be erased
+
+  Scenario: Filling a hex with an icon
+    Given I have selected the bucket tool
+    When I click a hex with an icon
+    Then every connected hex with the same icon will be replaced with the selected icon

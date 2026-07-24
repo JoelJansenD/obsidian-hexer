@@ -50,3 +50,12 @@ Then('every hovered icon will be erased', async function (this: TestContext) {
         expect(result?.icon || null).toBeNull();
     }
 });
+
+Then('every connected hex with the same icon will be replaced with the selected icon', async function (this: TestContext) {
+    const connectedHexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }, { q: 3, r: 1 }];
+    for (const hex of connectedHexes) {
+        const result = await editorPage.getHex(hex);
+        expect(result?.icon?.name).toBe(this.icon?.name);
+        expect(result?.icon?.color).toBe(this.icon?.color);
+    }
+});
