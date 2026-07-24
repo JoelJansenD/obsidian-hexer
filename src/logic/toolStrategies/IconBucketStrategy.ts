@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
-import { HexMap } from "../HexerData";
+import { getArea, RadialCoordinates } from "../hexagon";
+import { hexKey, HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class IconBucketStrategy implements ToolStrategy {
@@ -9,7 +9,24 @@ export default class IconBucketStrategy implements ToolStrategy {
     }
 
     public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        // TODO: implement bucket fill for icons
+        const clickedHex = hexMap.get(hexKey(radialCoordinates.q, radialCoordinates.r));
+        if(!clickedHex) {
+            return;
+        }
+
+        const area = getArea(radialCoordinates, (hex) => {
+            const existing = hexMap.get(hexKey(hex.q, hex.r));
+            return existing !== undefined && existing.icon?.name === clickedHex.icon?.name;
+        });
+
+        area.forEach((hex) => {
+            const key = hexKey(hex.q, hex.r);
+            const hexagon = hexMap.get(key);
+            if(hexagon) {
+                hexagon.icon = {...editorState.activeIcon};
+                hexMap.set(key, hexagon);
+            }
+        });
     }
 
     public getEvents(): RegisteredEvents {
