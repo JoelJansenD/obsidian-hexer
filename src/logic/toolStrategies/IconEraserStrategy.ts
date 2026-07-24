@@ -18,9 +18,13 @@ export default class IconEraserStrategy implements ToolStrategy {
 
     private erase(hexMap: HexMap, radialCoordinates: RadialCoordinates) {
         const key = hexKey(radialCoordinates.q, radialCoordinates.r);
-        const hex = hexMap.get(key)!;
+        const hex = hexMap.get(key);
+        if(!hex) {
+            return;
+        }
+
         hex.icon = null;
-        
+
         if(hexagonIsEmpty(hex)) {
             hexMap.delete(key);
         }
