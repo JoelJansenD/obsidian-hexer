@@ -46,12 +46,10 @@
 .hexer-sidebar-section-content-inner {
     overflow: hidden;
     min-height: 0;
-    padding: 0 12px;
-    transition: padding 300ms ease;
 }
 
-.hexer-sidebar-section.is-expanded .hexer-sidebar-section-content-inner {
-    padding: 8px 12px;
+.hexer-sidebar-section-padded {
+    padding: 0px 12px;
 }
 
 .hexer-sidebar-section-label {

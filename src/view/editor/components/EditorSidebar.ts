@@ -43,9 +43,10 @@ export default class EditorSidebar {
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
         addPathButton.createEl('span', { text: 'New river' });
 
-        new PathRow(riverSection.contentEl, { name: 'River #01' });
-        new PathRow(riverSection.contentEl, { name: 'River #02' });
-        new PathRow(riverSection.contentEl, { name: 'River #03' });
+        const paddedEl = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        new PathRow(paddedEl, { name: 'River #01' });
+        new PathRow(paddedEl, { name: 'River #02' });
+        new PathRow(paddedEl, { name: 'River #03' });
 
         return riverSection;
     }
@@ -59,8 +60,9 @@ export default class EditorSidebar {
         });
         
         const editorState = this._componentOptions.getEditorState();
+        const paletteEl = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
         new ColourPalette(
-            terrainSection.contentEl,
+            paletteEl,
             {
                 dataField: 'terrain',
                 value: editorState.activeColour,
@@ -81,7 +83,7 @@ export default class EditorSidebar {
             onSelect: () => this.select('icon'),
         });
 
-        const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon' });
+        const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon hexer-sidebar-section-padded' });
         
         const editorState = this._componentOptions.getEditorState();        
         new ColourPalette(
