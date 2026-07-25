@@ -1,6 +1,19 @@
 .hexer-sidebar-section {
-    &.is-expanded .hexer-sidebar-section-content {
-        display:block;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    min-height: 0;
+    /* Animate the grow factor so the filler space of the expanded section
+       (and therefore the position of the collapsed sections below it) slides
+       to the bottom instead of snapping. */
+    transition: flex-grow 300ms ease;
+
+    &.is-expanded {
+        /* Grow to fill the free space, pushing collapsed sections below it
+           to the bottom while collapsed sections above stay at the top. */
+        flex-grow: 1;
     }
 
     &:not(.is-expanded) .hexer-sidebar-section-chevron {
@@ -11,6 +24,7 @@
 .hexer-sidebar-section-header {
     align-items: center;
     display: flex;
+    flex: 0 0 auto;
     flex-direction: row;
     justify-content: space-between;
     padding: 8px 12px;
