@@ -15,6 +15,8 @@ export function toFrontmatter(data: HexerData): HexerFrontmatter {
             version: data.version,
             size: data.size,
             hexes: Object.fromEntries(data.hexes),
+            rivers: data.rivers,
+            roads: data.roads
         },
     };
 }
@@ -25,5 +27,7 @@ export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
         version,
         size,
         hexes: new Map(Object.entries(hexes ?? {})),
+        rivers: frontmatter.hexer.rivers ?? [],
+        roads: frontmatter.hexer.roads ?? []
     });
 }

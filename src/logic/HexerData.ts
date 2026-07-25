@@ -1,9 +1,12 @@
 import { Hexagon, RadialCoordinates } from "./hexagon";
+import { Path } from "./path";
 
 
 export interface HexerState {
     version: string;
     hexes: HexMap;
+    rivers: Path[];
+    roads: Path[];
     size: number;
 }
 
@@ -17,6 +20,8 @@ export class HexerData implements HexerState {
     public hexes: HexMap;
     public readonly version: string;
     public size: number;
+    public rivers: Path[] = [];
+    public roads: Path[] = [];
 
     constructor(state: HexerState) {
         this.version = state.version;
@@ -24,6 +29,8 @@ export class HexerData implements HexerState {
             ? state.hexes
             : new Map(Object.entries(state.hexes));
         this.size = state.size;
+        this.rivers = state.rivers;
+        this.roads = state.roads;
     }
 
     public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
