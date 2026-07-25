@@ -1,6 +1,13 @@
 .hexer-sidebar {
     flex: 0 0 20%;
     max-width: 20%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Reserve space for Obsidian's status bar, which floats over the
+       bottom-right of the workspace and would otherwise hide the bottom
+       collapsed section. */
+    padding-bottom: var(--size-4-8);
     color: var(--text-normal);
     font-size: var(--font-smaller);
     font-weight: var(--font-semibold);
@@ -41,5 +48,20 @@
     & svg,
     & svg * {
         fill: currentColor;
+    }
+}
+
+.hexer-sidebar-add-path {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: var(--font-smaller);
+    color: var(--text-muted);
+
+    &:hover {
+        background-color: var(--interactive-hover);
     }
 }

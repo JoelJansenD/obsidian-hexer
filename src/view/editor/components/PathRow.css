@@ -1,0 +1,28 @@
+.hexer-path-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
+.hexer-path-row-name {
+    flex: 1;
+}
+
+.hexer-path-row-edit-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+
+    cursor: pointer;
+    border-radius: var(--radius-s);
+    color: var(--text-muted);
+
+    &:hover {
+        background-color: var(--interactive-hover);
+    }
+}
