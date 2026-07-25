@@ -1,7 +1,7 @@
 import { Hexagon } from "./hexagon";
 import { HexerData, HexerState } from "./HexerData";
 
-const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>() });
+const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [] });
 
 describe('HexerData', () => {
     it('constructor applies the provided state', () => {
@@ -13,6 +13,8 @@ describe('HexerData', () => {
                 ['0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: null }],
                 ['1,1', { q: 1, r: 1, terrainColor: '#0000ff', icon: null }],
             ]),
+            rivers: [],
+            roads: [],
         };
 
         // Act
