@@ -1,15 +1,106 @@
+import { hexKey } from "./HexerData";
 import { RadialCoordinates } from "./hexagon";
 
-export interface Path {
+export interface PathNode extends RadialCoordinates { }
 
+export interface PathEdge {
+    from: string; // hexKey of a node
+    to: string;   // hexKey of a node
 }
 
-export class Node implements RadialCoordinates {
-    q: number;
-    r: number;
+export type PathNodeMap = Map<string, PathNode>;
 
-    constructor(q: number, r: number) {
-        this.q = q;
-        this.r = r;
+export interface PathData {
+    name: string;
+    nodes: PathNodeMap;
+    edges: PathEdge[];
+}
+
+export class Path implements PathData {
+    public name: string;
+    public nodes: PathNodeMap;
+    public edges: PathEdge[];
+
+    constructor(state: PathData) {
+        this.name = state.name;
+        // A Map does not survive serialization, so paths read back from
+        // frontmatter arrive with a plain object of nodes instead.
+        this.nodes = state.nodes instanceof Map
+            ? state.nodes
+            : new Map(Object.entries(state.nodes));
+        this.edges = state.edges ?? [];
     }
+
+    public static create(name: string): Path {
+        return new Path({ name, nodes: new Map(), edges: [] });
+    }
+
+    public addNode(coordinates: RadialCoordinates): string {
+        const key = hexKey(coordinates.q, coordinates.r);
+        if (!this.nodes.has(key)) {
+            this.nodes.set(key, { q: coordinates.q, r: coordinates.r });
+        }
+        return key;
+    }
+
+    // Undirected: an edge between a and b is added once, and the endpoints are
+    // created as nodes if they do not exist yet.
+    public addEdge(a: RadialCoordinates, b: RadialCoordinates): void {
+        const from = this.addNode(a);
+        const to = this.addNode(b);
+        if (from === to || this.hasEdge(a, b)) {
+            return;
+        }
+        this.edges.push({ from, to });
+    }
+
+    public hasEdge(a: RadialCoordinates, b: RadialCoordinates): boolean {
+        const from = hexKey(a.q, a.r);
+        const to = hexKey(b.q, b.r);
+        return this.edges.some(edge => sameEdge(edge, from, to));
+    }
+
+    public removeEdge(a: RadialCoordinates, b: RadialCoordinates): void {
+        const from = hexKey(a.q, a.r);
+        const to = hexKey(b.q, b.r);
+        this.edges = this.edges.filter(edge => !sameEdge(edge, from, to));
+    }
+
+    // Removes the node and any edges that touch it.
+    public removeNode(coordinates: RadialCoordinates): void {
+        const key = hexKey(coordinates.q, coordinates.r);
+        this.nodes.delete(key);
+        this.edges = this.edges.filter(edge => edge.from !== key && edge.to !== key);
+    }
+
+    // Returns the coordinates of every node directly connected to the given node.
+    public getConnectedNodes(coordinates: RadialCoordinates): PathNode[] {
+        const key = hexKey(coordinates.q, coordinates.r);
+        const neighbourKeys = this.edges
+            .filter(edge => edge.from === key || edge.to === key)
+            .map(edge => (edge.from === key ? edge.to : edge.from));
+
+        return neighbourKeys
+            .map(neighbourKey => this.nodes.get(neighbourKey))
+            .filter((node): node is PathNode => node !== undefined);
+    }
+
+    public isEmpty(): boolean {
+        return this.edges.length === 0 && this.nodes.size === 0;
+    }
+
+    public clone(): Path {
+        const nodes: PathNodeMap = new Map();
+        for (const [key, node] of this.nodes) {
+            nodes.set(key, { ...node });
+        }
+        const edges = this.edges.map(edge => ({ ...edge }));
+        return new Path({ name: this.name, nodes, edges });
+    }
+}
+
+// Undirected comparison: (from, to) matches (to, from).
+function sameEdge(edge: PathEdge, from: string, to: string): boolean {
+    return (edge.from === from && edge.to === to)
+        || (edge.from === to && edge.to === from);
 }
