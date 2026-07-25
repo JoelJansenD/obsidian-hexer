@@ -1,4 +1,4 @@
-import { Mountain, Droplets, Shapes, createElement, Plus } from "lucide";
+import { Mountain, Droplets, Shapes, createElement, Plus, Route } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../components/ColourPalette";
 import { Layer } from "../../../logic/EditorState";
@@ -21,17 +21,20 @@ export default class EditorSidebar {
 
         const iconSection = this.buildIcon(this._sidebarEl);
 
-        const pathSection = this.buildPath(this._sidebarEl);
-        pathSection.setExpanded(true);
+        const riverSection = this.buildRivers(this._sidebarEl);
+        riverSection.setExpanded(true);
+
+        const roadSection = this.buildRoads(this._sidebarEl);
 
         this._sections.set('terrain', terrainSection);
         this._sections.set('icon', iconSection);
-        this._sections.set('river', pathSection);
+        this._sections.set('river', riverSection);
+        this._sections.set('road', roadSection);
 
         this.updateIconElements();
     }
 
-    private buildPath(sidebarEl: HTMLElement) {
+    private buildRivers(sidebarEl: HTMLElement) {
         const riverSection = new EditorSidebarSection(sidebarEl, {
             icon: Droplets,
             layer: 'river',
@@ -49,6 +52,26 @@ export default class EditorSidebar {
         new PathRow(paddedEl, { name: 'River #03' });
 
         return riverSection;
+    }
+
+    private buildRoads(sidebarEl: HTMLElement) {
+        const roadSection = new EditorSidebarSection(sidebarEl, {
+            icon: Route,
+            layer: 'road',
+            label: 'Roads',
+            onSelect: () => this.select('road'),
+        });
+
+        const addPathButton = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
+        addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
+        addPathButton.createEl('span', { text: 'New road' });
+
+        const paddedEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        new PathRow(paddedEl, { name: 'Road #01' });
+        new PathRow(paddedEl, { name: 'Road #02' });
+        new PathRow(paddedEl, { name: 'Road #03' });
+
+        return roadSection;
     }
 
     private buildTerrain(sidebarEl: HTMLElement) {
