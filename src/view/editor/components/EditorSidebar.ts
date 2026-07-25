@@ -1,4 +1,4 @@
-import { Mountain, Droplets, Shapes } from "lucide";
+import { Mountain, Droplets, Shapes, createElement, Plus } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../components/ColourPalette";
 import { Layer } from "../../../logic/EditorState";
@@ -38,6 +38,10 @@ export default class EditorSidebar {
             label: 'Rivers',
             onSelect: () => this.select('river'),
         });
+
+        const addPathButton = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
+        addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
+        addPathButton.createEl('span', { text: 'New river' });
 
         new PathRow(riverSection.contentEl, { name: 'River #01' });
         new PathRow(riverSection.contentEl, { name: 'River #02' });

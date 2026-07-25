@@ -43,3 +43,18 @@
         fill: currentColor;
     }
 }
+
+.hexer-sidebar-add-path {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: var(--font-smaller);
+    color: var(--text-muted);
+
+    &:hover {
+        background-color: var(--interactive-hover);
+    }
+}
