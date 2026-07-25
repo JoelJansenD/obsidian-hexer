@@ -18,11 +18,11 @@ export default class EditorSidebar {
         this._sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
         const terrainSection = this.buildTerrain(this._sidebarEl);
+        terrainSection.setExpanded(true);
 
         const iconSection = this.buildIcon(this._sidebarEl);
 
         const riverSection = this.buildRivers(this._sidebarEl);
-        riverSection.setExpanded(true);
 
         const roadSection = this.buildRoads(this._sidebarEl);
 

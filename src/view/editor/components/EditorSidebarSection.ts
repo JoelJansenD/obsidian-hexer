@@ -51,7 +51,7 @@ export default class EditorSidebarSection {
         }
 
         const chevronEl = sectionHeaderEl.createEl('div', { cls: 'hexer-sidebar-section-chevron' });
-        chevronEl.appendChild(createElement(ChevronDown, { heiight: 16, width: 16 }));
+        chevronEl.appendChild(createElement(ChevronDown, { height: 16, width: 16 }));
 
         const contentEl = this._sectionEl.createEl('div', { cls: 'hexer-sidebar-section-content' });
         this._contentEl = contentEl.createEl('div', { cls: 'hexer-sidebar-section-content-inner' });
