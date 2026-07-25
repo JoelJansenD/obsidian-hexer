@@ -1,6 +1,6 @@
 import { Icon } from "./icon";
 
-export type Layer = 'terrain' | 'icon';
+export type Layer = 'terrain' | 'icon' | 'river' | 'road';
 export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser';
 
 export interface EditorState {

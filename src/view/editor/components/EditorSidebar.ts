@@ -1,9 +1,10 @@
-import { Mountain, Shapes } from "lucide";
+import { Mountain, Droplets, Shapes } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../components/ColourPalette";
 import { Layer } from "../../../logic/EditorState";
 import { ComponentOptions } from "../Editor";
 import { HEXER_ICONS } from "../../../logic/icon";
+import PathRow from "./PathRow";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
@@ -17,14 +18,32 @@ export default class EditorSidebar {
         this._sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
         const terrainSection = this.buildTerrain(this._sidebarEl);
-        terrainSection.setExpanded(true);
 
         const iconSection = this.buildIcon(this._sidebarEl);
 
+        const pathSection = this.buildPath(this._sidebarEl);
+        pathSection.setExpanded(true);
+
         this._sections.set('terrain', terrainSection);
         this._sections.set('icon', iconSection);
+        this._sections.set('river', pathSection);
 
         this.updateIconElements();
+    }
+
+    private buildPath(sidebarEl: HTMLElement) {
+        const riverSection = new EditorSidebarSection(sidebarEl, {
+            icon: Droplets,
+            layer: 'river',
+            label: 'Rivers',
+            onSelect: () => this.select('river'),
+        });
+
+        new PathRow(riverSection.contentEl, { name: 'River #01' });
+        new PathRow(riverSection.contentEl, { name: 'River #02' });
+        new PathRow(riverSection.contentEl, { name: 'River #03' });
+
+        return riverSection;
     }
 
     private buildTerrain(sidebarEl: HTMLElement) {
