@@ -5,10 +5,13 @@ import { Layer } from "../../../logic/EditorState";
 import { ComponentOptions } from "../Editor";
 import { HEXER_ICONS } from "../../../logic/icon";
 import PathRow from "./PathRow";
+import { Path } from "../../../logic/path";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
     private _sidebarEl!: HTMLDivElement;
+    private _riverEl!: HTMLDivElement;
+    private _roadEl!: HTMLDivElement;
 
     constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
@@ -45,11 +48,21 @@ export default class EditorSidebar {
         const addPathButton = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
         addPathButton.createEl('span', { text: 'New river' });
+        addPathButton.addEventListener('click', () => {
+            const data = this._componentOptions.getData();
+            data.rivers.push(new Path("New river"));
+            this._componentOptions.setData(data);
+            this._riverEl.empty();
+            data.rivers.forEach((_, index) => {
+                new PathRow(this._riverEl, { name: `River #${index + 1}` });
+            });
+        });
 
-        const paddedEl = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        new PathRow(paddedEl, { name: 'River #01' });
-        new PathRow(paddedEl, { name: 'River #02' });
-        new PathRow(paddedEl, { name: 'River #03' });
+        const data = this._componentOptions.getData();
+        this._riverEl = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        data.rivers.forEach((_, index) => {
+            new PathRow(this._riverEl, { name: `River #${index + 1}` });
+        });
 
         return riverSection;
     }
@@ -66,10 +79,22 @@ export default class EditorSidebar {
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
         addPathButton.createEl('span', { text: 'New road' });
 
-        const paddedEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        new PathRow(paddedEl, { name: 'Road #01' });
-        new PathRow(paddedEl, { name: 'Road #02' });
-        new PathRow(paddedEl, { name: 'Road #03' });
+        this._roadEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        addPathButton.addEventListener('click', () => {
+            const data = this._componentOptions.getData();
+            data.roads.push(new Path("New road"));
+            this._componentOptions.setData(data);
+            this._roadEl.empty();
+            data.roads.forEach((_, index) => {
+                new PathRow(this._roadEl, { name: `Road #${index + 1}` });
+            });
+        });
+
+        const data = this._componentOptions.getData();
+        this._roadEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        data.roads.forEach((_, index) => {
+            new PathRow(this._roadEl, { name: `Road #${index + 1}` });
+        });
 
         return roadSection;
     }
