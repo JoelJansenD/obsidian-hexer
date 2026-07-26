@@ -46,6 +46,7 @@ export default class EditorSidebar {
         });
 
         const addPathButton = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
+        addPathButton.dataset.role = 'add-river';
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
         addPathButton.createEl('span', { text: 'New river' });
         addPathButton.addEventListener('click', () => {
@@ -76,6 +77,7 @@ export default class EditorSidebar {
         });
 
         const addPathButton = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
+        addPathButton.dataset.role = 'add-road';
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
         addPathButton.createEl('span', { text: 'New road' });
 
