@@ -54,15 +54,15 @@ export default class EditorSidebar {
             data.rivers.push(new Path("New river"));
             this._componentOptions.setData(data);
             this._riverEl.empty();
-            data.rivers.forEach((_, index) => {
-                new PathRow(this._riverEl, { name: `River #${index + 1}` });
+            data.rivers.forEach(path => {
+                new PathRow(this._riverEl, path);
             });
         });
 
         const data = this._componentOptions.getData();
         this._riverEl = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        data.rivers.forEach((_, index) => {
-            new PathRow(this._riverEl, { name: `River #${index + 1}` });
+        data.rivers.forEach(path => {
+            new PathRow(this._riverEl, path);
         });
 
         return riverSection;
@@ -86,15 +86,15 @@ export default class EditorSidebar {
             data.roads.push(new Path("New road"));
             this._componentOptions.setData(data);
             this._roadEl.empty();
-            data.roads.forEach((_, index) => {
-                new PathRow(this._roadEl, { name: `Road #${index + 1}` });
+            data.roads.forEach(path => {
+                new PathRow(this._roadEl, path);
             });
         });
 
         const data = this._componentOptions.getData();
         this._roadEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        data.roads.forEach((_, index) => {
-            new PathRow(this._roadEl, { name: `Road #${index + 1}` });
+        data.roads.forEach(path => {
+            new PathRow(this._roadEl, path);
         });
 
         return roadSection;

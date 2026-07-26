@@ -5,6 +5,10 @@ class PathPage {
         await this.selectAndClick('[data-role="add-river"]');
     }
 
+    public async getRiverElement(id: string) {
+        return browser.$(`[data-path-id="${id}"]`);
+    }
+
     async getRivers(): Promise<Path[]> {
         return this.getPaths();
     }
