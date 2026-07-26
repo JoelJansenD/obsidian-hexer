@@ -11,12 +11,14 @@ export interface PathEdge {
 export type PathNodeMap = Map<string, PathNode>;
 
 export interface PathData {
+    id: string;
     name: string;
     nodes: PathNodeMap;
     edges: PathEdge[];
 }
 
 export class Path implements PathData {
+    public id: string;
     public name: string;
     public nodes: PathNodeMap;
     public edges: PathEdge[];
@@ -25,12 +27,14 @@ export class Path implements PathData {
     constructor(state: PathData);
     constructor(arg: string | PathData) {
         if (typeof arg === 'string') {
+            this.id = crypto.randomUUID();
             this.name = arg;
             this.nodes = new Map();
             this.edges = [];
             return;
         }
 
+        this.id = arg.id;
         this.name = arg.name;
         this.nodes = arg.nodes;
         this.edges = arg.edges ?? [];
@@ -61,7 +65,7 @@ export class Path implements PathData {
             nodes.set(key, { ...node });
         }
         const edges = this.edges.map(edge => ({ ...edge }));
-        return new Path({ name: this.name, nodes, edges });
+        return new Path({ id: this.id, name: this.name, nodes, edges });
     }
 
     // Returns the coordinates of every node directly connected to the given node.

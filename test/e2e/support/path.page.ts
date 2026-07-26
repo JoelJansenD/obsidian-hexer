@@ -16,12 +16,14 @@ class PathPage {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
                 hexerData?: Record<string, Array<{
+                    id: string;
                     name: string;
                     nodes?: Map<string, PathNode>;
                     edges?: PathEdge[];
                 }>>;
             } | undefined;
             return (view?.hexerData?.[key] ?? []).map((path) => ({
+                id: path.id,
                 name: path.name,
                 nodes: path.nodes ? Object.fromEntries(path.nodes) : {},
                 edges: path.edges ?? [],
@@ -29,6 +31,7 @@ class PathPage {
         }, 'rivers');
         console.debug(`[hexer-e2e] getPaths (rivers)`, JSON.stringify(paths));
         return paths.map((path) => new Path({
+            id: path.id,
             name: path.name,
             nodes: new Map(Object.entries(path.nodes)),
             edges: path.edges,
