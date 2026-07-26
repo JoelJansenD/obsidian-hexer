@@ -16,16 +16,12 @@ export function hexKey(q: number, r: number): string {
     return `${q},${r}`;
 }
 
-function toPathData(path: Path): Path {
-    return path instanceof Path ? path : new Path(path);
-}
-
 export class HexerData implements HexerState {
     public hexes: HexMap;
     public readonly version: string;
     public size: number;
-    public rivers: Path[] = [];
-    public roads: Path[] = [];
+    public rivers: Path[];
+    public roads: Path[];
 
     constructor(state: HexerState) {
         this.version = state.version;
@@ -33,10 +29,8 @@ export class HexerData implements HexerState {
             ? state.hexes
             : new Map(Object.entries(state.hexes));
         this.size = state.size;
-        // Paths read back from frontmatter are plain objects; wrap them so the
-        // PathData behaviour (and its node Map) is restored.
-        this.rivers = (state.rivers ?? []).map(toPathData);
-        this.roads = (state.roads ?? []).map(toPathData);
+        this.rivers = state.rivers;
+        this.roads = state.roads;
     }
 
     public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
@@ -71,5 +65,7 @@ hexer:
   version: "${CURRENT_VERSION}"
   size: 50
   hexes: {}
+  rivers: []
+  roads: []
 ---
 `;

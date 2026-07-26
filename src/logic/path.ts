@@ -32,11 +32,7 @@ export class Path implements PathData {
         }
 
         this.name = arg.name;
-        // A Map does not survive serialization, so paths read back from
-        // frontmatter arrive with a plain object of nodes instead.
-        this.nodes = arg.nodes instanceof Map
-            ? arg.nodes
-            : new Map(Object.entries(arg.nodes));
+        this.nodes = arg.nodes;
         this.edges = arg.edges ?? [];
     }
 
@@ -76,7 +72,7 @@ export class Path implements PathData {
             .map(edge => (edge.from === key ? edge.to : edge.from));
 
         return neighbourKeys
-            .map(neighbourKey => this.nodes.get(neighbourKey))
+            .map(neighbourKey => ({... this.nodes.get(neighbourKey)}))
             .filter((node): node is PathNode => node !== undefined);
     }
 

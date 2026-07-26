@@ -79,7 +79,6 @@ export default class EditorSidebar {
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
         addPathButton.createEl('span', { text: 'New road' });
 
-        this._roadEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
         addPathButton.addEventListener('click', () => {
             const data = this._componentOptions.getData();
             data.roads.push(new Path("New road"));

@@ -21,7 +21,7 @@ describe('Path', () => {
     describe('constructor', () => {
         it('creates an empty graph when given a name', () => {
             // Act
-            var path = new Path('test');
+            const path = new Path('test');
 
             // Assert
             expect(path.name).toBe('test');
@@ -30,7 +30,7 @@ describe('Path', () => {
 
         it('loads a graph from a PathData object', () => {
             // Act
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Assert
             expect(path.name).toBe('test');
@@ -41,12 +41,12 @@ describe('Path', () => {
     });
 
     describe('addEdge', () => {
-        it('doesn\'t add an edge if a node already exists', () => {
+        it('doesn\'t add a duplicate edge if a node already exists', () => {
             // Arrange
-            var existingNode = { q: 0, r: 0 };
+            const existingNode = { q: 0, r: 0 };
 
             // Act
-            var path = new Path('test');
+            const path = new Path('test');
             path.addNode(existingNode);
             path.addEdge(existingNode, { q: 1, r: 0 });
             path.addEdge(existingNode, { q: 1, r: 0 });
@@ -55,15 +55,14 @@ describe('Path', () => {
             expect(path.nodes.get('0,0')).toEqual({ q: 0, r: 0 });
             expect(path.nodes.get('1,0')).toEqual({ q: 1, r: 0 });
             expect(path.edges.length).toBe(1);
-            expect(path.edges.length).toBe(1);
         });
 
         it('doesn\'t add an edge if both nodes are the same', () => {
             // Arrange
-            var node = { q: 0, r: 0 };
+            const node = { q: 0, r: 0 };
 
             // Act
-            var path = new Path('test');
+            const path = new Path('test');
             path.addEdge(node, node);
 
             // Assert
@@ -75,8 +74,8 @@ describe('Path', () => {
     describe('addNode', () => {
         it('adds a node if it doesn\'t already exist', () => {
             // Arrange
-            var node = { q: 0, r: 0 };
-            var path = new Path('test');
+            const node = { q: 0, r: 0 };
+            const path = new Path('test');
 
             // Act
             path.addNode(node);
@@ -88,8 +87,8 @@ describe('Path', () => {
 
         it('doesn\'t add a node if it already exists', () => {
             // Arrange
-            var node = { q: 0, r: 0 };
-            var path = new Path('test');
+            const node = { q: 0, r: 0 };
+            const path = new Path('test');
             path.addNode(node);
 
             // Act
@@ -104,10 +103,10 @@ describe('Path', () => {
     describe('clone', () => {
         it('creates a deep clone', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
-            var clone = path.clone();
+            const clone = path.clone();
 
             // Assert
             expect(clone).toEqual(path);
@@ -122,10 +121,10 @@ describe('Path', () => {
     describe('getConnectedNodes', () => {
         it('returns all nodes to which the target is connected', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
-            var neighbours = path.getConnectedNodes({ q: 0, r: 0 });
+            const neighbours = path.getConnectedNodes({ q: 0, r: 0 });
 
             // Assert
             expect(neighbours.length).toBe(1);
@@ -134,10 +133,10 @@ describe('Path', () => {
 
         it('returns all nodes to which the target is invertedly connected', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
-            var neighbours = path.getConnectedNodes({q: 1, r: 0});
+            const neighbours = path.getConnectedNodes({q: 1, r: 0});
 
             // Assert
             expect(neighbours.length).toBe(1);
@@ -148,10 +147,10 @@ describe('Path', () => {
     describe('hasEdge', () => {
         it('returns true if the edge exists', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
-            var result = path.hasEdge({ q: 0, r: 0 }, { q: 1, r: 0 });
+            const result = path.hasEdge({ q: 0, r: 0 }, { q: 1, r: 0 });
 
             // Assert
             expect(result).toBe(true);
@@ -159,10 +158,10 @@ describe('Path', () => {
 
         it('returns true if the edge exists in reverse', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
-            var result = path.hasEdge({ q: 1, r: 0 }, { q: 0, r: 0 });
+            const result = path.hasEdge({ q: 1, r: 0 }, { q: 0, r: 0 });
 
             // Assert
             expect(result).toBe(true);
@@ -170,10 +169,10 @@ describe('Path', () => {
 
         it('returns false if the edge does not exist', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
-            var result = path.hasEdge({ q: 0, r: 0 }, { q: 2, r: 0 });
+            const result = path.hasEdge({ q: 0, r: 0 }, { q: 2, r: 0 });
 
             // Assert
             expect(result).toBe(false);
@@ -219,7 +218,7 @@ describe('Path', () => {
     describe('removeEdge', () => {
         it('removes an edge if it exists', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
             path.removeEdge({ q: 0, r: 0 }, { q: 1, r: 0 });
@@ -230,7 +229,7 @@ describe('Path', () => {
 
         it('does nothing if the edge does not exist', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
             path.removeEdge({ q: 0, r: 0 }, { q: 2, r: 0 });
@@ -243,7 +242,7 @@ describe('Path', () => {
     describe('removeNode', () => {
         it('removes a node and its edges if it exists', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
             path.removeNode({ q: 0, r: 0 });
@@ -255,7 +254,7 @@ describe('Path', () => {
 
         it('does nothing if the node does not exist', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
 
             // Act
             path.removeNode({ q: 2, r: 0 });
@@ -267,7 +266,7 @@ describe('Path', () => {
 
         it('removes no edges if the node has no edges', () => {
             // Arrange
-            var path = new Path(data);
+            const path = new Path(data);
             path.addNode({ q: 2, r: 0 });
 
             // Act
