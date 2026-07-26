@@ -1,38 +1,38 @@
-export interface PathSummary {
-    name: string;
-    nodeCount: number;
-    edgeCount: number;
-}
+import { Path, PathEdge, PathNode } from "../../../src/logic/path";
 
 class PathPage {
     async createRiver() {
         await this.selectAndClick('[data-role="add-river"]');
     }
 
-    async getRivers(): Promise<PathSummary[]> {
+    async getRivers(): Promise<Path[]> {
         return this.getPaths();
     }
 
-    // A path's nodes are held in a Map, which cannot cross the Obsidian bridge,
-    // so summarise each path down to serialisable primitives.
-    private async getPaths(): Promise<PathSummary[]> {
+    private async getPaths(): Promise<Path[]> {
+        // A path's nodes are held in a Map, which cannot cross the Obsidian
+        // bridge, so send plain objects and rebuild the Path on this side.
         const paths = await browser.executeObsidian(({ app }, key) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
                 hexerData?: Record<string, Array<{
                     name: string;
-                    nodes?: Map<string, unknown>;
-                    edges?: unknown[];
+                    nodes?: Map<string, PathNode>;
+                    edges?: PathEdge[];
                 }>>;
             } | undefined;
             return (view?.hexerData?.[key] ?? []).map((path) => ({
                 name: path.name,
-                nodeCount: path.nodes ? path.nodes.size : 0,
-                edgeCount: path.edges ? path.edges.length : 0,
+                nodes: path.nodes ? Object.fromEntries(path.nodes) : {},
+                edges: path.edges ?? [],
             }));
         }, 'rivers');
         console.debug(`[hexer-e2e] getPaths (rivers)`, JSON.stringify(paths));
-        return paths;
+        return paths.map((path) => new Path({
+            name: path.name,
+            nodes: new Map(Object.entries(path.nodes)),
+            edges: path.edges,
+        }));
     }
 
     private async selectAndClick(selector: string) {
