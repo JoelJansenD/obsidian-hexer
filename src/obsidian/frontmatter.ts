@@ -2,6 +2,9 @@ import { Hexagon } from "../logic/hexagon";
 import { HexerData, HexerState } from "../logic/HexerData";
 import { Path, PathEdge, PathNode } from "../logic/path";
 
+/** Matches the leading `---\n...\n---` YAML frontmatter block of a Hexer file. */
+export const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
+
 export interface SerializedPath {
     id: string;
     name: string;
@@ -42,7 +45,7 @@ export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
     });
 }
 
-function serializePath(path: Path): SerializedPath {
+export function serializePath(path: Path): SerializedPath {
     return {
         id: path.id,
         name: path.name,
