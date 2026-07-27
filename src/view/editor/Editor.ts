@@ -26,7 +26,8 @@ export default class Editor {
             name: 'castle'
         },
         activeLayer: 'terrain',
-        activePaintTool: 'select'
+        activePaintTool: 'select',
+        activePath: null
     };
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: DataOptions) {

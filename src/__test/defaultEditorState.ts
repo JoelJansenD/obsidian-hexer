@@ -7,6 +7,7 @@ const defaultEditorState: EditorState = {
         name: 'castle'
     },
     activeLayer: 'terrain',
-    activePaintTool: 'brush'
+    activePaintTool: 'brush',
+    activePath: null
 };
 export default defaultEditorState;

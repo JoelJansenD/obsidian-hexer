@@ -146,6 +146,13 @@ export default class EditorSidebar {
 
         const state = this._componentOptions.getEditorState();
         state.activeLayer = layer;
+        state.activePath = null;
         this._componentOptions.setEditorState(state);
+
+        for (const section of this._sections.values()) {
+            if (section instanceof PathSidebarSection) {
+                section.refresh();
+            }
+        }
     }
 }

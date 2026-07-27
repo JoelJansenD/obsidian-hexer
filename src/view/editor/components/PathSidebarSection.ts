@@ -22,7 +22,6 @@ interface PathSidebarSectionOptions {
  */
 export default class PathSidebarSection extends EditorSidebarSection {
     private _pathsEl!: HTMLDivElement;
-    private _activePathId: string | null = null;
 
     constructor(
         parentEl: HTMLElement,
@@ -49,13 +48,19 @@ export default class PathSidebarSection extends EditorSidebarSection {
         this.renderPaths();
     }
 
+    /** Re-renders the path list, e.g. after the active path is cleared elsewhere. */
+    public refresh() {
+        this.renderPaths();
+    }
+
     private renderPaths() {
         const data = this._componentOptions.getData();
+        const activePath = this._componentOptions.getEditorState().activePath;
         this._pathsEl.empty();
         this._pathOptions.getPaths(data).forEach(path => {
             new PathRow(this._pathsEl, {
-                disableEdit: this._activePathId !== null && this._activePathId !== path.id,
-                editMode: this._activePathId === path.id,
+                disableEdit: activePath !== null && activePath.id !== path.id,
+                editMode: activePath?.id === path.id,
                 path,
                 onEdit: this.editPath.bind(this),
                 onSave: this.savePath.bind(this)
@@ -63,17 +68,25 @@ export default class PathSidebarSection extends EditorSidebarSection {
         });
     }
 
+    private setActivePath(path: Path | null) {
+        const state = this._componentOptions.getEditorState();
+        state.activePath = path;
+        this._componentOptions.setEditorState(state);
+    }
+
     private createPath() {
         const data = this._componentOptions.getData();
         const newPath = new Path(this._pathOptions.newPathLabel);
         this._pathOptions.getPaths(data).push(newPath);
         this._componentOptions.setData(data);
-        this._activePathId = newPath.id;
+        this.setActivePath(newPath);
         this.renderPaths();
     }
 
     private editPath(pathId: string) {
-        this._activePathId = pathId;
+        const data = this._componentOptions.getData();
+        const path = this._pathOptions.getPaths(data).find(p => p.id === pathId) ?? null;
+        this.setActivePath(path);
         this.renderPaths();
     }
 
@@ -85,7 +98,7 @@ export default class PathSidebarSection extends EditorSidebarSection {
             paths[index] = path;
             this._componentOptions.setData(data);
         }
-        this._activePathId = null;
+        this.setActivePath(null);
         this.renderPaths();
     }
 }

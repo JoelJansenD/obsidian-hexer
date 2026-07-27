@@ -1,4 +1,5 @@
 import { Icon } from "./icon";
+import { Path } from "./path";
 
 export type Layer = 'terrain' | 'icon' | 'river' | 'road';
 export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser';
@@ -8,4 +9,6 @@ export interface EditorState {
     activeIcon: Icon;
     activeLayer: Layer;
     activePaintTool: PaintTool;
+    /** The path currently being edited, or null when none is active. */
+    activePath: Path | null;
 }
