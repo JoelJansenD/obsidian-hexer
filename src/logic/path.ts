@@ -1,6 +1,8 @@
 import { hexKey } from "./HexerData";
 import { RadialCoordinates } from "./hexagon";
 
+export type PathType = 'river' | 'road';
+
 export interface PathNode extends RadialCoordinates { }
 
 export interface PathEdge {

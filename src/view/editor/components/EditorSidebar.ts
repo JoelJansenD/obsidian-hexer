@@ -1,17 +1,14 @@
-import { Mountain, Droplets, Shapes, createElement, Plus, Route } from "lucide";
+import { Mountain, Droplets, Shapes, Route } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../components/ColourPalette";
 import { Layer } from "../../../logic/EditorState";
 import { ComponentOptions } from "../Editor";
 import { HEXER_ICONS } from "../../../logic/icon";
-import PathRow from "./PathRow";
-import { Path } from "../../../logic/path";
+import PathSidebarSection from "./PathSidebarSection";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
     private _sidebarEl!: HTMLDivElement;
-    private _riverEl!: HTMLDivElement;
-    private _roadEl!: HTMLDivElement;
 
     constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
@@ -21,83 +18,41 @@ export default class EditorSidebar {
         this._sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
         const terrainSection = this.buildTerrain(this._sidebarEl);
-        terrainSection.setExpanded(true);
+        this._sections.set('terrain', terrainSection);
 
         const iconSection = this.buildIcon(this._sidebarEl);
+        this._sections.set('icon', iconSection);
 
         const riverSection = this.buildRivers(this._sidebarEl);
+        this._sections.set('river', riverSection);
+        riverSection.setExpanded(true);
 
         const roadSection = this.buildRoads(this._sidebarEl);
-
-        this._sections.set('terrain', terrainSection);
-        this._sections.set('icon', iconSection);
-        this._sections.set('river', riverSection);
         this._sections.set('road', roadSection);
 
         this.updateIconElements();
     }
 
     private buildRivers(sidebarEl: HTMLElement) {
-        const riverSection = new EditorSidebarSection(sidebarEl, {
+        return new PathSidebarSection(sidebarEl, this._componentOptions, {
             icon: Droplets,
-            layer: 'river',
+            type: 'river',
             label: 'Rivers',
+            newPathLabel: 'New river',
+            getPaths: data => data.rivers,
             onSelect: () => this.select('river'),
         });
-
-        const addPathButton = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
-        addPathButton.dataset.role = 'add-river';
-        addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
-        addPathButton.createEl('span', { text: 'New river' });
-        addPathButton.addEventListener('click', () => {
-            const data = this._componentOptions.getData();
-            data.rivers.push(new Path("New river"));
-            this._componentOptions.setData(data);
-            this._riverEl.empty();
-            data.rivers.forEach(path => {
-                new PathRow(this._riverEl, path);
-            });
-        });
-
-        const data = this._componentOptions.getData();
-        this._riverEl = riverSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        data.rivers.forEach(path => {
-            new PathRow(this._riverEl, path);
-        });
-
-        return riverSection;
     }
 
     private buildRoads(sidebarEl: HTMLElement) {
-        const roadSection = new EditorSidebarSection(sidebarEl, {
+        return new PathSidebarSection(sidebarEl, this._componentOptions, {
             icon: Route,
-            layer: 'road',
+            type: 'road',
             label: 'Roads',
+            newPathLabel: 'New road',
+            getPaths: data => data.roads,
             onSelect: () => this.select('road'),
         });
-
-        const addPathButton = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
-        addPathButton.dataset.role = 'add-road';
-        addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
-        addPathButton.createEl('span', { text: 'New road' });
-
-        addPathButton.addEventListener('click', () => {
-            const data = this._componentOptions.getData();
-            data.roads.push(new Path("New road"));
-            this._componentOptions.setData(data);
-            this._roadEl.empty();
-            data.roads.forEach(path => {
-                new PathRow(this._roadEl, path);
-            });
-        });
-
-        const data = this._componentOptions.getData();
-        this._roadEl = roadSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        data.roads.forEach(path => {
-            new PathRow(this._roadEl, path);
-        });
-
-        return roadSection;
     }
 
     private buildTerrain(sidebarEl: HTMLElement) {
