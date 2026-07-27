@@ -9,3 +9,8 @@ Feature: Rivers and Road
         When I create a new river
         Then a new river is created
         And the river is selected
+    
+    Scenario: Editing a river
+        Given I have a river
+        When I edit the river
+        Then the river is selected
