@@ -3,6 +3,7 @@ import { HexerData, HexerState } from "../logic/HexerData";
 import { Path, PathEdge, PathNode } from "../logic/path";
 
 export interface SerializedPath {
+    id: string;
     name: string;
     nodes: Record<string, PathNode>;
     edges: PathEdge[];
@@ -43,6 +44,7 @@ export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
 
 function serializePath(path: Path): SerializedPath {
     return {
+        id: path.id,
         name: path.name,
         nodes: Object.fromEntries(path.nodes),
         edges: path.edges
@@ -51,6 +53,7 @@ function serializePath(path: Path): SerializedPath {
 
 function deserializePath(path: SerializedPath): Path {
     return new Path({
+        id: path.id,
         name: path.name,
         nodes: new Map(Object.entries(path.nodes ?? {})),
         edges: path.edges ?? []
