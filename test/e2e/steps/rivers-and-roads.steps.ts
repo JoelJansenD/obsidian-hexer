@@ -17,5 +17,5 @@ Then('a new river is created', async function () {
 Then('the river is selected', async function (this: TestContext) {
     expect(this.selectedRiver).toBeDefined();
     const pathEl = await pathPage.getRiverElement(this.selectedRiver!.id);
-    await expect(pathEl).toHaveElementClass('active');
+    await expect(pathEl).toHaveAttribute('data-editing', 'true');
 });
