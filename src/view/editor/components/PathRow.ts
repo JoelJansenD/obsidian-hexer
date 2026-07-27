@@ -1,19 +1,42 @@
-import { createElement, Hexagon, PencilLine } from "lucide";
+import { Check, createElement, Hexagon, PencilLine } from "lucide";
 import { Path } from "../../../logic/path";
 
+interface PathRowOptions {
+    disableEdit: boolean;
+    editMode: boolean;
+    path: Path;
+    onEdit?: (pathId: string) => void;
+    onSave?: (path: Path) => void;
+}
+
 export default class PathRow {
-    constructor(private _parentEl: HTMLElement, private _path: Path) {
+    constructor(private _parentEl: HTMLElement, private _options: PathRowOptions) {
         this.render();
     }
 
     private render() {
         const rowEl = this._parentEl.createDiv({ cls: "hexer-path-row" });
-        rowEl.dataset.pathId = this._path.id;
+        rowEl.dataset.pathId = this._options.path.id;
         
         rowEl.appendChild(createElement(Hexagon, { width: 36, height: 36 }));
-        rowEl.createSpan({ text: this._path.name, cls: "hexer-path-row-name" });
+        rowEl.createSpan({ text: this._options.path.name, cls: "hexer-path-row-name" });
 
         const editButton = rowEl.createDiv({  cls: 'hexer-path-row-edit-button' });
-        editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
+
+        if(this._options.disableEdit) {
+            editButton.style.display = 'none';
+        } 
+        else if(this._options.editMode) {
+            editButton.appendChild(createElement(Check, { width: 16, height: 16 }));        
+            editButton.addEventListener('click', () => {
+                this._options.onSave?.(this._options.path);
+            });
+        } 
+        else {
+            editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
+            editButton.addEventListener('click', () => {
+                this._options.onEdit?.(this._options.path.id);
+            });
+        }
     }
 }

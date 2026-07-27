@@ -22,6 +22,7 @@ interface PathSidebarSectionOptions {
  */
 export default class PathSidebarSection extends EditorSidebarSection {
     private _pathsEl!: HTMLDivElement;
+    private _activePathId: string | null = null;
 
     constructor(
         parentEl: HTMLElement,
@@ -59,7 +60,30 @@ export default class PathSidebarSection extends EditorSidebarSection {
         const data = this._componentOptions.getData();
         this._pathsEl.empty();
         this._pathOptions.getPaths(data).forEach(path => {
-            new PathRow(this._pathsEl, path);
+            new PathRow(this._pathsEl, {
+                disableEdit: this._activePathId !== null && this._activePathId !== path.id,
+                editMode: this._activePathId === path.id,
+                path,
+                onEdit: this.editPath.bind(this),
+                onSave: this.savePath.bind(this)
+            });
         });
+    }
+
+    private editPath(pathId: string) {
+        this._activePathId = pathId;
+        this.renderPaths();
+    }
+
+    private savePath(path: Path) {
+        const data = this._componentOptions.getData();
+        const paths = this._pathOptions.getPaths(data);
+        const index = paths.findIndex(p => p.id === path.id);
+        if (index !== -1) {
+            paths[index] = path;
+            this._componentOptions.setData(data);
+        }
+        this._activePathId = null;
+        this.renderPaths();
     }
 }
