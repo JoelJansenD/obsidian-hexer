@@ -39,18 +39,11 @@ export default class PathSidebarSection extends EditorSidebarSection {
     }
 
     private buildPathContent() {
-        const { type, newPathLabel } = this._pathOptions;
-
         const addPathButton = this.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
-        addPathButton.dataset.role = `add-${type}`;
+        addPathButton.dataset.role = `add-${this._pathOptions.type}`;
         addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
-        addPathButton.createEl('span', { text: newPathLabel });
-        addPathButton.addEventListener('click', () => {
-            const data = this._componentOptions.getData();
-            this._pathOptions.getPaths(data).push(new Path(newPathLabel));
-            this._componentOptions.setData(data);
-            this.renderPaths();
-        });
+        addPathButton.createEl('span', { text: this._pathOptions.newPathLabel });
+        addPathButton.addEventListener('click', this.createPath.bind(this));
 
         this._pathsEl = this.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
         this.renderPaths();
@@ -68,6 +61,15 @@ export default class PathSidebarSection extends EditorSidebarSection {
                 onSave: this.savePath.bind(this)
             });
         });
+    }
+
+    private createPath() {
+        const data = this._componentOptions.getData();
+        const newPath = new Path(this._pathOptions.newPathLabel);
+        this._pathOptions.getPaths(data).push(newPath);
+        this._componentOptions.setData(data);
+        this._activePathId = newPath.id;
+        this.renderPaths();
     }
 
     private editPath(pathId: string) {
