@@ -47,6 +47,14 @@ export class HexerData implements HexerState {
         this.hexes.set(key, hex);
     }
 
+    public deleteHex(coordinates: RadialCoordinates): void;
+    public deleteHex(q: number, r: number): void;
+    public deleteHex(arg1: RadialCoordinates | number, arg2?: number): void {
+        const q = typeof arg1 === 'object' ? arg1.q : arg1;
+        const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+        this.hexes.delete(hexKey(q, r));
+    }
+
     public clone(): HexerData {
         const hexes: HexMap = new Map();
         for (const [key, hex] of this.hexes) {

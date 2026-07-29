@@ -1,3 +1,4 @@
+import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { Hexagon } from "../hexagon";
 import { HexMap } from "../HexerData";
@@ -14,9 +15,10 @@ describe('onLeftClick', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
+        const data = createHexerData({ hexes: hexMap });
 
         // Act
-        strategyToTest.onLeftClick(hexMap, defaultEditorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(data, defaultEditorState, { q: 0, r: 0 });
 
         // Assert
         expect(hexMap.has('0,0')).toBe(false);
@@ -26,9 +28,10 @@ describe('onLeftClick', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: { name: 'castle', color: '#ff0000' } });
+        const data = createHexerData({ hexes: hexMap });
 
         // Act
-        strategyToTest.onLeftClick(hexMap, defaultEditorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(data, defaultEditorState, { q: 0, r: 0 });
 
         // Assert
         const result = hexMap.get('0,0');
@@ -51,11 +54,12 @@ describe('onLeftDrag', () => {
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
         hexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
         hexMap.set('2,0', { q: 2, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
+        const data = createHexerData({ hexes: hexMap });
 
         // Act
-        strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 0, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 1, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 2, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 0, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 1, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 2, r: 0 });
 
         // Assert
         expect(hexMap.get('0,0')).toBeUndefined();
@@ -69,11 +73,12 @@ describe('onLeftDrag', () => {
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' } });
         hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' } });
         hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' } });
+        const data = createHexerData({ hexes: hexMap });
 
         // Act
-        strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 0, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 1, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, defaultEditorState, { q: 2, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 0, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 1, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 2, r: 0 });
 
         // Assert
         expect(hexMap.get('0,0')?.icon).toBeNull();

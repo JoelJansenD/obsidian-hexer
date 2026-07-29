@@ -1,11 +1,13 @@
 import TerrainBucketStrategy from "./TerrainBucketStrategy";
-import { HexMap } from "../HexerData";
+import { HexerData, HexMap } from "../HexerData";
+import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { Hexagon } from "../hexagon";
 describe('onLeftClick', () => {
 
     let strategyToTest: TerrainBucketStrategy;
     let hexMap: HexMap;
+    let data: HexerData;
 
     beforeEach(() => {
         strategyToTest = new TerrainBucketStrategy();
@@ -24,6 +26,8 @@ describe('onLeftClick', () => {
 
         // A same-colour hex that is disconnected and must not be filled.
         hexMap.set('10,10', { q: 10, r: 10, terrainColor: '#ff0000', icon: null });
+
+        data = createHexerData({ hexes: hexMap });
     });
 
     it('fills connected hexes sharing the same terrain colour', () => {
@@ -32,7 +36,7 @@ describe('onLeftClick', () => {
         const editorState = {...defaultEditorState, activeColour: fillColour};
 
         // Act
-        strategyToTest.onLeftClick(hexMap, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(data, editorState, { q: 0, r: 0 });
 
         // Assert
         expect(hexMap.get('0,0')!.terrainColor).toBe(fillColour);
@@ -49,12 +53,13 @@ describe('onLeftClick', () => {
         const emptyHexMap = new Map<string, Hexagon>();
         emptyHexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: null });
         emptyHexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: null });
+        const emptyData = createHexerData({ hexes: emptyHexMap });
 
         const fillColour = '#00ff00';
         const editorState = {...defaultEditorState, activeColour: fillColour};
 
         // Act
-        strategyToTest.onLeftClick(emptyHexMap, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(emptyData, editorState, { q: 0, r: 0 });
 
         // Assert
         expect(emptyHexMap.get('0,0')!.terrainColor).toBe(fillColour);
