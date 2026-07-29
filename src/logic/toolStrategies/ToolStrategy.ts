@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
-import { HexMap } from "../HexerData";
+import { HexerData } from "../HexerData";
 import IconBrushStrategy from "./IconBrushStrategy";
 import IconBucketStrategy from "./IconBucketStrategy";
 import IconEraserStrategy from "./IconEraserStrategy";
@@ -8,7 +8,7 @@ import TerrainBrushStrategy from "./TerrainBrushStrategy";
 import TerrainBucketStrategy from "./TerrainBucketStrategy";
 import TerrainEraserStrategy from "./TerrainEraserStrategy";
 
-export type ToolEventHandler = (hexMap: HexMap, editorState: EditorState, coordinates: RadialCoordinates) => void;
+export type ToolEventHandler = (data: HexerData, editorState: EditorState, coordinates: RadialCoordinates) => void;
 
 export type RegisteredEvents = {
     onLeftClick?: ToolEventHandler;

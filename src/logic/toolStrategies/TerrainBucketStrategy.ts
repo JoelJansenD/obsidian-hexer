@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { getArea, RadialCoordinates } from "../hexagon";
-import { hexKey, HexMap } from "../HexerData";
+import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainBucketStrategy implements ToolStrategy {
@@ -8,23 +8,22 @@ export default class TerrainBucketStrategy implements ToolStrategy {
         return layer === 'terrain' && tool === 'bucket';
     }
 
-    public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const clickedHex = hexMap.get(hexKey(radialCoordinates.q, radialCoordinates.r));
+    public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        const clickedHex = data.getHex(radialCoordinates);
         if(!clickedHex) {
             return;
         }
 
         const area = getArea(radialCoordinates, (hex) => {
-            const existing = hexMap.get(hexKey(hex.q, hex.r));
+            const existing = data.getHex(hex);
             return existing !== undefined && existing.terrainColor === clickedHex.terrainColor;
         });
 
         area.forEach((hex) => {
-            const key = hexKey(hex.q, hex.r);
-            const hexagon = hexMap.get(key);
+            const hexagon = data.getHex(hex);
             if(hexagon) {
                 hexagon.terrainColor = editorState.activeColour;
-                hexMap.set(key, hexagon);
+                data.setHex(hexagon);
             }
         });
     }
