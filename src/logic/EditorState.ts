@@ -2,7 +2,7 @@ import { Icon } from "./icon";
 import { Path } from "./path";
 
 export type Layer = 'terrain' | 'icon' | 'river' | 'road';
-export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser';
+export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser' | 'polygon';
 
 export interface EditorState {
     activeColour: string;

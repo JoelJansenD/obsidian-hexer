@@ -4,6 +4,7 @@ import { HexMap } from "../HexerData";
 import IconBrushStrategy from "./IconBrushStrategy";
 import IconBucketStrategy from "./IconBucketStrategy";
 import IconEraserStrategy from "./IconEraserStrategy";
+import PathPolygonStrategy from "./PathPolygonStrategy";
 import TerrainBrushStrategy from "./TerrainBrushStrategy";
 import TerrainBucketStrategy from "./TerrainBucketStrategy";
 import TerrainEraserStrategy from "./TerrainEraserStrategy";
@@ -24,6 +25,7 @@ const toolStrategies: ToolStrategy[] = [
     new IconBrushStrategy(),
     new IconBucketStrategy(),
     new IconEraserStrategy(),
+    new PathPolygonStrategy(),
     new TerrainBrushStrategy(),
     new TerrainBucketStrategy(),
     new TerrainEraserStrategy()

@@ -1,14 +1,9 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
-import { PaintTool } from '../../../src/logic/EditorState';
 import editorPage from '../support/editor.page';
 import terrainPage from '../support/terrain.page';
 import { TerrainContext } from '../support/contexts/terrain.context';
 import { colourToHex } from '../support/colours';
-
-Given('I have selected the {word} tool', async function (tool: PaintTool) {
-    await editorPage.selectPaintTool(tool);
-});
 
 Given('my selected colour is blue', async function () {
     await terrainPage.setColour(colourToHex('blue'));

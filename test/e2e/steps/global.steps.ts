@@ -3,7 +3,7 @@ import { obsidianPage } from 'wdio-obsidian-service';
 import { fileExplorer } from '../support/obsidian.page';
 import { CURRENT_VERSION } from '../../../src/logic/HexerData';
 import editorPage from "../support/editor.page";
-import { Layer } from "../../../src/logic/EditorState";
+import { Layer, PaintTool } from "../../../src/logic/EditorState";
 import { GlobalContext } from "../support/contexts/global.context";
 import { EXISTING_RIVER_ID } from "../support/fixture";
 
@@ -91,6 +91,10 @@ Given('I have opened a Hexer file', async function () {
 
 Given('I have selected the {word} layer', async function (layer: Layer) {
     await editorPage.selectLayer(layer);
+});
+
+Given('I have selected the {word} tool', async function (tool: PaintTool) {
+    await editorPage.selectPaintTool(tool);
 });
 
 Given('Obsidian is open', async function () {

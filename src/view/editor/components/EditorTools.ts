@@ -1,4 +1,4 @@
-import { Brush, createElement, Eraser, IconNode, MousePointer2, PaintBucket } from "lucide";
+import { Brush, createElement, Eraser, IconNode, MousePointer2, PaintBucket, Pentagon } from "lucide";
 import { PaintTool } from "../../../logic/EditorState";
 import { ComponentOptions } from "../Editor";
 
@@ -15,6 +15,7 @@ export default class EditorTools {
         this.createButton(toolsEl, Brush, 'brush');
         this.createButton(toolsEl, PaintBucket, 'bucket');
         this.createButton(toolsEl, Eraser, 'eraser');
+        this.createButton(toolsEl, Pentagon, 'polygon');
     }
 
     private createButton(toolsEl: HTMLElement, icon: IconNode, paintTool: PaintTool) {

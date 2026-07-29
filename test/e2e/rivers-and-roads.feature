@@ -4,6 +4,7 @@ Feature: Rivers and Roads
     Background:
         Given I have opened a Hexer file
         And I have selected the river layer
+        And I have selected the polygon tool
 
     Scenario: Creating a new river
         When I create a new river
