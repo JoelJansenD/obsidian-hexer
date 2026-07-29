@@ -21,6 +21,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         }
 
         targetPath.addNode(radialCoordinates);
+        editorState.activePath.activeNode = radialCoordinates;
     }
 
     private getPath(id: string, paths: Path[]): Path | null {

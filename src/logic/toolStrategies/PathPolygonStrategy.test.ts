@@ -41,7 +41,7 @@ describe('onLeftClick', () => {
         }).toThrow(`Active path 'Nonexistent path' with id ${editorState.activePath.path.id} not found in data.`);
     });
 
-    it('adds a node to the active path when a path is active', () => {
+    it('adds a node to the active path when a path is active and marks it as active', () => {
         // Arrange
         const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
         const data = defaultHexerData.clone();
@@ -53,6 +53,7 @@ describe('onLeftClick', () => {
         const river = data.rivers[0];
         expect(river.nodes.size).toBe(1);
         expect(river.nodes.has('0,0')).toBe(true);
+        expect(editorState.activePath.activeNode).toEqual({q: 0, r: 0});
     });
 
 });
