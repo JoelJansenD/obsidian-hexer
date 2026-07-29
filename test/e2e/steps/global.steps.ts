@@ -4,7 +4,7 @@ import { fileExplorer } from '../support/obsidian.page';
 import { CURRENT_VERSION } from '../../../src/logic/HexerData';
 import editorPage from "../support/editor.page";
 import { Layer } from "../../../src/logic/EditorState";
-import { TestContext } from "../support/TestContext";
+import { GlobalContext } from "../support/contexts/global.context";
 import { EXISTING_RIVER_ID } from "../support/fixture";
 
 const HEXER_EXT = '.hexer.md';
@@ -98,12 +98,12 @@ Given('Obsidian is open', async function () {
     await maximizeObsidianWindow();
 });
 
-When('I click an empty hex', async function (this: TestContext) {
+When('I click an empty hex', async function (this: GlobalContext) {
     await editorPage.clickHex(EMPTY_HEX);
     this.lastClickedHex = EMPTY_HEX;
 });
 
-When('I click and drag across multiple hexes', async function (this: TestContext) {
+When('I click and drag across multiple hexes', async function (this: GlobalContext) {
     const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
     await editorPage.dragAcrossHexes(DRAG_HEXES);
     this.lastDraggedHexes = DRAG_HEXES;

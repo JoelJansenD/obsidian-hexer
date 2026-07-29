@@ -3,7 +3,7 @@ import { expect } from '@wdio/globals';
 import { PaintTool } from '../../../src/logic/EditorState';
 import editorPage from '../support/editor.page';
 import terrainPage from '../support/terrain.page';
-import { TestContext } from '../support/TestContext';
+import { TerrainContext } from '../support/contexts/terrain.context';
 import { colourToHex } from '../support/colours';
 
 Given('I have selected the {word} tool', async function (tool: PaintTool) {
@@ -16,31 +16,31 @@ Given('my selected colour is blue', async function () {
     await editorPage.logHexerState('initial (colour selected)');
 });
 
-When('I click a hex with coloured terrain', async function (this: TestContext) {
+When('I click a hex with coloured terrain', async function (this: TerrainContext) {
     await editorPage.clickHex({ q: 2, r: 2 });
     this.lastClickedHex = { q: 2, r: 2 };
 });
 
-Then('every hovered hex terrain will be painted blue', async function (this: TestContext) {
+Then('every hovered hex terrain will be painted blue', async function (this: TerrainContext) {
     for (const hex of this.lastDraggedHexes || []) {
         const result = await editorPage.getHex(hex);
         expect(result?.terrainColor).toBe(colourToHex('blue'));
     }
 });
 
-Then('the hex terrain will be painted blue', async function (this: TestContext) {
+Then('the hex terrain will be painted blue', async function (this: TerrainContext) {
     expect(this.lastClickedHex).not.toBeNull();
     const hex = await editorPage.getHex(this.lastClickedHex!);
     expect(hex?.terrainColor).toBe(colourToHex('blue'));
 });
 
-Then('the hex terrain will be erased', async function (this: TestContext) {
+Then('the hex terrain will be erased', async function (this: TerrainContext) {
     expect(this.lastClickedHex).not.toBeNull();
     const result = await editorPage.getHex(this.lastClickedHex!);
     expect(result?.terrainColor || null).toBeNull();
 });
 
-Then('every hovered hex terrain will be erased', async function (this: TestContext) {
+Then('every hovered hex terrain will be erased', async function (this: TerrainContext) {
     for (const hex of this.lastDraggedHexes || []) {
         const result = await editorPage.getHex(hex);
         expect(result?.terrainColor).toBeNull();
