@@ -21,3 +21,10 @@ Feature: Rivers and Roads
         When I click on a hex
         Then the hex is added to the river
         And no edge is added
+
+    Scenario: Drawing an edge to an existing hex
+        Given I am editing a river
+        And I have clicked on a hex
+        When I click on another hex that is not part of any edge
+        Then the hex is added to the river
+        And an edge is added between the two clicked hexes
