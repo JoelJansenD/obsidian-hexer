@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
-import { HexMap } from "../HexerData";
+import { HexerData, HexMap } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class PathPolygonStrategy implements ToolStrategy {
@@ -8,7 +8,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         return (layer === 'river' || layer === 'road') && tool === 'polygon';
     }
 
-    public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+    public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
     }
 
     public getEvents(): RegisteredEvents {
