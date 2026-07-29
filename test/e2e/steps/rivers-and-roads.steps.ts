@@ -2,17 +2,18 @@ import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import pathPage from '../support/path.page';
 import { TestContext } from '../support/TestContext';
+import { EXISTING_RIVER_ID } from '../support/fixture';
 
 When('I create a new river', async function (this: TestContext) {
     await pathPage.createRiver();
     const rivers = await pathPage.getRivers();
-    this.selectedRiver = rivers[rivers.length - 1];
+    this.selectedRiver = rivers.find(river => river.id !== EXISTING_RIVER_ID);
 });
 
 Given('I have a river', async function (this: TestContext) {
-    const id = await pathPage.seedRiver('Test river');
     const rivers = await pathPage.getRivers();
-    this.selectedRiver = rivers.find(river => river.id === id);
+    this.selectedRiver = rivers.find(river => river.id === EXISTING_RIVER_ID);
+    expect(this.selectedRiver).toBeDefined();
 });
 
 When('I edit the river', async function (this: TestContext) {
@@ -22,7 +23,8 @@ When('I edit the river', async function (this: TestContext) {
 
 Then('a new river is created', async function () {
     const rivers = await pathPage.getRivers();
-    expect(rivers.length).toBe(1);
+    const newRivers = rivers.filter(river => river.id !== EXISTING_RIVER_ID);
+    expect(newRivers.length).toBe(1);
 });
 
 Then('the river is selected', async function (this: TestContext) {
