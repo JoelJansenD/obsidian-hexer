@@ -25,6 +25,6 @@ Feature: Rivers and Roads
     Scenario: Drawing an edge to an existing hex
         Given I am editing a river
         And I have clicked on a hex
-        When I click on another hex that is not part of any edge
+        When I click on another hex
         Then the hex is added to the river
         And an edge is added between the two clicked hexes

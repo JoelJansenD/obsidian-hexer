@@ -15,8 +15,10 @@ const UNCONNECTED_HEX = { q: 5, r: 5 };
 const EXISTING_RIVER_HEX = { q: 1, r: 1 };
 
 // A neighbour of EXISTING_RIVER_HEX that no fixture edge touches — the fixture's
-// only edge runs from "1,1" to "2,1".
-const NEIGHBOURING_HEX = { q: 0, r: 1 };
+// only edge runs from "1,1" to "2,1". Must keep q > 0: the canvas origin is its
+// top-left corner, so q = 0 maps to x = 0 (the left edge) and a click there
+// lands on the canvas boundary rather than inside it.
+const NEIGHBOURING_HEX = { q: 2, r: 0 };
 
 When('I create a new river', async function (this: RiversAndRoadsContext) {
     await pathPage.createRiver();
@@ -52,7 +54,7 @@ Given('I have clicked on a hex', async function (this: RiversAndRoadsContext) {
     this.lastClickedHex = EXISTING_RIVER_HEX;
 });
 
-When('I click on another hex that is not part of any edge', async function (this: RiversAndRoadsContext) {
+When('I click on another hex', async function (this: RiversAndRoadsContext) {
     expect(this.lastClickedHex).toBeDefined();
     await editorPage.clickHex(NEIGHBOURING_HEX);
     this.previouslyClickedHex = this.lastClickedHex;
