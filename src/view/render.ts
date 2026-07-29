@@ -1,8 +1,10 @@
+import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HEXER_ICONS } from "../logic/icon";
+import { Path } from "../logic/path";
 
-export default function render(context: CanvasRenderingContext2D, data: HexerData) {
+export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
     context.save();
     context.setTransform(1, 0, 0, 1, 0, 0);
@@ -12,6 +14,10 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     for(const hex of data.hexes.values()) {
         drawHex(context, hex, data.size);
         drawIcon(context, hex, data.size);
+    }
+
+    for(const path of [...data.rivers, ...data.roads]) {
+        drawPath(context, path, data.size, editorState.activePath);
     }
 }
 
@@ -72,6 +78,31 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number)
         context.fill(new Path2D(pathEl.getAttribute('d') ?? ''));
         context.restore();
     });
+
+    context.restore();
+}
+
+function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null) {
+    if(activePath === null || path.id !== activePath.path.id) {
+        // TODO: temporary code
+        return;
+    }
+
+    const nodes = path.nodes;
+    const nodeRadius = size * 0.15;
+
+    context.save();
+
+    for(const node of nodes.values()) {
+        const center = radialCoordinatesToPoint(node, size);
+        const isActive = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
+
+        context.beginPath();
+        context.arc(center.x, center.y, nodeRadius, 0, Math.PI * 2);
+        context.fillStyle = isActive ? '#ffcc00' : '#ffffff';
+        context.fill();
+        context.stroke();
+    }
 
     context.restore();
 }

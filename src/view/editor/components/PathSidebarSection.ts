@@ -59,8 +59,8 @@ export default class PathSidebarSection extends EditorSidebarSection {
         this._pathsEl.empty();
         this._pathOptions.getPaths(data).forEach(path => {
             new PathRow(this._pathsEl, {
-                disableEdit: activePath !== null && activePath.id !== path.id,
-                editMode: activePath?.id === path.id,
+                disableEdit: activePath !== null && activePath.path.id !== path.id,
+                editMode: activePath?.path.id === path.id,
                 path,
                 onEdit: this.editPath.bind(this),
                 onSave: this.savePath.bind(this)
@@ -70,7 +70,12 @@ export default class PathSidebarSection extends EditorSidebarSection {
 
     private setActivePath(path: Path | null) {
         const state = this._componentOptions.getEditorState();
-        state.activePath = path;
+        if(path === null) {
+            state.activePath = null;
+        }
+        else {
+            state.activePath = { path: path, activeNode: null };
+        }
         this._componentOptions.setEditorState(state);
     }
 

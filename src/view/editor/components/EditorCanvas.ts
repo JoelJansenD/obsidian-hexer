@@ -52,7 +52,7 @@ export default class EditorCanvas {
         this._renderRequested = true;
         requestAnimationFrame(() => {
             this._renderRequested = false;
-            render(this._context, this._dataOptions.getData());
+            render(this._context, this._dataOptions.getData(), this._dataOptions.getEditorState());
         });
     }
 
