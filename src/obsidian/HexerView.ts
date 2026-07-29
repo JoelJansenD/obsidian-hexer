@@ -1,11 +1,9 @@
 import { parseYaml, stringifyYaml, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
-import { fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
+import { FRONTMATTER_REGEX, fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
-
-const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 
 export class HexerView extends TextFileView {
     private editor?: Editor;

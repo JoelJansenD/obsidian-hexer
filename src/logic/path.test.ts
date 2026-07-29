@@ -6,6 +6,7 @@ describe('Path', () => {
 
     beforeEach(() => {
         data = {
+            id: 'test-id',
             name: 'test',
             nodes: new Map([
                 ['0,0', { q: 0, r: 0 }],

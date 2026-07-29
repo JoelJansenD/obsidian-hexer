@@ -5,6 +5,7 @@ import { CURRENT_VERSION } from '../../../src/logic/HexerData';
 import editorPage from "../support/editor.page";
 import { Layer } from "../../../src/logic/EditorState";
 import { TestContext } from "../support/TestContext";
+import { EXISTING_RIVER_ID } from "../support/fixture";
 
 const HEXER_EXT = '.hexer.md';
 const EMPTY_HEX = { q: 5, r: 5 };
@@ -58,6 +59,19 @@ Given('I have opened a Hexer file', async function () {
         '      icon:',
         '        name: "dungeon-gate"',
         '        color: "#00ff00"',
+        '  rivers:',
+        `    - id: "${EXISTING_RIVER_ID}"`,
+        '      name: "Existing river"',
+        '      nodes:',
+        '        "1,1":',
+        '          q: 1',
+        '          r: 1',
+        '        "2,1":',
+        '          q: 2',
+        '          r: 1',
+        '      edges:',
+        '        - from: "1,1"',
+        '          to: "2,1"',
         '---',
         '',
     ].join('\n');
