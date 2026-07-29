@@ -10,10 +10,13 @@ import { hexKey } from '../../../src/logic/HexerData';
 // connecting to one, so the scenario only exercises adding a node.
 const UNCONNECTED_HEX = { q: 5, r: 5 };
 
-// A neighbour of UNCONNECTED_HEX, and likewise not part of any fixture edge. It
-// sits closer to the origin than UNCONNECTED_HEX on both axes, so if that hex is
-// inside the canvas then this one is too.
-const NEIGHBOURING_HEX = { q: 4, r: 5 };
+// A node the fixture river already has, so the active hex is an existing one
+// rather than one the scenario had to create first.
+const EXISTING_RIVER_HEX = { q: 1, r: 1 };
+
+// A neighbour of EXISTING_RIVER_HEX that no fixture edge touches — the fixture's
+// only edge runs from "1,1" to "2,1".
+const NEIGHBOURING_HEX = { q: 0, r: 1 };
 
 When('I create a new river', async function (this: RiversAndRoadsContext) {
     await pathPage.createRiver();
@@ -45,8 +48,8 @@ When('I click on a hex', async function (this: RiversAndRoadsContext) {
 });
 
 Given('I have clicked on a hex', async function (this: RiversAndRoadsContext) {
-    await editorPage.clickHex(UNCONNECTED_HEX);
-    this.lastClickedHex = UNCONNECTED_HEX;
+    await editorPage.clickHex(EXISTING_RIVER_HEX);
+    this.lastClickedHex = EXISTING_RIVER_HEX;
 });
 
 When('I click on another hex that is not part of any edge', async function (this: RiversAndRoadsContext) {
