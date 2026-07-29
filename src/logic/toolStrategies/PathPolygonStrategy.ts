@@ -21,6 +21,9 @@ export default class PathPolygonStrategy implements ToolStrategy {
         }
 
         targetPath.addNode(radialCoordinates);
+        if(editorState.activePath.activeNode) {
+            targetPath.addEdge(editorState.activePath.activeNode, radialCoordinates);
+        }
         editorState.activePath.activeNode = radialCoordinates;
     }
 

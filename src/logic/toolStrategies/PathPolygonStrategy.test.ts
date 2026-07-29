@@ -56,4 +56,22 @@ describe('onLeftClick', () => {
         expect(editorState.activePath.activeNode).toEqual({q: 0, r: 0});
     });
 
+    it('adds and selectes a node when another node is already active and adds an edge between them', () => {
+        // Arrange
+        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
+        const data = defaultHexerData.clone();
+        strategyToTest.onLeftClick(data, editorState, {q: 0, r: 0});
+
+        // Act
+        strategyToTest.onLeftClick(data, editorState, {q: 1, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.size).toBe(2);
+        expect(river.nodes.has('0,0')).toBe(true);
+        expect(river.nodes.has('1,0')).toBe(true);
+        expect(editorState.activePath.activeNode).toEqual({q: 1, r: 0});
+        expect(river.hasEdge({q: 1, r: 0}, {q: 0, r: 0})).toBe(true);
+    });
+
 });
