@@ -32,18 +32,18 @@ describe('onLeftClick', () => {
 
     it('throws an exception if the active path is not found in the data', () => {
         // Arrange
-        const editorState = {...defaultEditorState, activePath: new Path('Nonexistent path')};
+        const editorState = {...defaultEditorState, activePath: { path: new Path('Nonexistent path'), activeNode: null } };
         const data = defaultHexerData.clone();
 
         // Act & Assert
         expect(() => {
             strategyToTest.onLeftClick(data, editorState, {q: 0, r: 0});
-        }).toThrow(`Active path 'Nonexistent path' with id ${editorState.activePath.id} not found in data.`);
+        }).toThrow(`Active path 'Nonexistent path' with id ${editorState.activePath.path.id} not found in data.`);
     });
 
     it('adds a node to the active path when a path is active', () => {
         // Arrange
-        const editorState = {...defaultEditorState, activePath: targetPath};
+        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
         const data = defaultHexerData.clone();
 
         // Act

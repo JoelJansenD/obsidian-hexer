@@ -15,9 +15,9 @@ export default class PathPolygonStrategy implements ToolStrategy {
         }
 
         const allPaths = [...data.rivers, ...data.roads];
-        const targetPath = this.getPath(editorState.activePath.id, allPaths);
+        const targetPath = this.getPath(editorState.activePath.path.id, allPaths);
         if(!targetPath) {
-            throw new Error(`Active path '${editorState.activePath.name}' with id ${editorState.activePath.id} not found in data.`);
+            throw new Error(`Active path '${editorState.activePath.path.name}' with id ${editorState.activePath.path.id} not found in data.`);
         }
 
         targetPath.addNode(radialCoordinates);
