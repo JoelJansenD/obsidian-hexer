@@ -14,3 +14,9 @@ Feature: Rivers and Roads
         Given I have a river
         When I edit the river
         Then the river is selected
+
+    Scenario: Adding a hex to a river
+        Given I am editing a river
+        When I click on a hex
+        Then the hex is added to the river
+        And no edge is added

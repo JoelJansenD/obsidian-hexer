@@ -13,6 +13,11 @@ class PathPage {
         return browser.$(`[data-path-id="${id}"]`);
     }
 
+    async getRiver(id: string): Promise<Path | undefined> {
+        const rivers = await this.getRivers();
+        return rivers.find(river => river.id === id);
+    }
+
     async getRivers(): Promise<Path[]> {
         return this.getPaths();
     }
