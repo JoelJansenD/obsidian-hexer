@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { Hexagon, RadialCoordinates } from "../hexagon";
-import { hexKey, HexMap } from "../HexerData";
+import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainBrushStrategy implements ToolStrategy {
@@ -8,26 +8,25 @@ export default class TerrainBrushStrategy implements ToolStrategy {
         return layer === 'terrain' && tool === 'brush';
     }
 
-    public onLeftClick(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        this.paint(hexMap, editorState, radialCoordinates);
+    public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        this.paint(data, editorState, radialCoordinates);
     }
 
-    public onLeftDrag(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        this.paint(hexMap, editorState, radialCoordinates);
+    public onLeftDrag(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        this.paint(data, editorState, radialCoordinates);
     }
 
-    private paint(hexMap: HexMap, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const key = hexKey(radialCoordinates.q, radialCoordinates.r);
-        const hexagon: Hexagon = hexMap.get(key) || {
+    private paint(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        const hexagon: Hexagon = data.getHex(radialCoordinates) || {
             q: radialCoordinates.q,
             r: radialCoordinates.r,
             terrainColor: null,
             icon: null
         };
         hexagon.terrainColor = editorState.activeColour;
-        hexMap.set(key, hexagon);
+        data.setHex(hexagon);
     }
-    
+
     public getEvents(): RegisteredEvents {
         return {
             onLeftClick: this.onLeftClick.bind(this),

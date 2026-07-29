@@ -103,7 +103,7 @@ export default class EditorCanvas {
         const canvasY = e.clientY - rect.top;
         const clickedHex = pointToRadialCoordinates(canvasX, canvasY, data.size);
         const editorState = this._dataOptions.getEditorState();
-        handler(data.hexes, editorState, clickedHex);
+        handler(data, editorState, clickedHex);
         this._dataOptions.setData(data);
         this.requestRender();
     }

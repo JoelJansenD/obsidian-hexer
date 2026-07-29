@@ -1,3 +1,4 @@
+import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { Hexagon } from "../hexagon";
 import { HexMap } from "../HexerData";
@@ -14,6 +15,7 @@ describe('onLeftClick', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
+        const data = createHexerData({ hexes: hexMap });
         const expectedIcon = {
             name: 'castle',
             color: '#ff0000'
@@ -21,16 +23,17 @@ describe('onLeftClick', () => {
         const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
 
         // Act
-        strategyToTest.onLeftClick(hexMap, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(data, editorState, { q: 0, r: 0 });
 
         // Assert
         const result = hexMap.get('0,0')!;
-        expect(result.icon).toEqual(expectedIcon);        
+        expect(result.icon).toEqual(expectedIcon);
     });
 
     it('creates a new hexagon with an icon when clicking on an empty hexagon', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
+        const data = createHexerData({ hexes: hexMap });
         const expectedIcon = {
             name: 'castle',
             color: '#ff0000'
@@ -38,7 +41,7 @@ describe('onLeftClick', () => {
         const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
 
         // Act
-        strategyToTest.onLeftClick(hexMap, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(data, editorState, { q: 0, r: 0 });
 
         // Assert
         const result = hexMap.get('0,0')!;
@@ -59,6 +62,7 @@ describe('onLeftDrag', () => {
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
         hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: null });
         hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: null });
+        const data = createHexerData({ hexes: hexMap });
         const expectedIcon = {
             name: 'castle',
             color: '#ff0000'
@@ -66,9 +70,9 @@ describe('onLeftDrag', () => {
         const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
 
         // Act
-        strategyToTest.onLeftDrag(hexMap, editorState, { q: 0, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, editorState, { q: 1, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, editorState, { q: 2, r: 0 });
+        strategyToTest.onLeftDrag(data, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftDrag(data, editorState, { q: 1, r: 0 });
+        strategyToTest.onLeftDrag(data, editorState, { q: 2, r: 0 });
 
         // Assert
         expect(hexMap.get('0,0')!.icon).toEqual(expectedIcon);
@@ -79,6 +83,7 @@ describe('onLeftDrag', () => {
     it.todo('creates new hexagons with icons when dragging over empty hexagons', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
+        const data = createHexerData({ hexes: hexMap });
         const expectedIcon = {
             name: 'castle',
             color: '#ff0000'
@@ -86,9 +91,9 @@ describe('onLeftDrag', () => {
         const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
 
         // Act
-        strategyToTest.onLeftDrag(hexMap, editorState, { q: 0, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, editorState, { q: 1, r: 0 });
-        strategyToTest.onLeftDrag(hexMap, editorState, { q: 2, r: 0 });
+        strategyToTest.onLeftDrag(data, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftDrag(data, editorState, { q: 1, r: 0 });
+        strategyToTest.onLeftDrag(data, editorState, { q: 2, r: 0 });
 
         // Assert
         expect(hexMap.get('0,0')!.icon).toEqual(expectedIcon);

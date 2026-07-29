@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { hexagonIsEmpty, RadialCoordinates } from "../hexagon";
-import { hexKey, HexMap } from "../HexerData";
+import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainEraserStrategy implements ToolStrategy {
@@ -8,27 +8,26 @@ export default class TerrainEraserStrategy implements ToolStrategy {
         return layer === 'terrain' && tool === 'eraser';
     }
 
-    public onLeftClick(hexMap: HexMap, _: EditorState, radialCoordinates: RadialCoordinates) {
-        this.erase(hexMap, radialCoordinates);
+    public onLeftClick(data: HexerData, _: EditorState, radialCoordinates: RadialCoordinates) {
+        this.erase(data, radialCoordinates);
     }
 
-    public onLeftDrag(hexMap: HexMap, _: EditorState, radialCoordinates: RadialCoordinates) {
-        this.erase(hexMap, radialCoordinates);
+    public onLeftDrag(data: HexerData, _: EditorState, radialCoordinates: RadialCoordinates) {
+        this.erase(data, radialCoordinates);
     }
 
-    private erase(hexMap: HexMap, radialCoordinates: RadialCoordinates) {
-        const key = hexKey(radialCoordinates.q, radialCoordinates.r);
-        const hexagon = hexMap.get(key);
+    private erase(data: HexerData, radialCoordinates: RadialCoordinates) {
+        const hexagon = data.getHex(radialCoordinates);
         if(!hexagon) {
             return;
         }
 
         hexagon.terrainColor = null;
         if(hexagonIsEmpty(hexagon)) {
-            hexMap.delete(key);
+            data.deleteHex(radialCoordinates);
         }
         else {
-            hexMap.set(key, hexagon);
+            data.setHex(hexagon);
         }
     }
 

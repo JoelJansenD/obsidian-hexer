@@ -1,11 +1,13 @@
 import IconBucketStrategy from "./IconBucketStrategy";
-import { HexMap } from "../HexerData";
+import { HexerData, HexMap } from "../HexerData";
+import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { Hexagon } from "../hexagon";
 describe('onLeftClick', () => {
 
     let strategyToTest: IconBucketStrategy;
     let hexMap: HexMap;
+    let data: HexerData;
 
     beforeEach(() => {
         strategyToTest = new IconBucketStrategy();
@@ -28,6 +30,8 @@ describe('onLeftClick', () => {
 
         // A same-icon hex that is disconnected and must not be filled.
         hexMap.set('10,10', { q: 10, r: 10, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
+
+        data = createHexerData({ hexes: hexMap });
     });
 
     it('fills connected hexes sharing the same icon', () => {
@@ -36,7 +40,7 @@ describe('onLeftClick', () => {
         const editorState = {...defaultEditorState, activeIcon: fillIcon};
 
         // Act
-        strategyToTest.onLeftClick(hexMap, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(data, editorState, { q: 0, r: 0 });
 
         // Assert
         expect(hexMap.get('0,0')!.icon).toEqual(fillIcon);
@@ -54,12 +58,13 @@ describe('onLeftClick', () => {
         const emptyHexMap = new Map<string, Hexagon>();
         emptyHexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: null });
         emptyHexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: null });
+        const emptyData = createHexerData({ hexes: emptyHexMap });
 
         const fillIcon = { name: 'castle', color: '#00ff00' };
         const editorState = {...defaultEditorState, activeIcon: fillIcon};
 
         // Act
-        strategyToTest.onLeftClick(emptyHexMap, editorState, { q: 0, r: 0 });
+        strategyToTest.onLeftClick(emptyData, editorState, { q: 0, r: 0 });
 
         // Assert
         expect(emptyHexMap.get('0,0')!.icon).toEqual(fillIcon);
