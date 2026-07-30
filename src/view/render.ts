@@ -83,25 +83,39 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number)
 }
 
 function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null) {
-    if(activePath === null || path.id !== activePath.path.id) {
-        // TODO: temporary code
-        return;
-    }
-
-    const nodes = path.nodes;
-    const nodeRadius = size * 0.15;
-
     context.save();
 
-    for(const node of nodes.values()) {
-        const center = radialCoordinatesToPoint(node, size);
-        const isActive = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
-
+    const edges = path.edges;
+    context.strokeStyle = path.id === activePath?.path.id ? '#ffcc00' : '#ff0000';
+    for(const edge of edges) {
+        const pathNodes = path.getFullEdgePath(edge);
+        console.log(pathNodes);
         context.beginPath();
-        context.arc(center.x, center.y, nodeRadius, 0, Math.PI * 2);
-        context.fillStyle = isActive ? '#ffcc00' : '#ffffff';
-        context.fill();
+        for(let i = 0; i < pathNodes.length; i++) {
+            const point = radialCoordinatesToPoint(pathNodes[i], size);
+            if(i === 0) {
+                context.moveTo(point.x, point.y);
+            } else {
+                context.lineTo(point.x, point.y);
+            }
+        }
         context.stroke();
+    }
+
+    if(path.id === activePath?.path.id) {
+        const nodes = path.nodes;
+        const nodeRadius = size * 0.15;
+
+        for(const node of nodes.values()) {
+            const center = radialCoordinatesToPoint(node, size);
+            const isActive = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
+
+            context.beginPath();
+            context.arc(center.x, center.y, nodeRadius, 0, Math.PI * 2);
+            context.fillStyle = isActive ? '#ffcc00' : '#ffffff';
+            context.fill();
+            context.stroke();
+        }
     }
 
     context.restore();

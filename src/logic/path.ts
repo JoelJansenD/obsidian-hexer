@@ -1,5 +1,6 @@
 import { hexKey } from "./HexerData";
-import { RadialCoordinates } from "./hexagon";
+import PriorityQueue from "./PriorityQueue";
+import { getNeighbours, RadialCoordinates } from "./hexagon";
 
 export type PathType = 'river' | 'road';
 
@@ -80,6 +81,76 @@ export class Path implements PathData {
         return neighbourKeys
             .map(neighbourKey => ({... this.nodes.get(neighbourKey)}))
             .filter((node): node is PathNode => node !== undefined);
+    }
+
+    public getFullEdgePath(edge: PathEdge): PathNode[] {
+        const fromNode = this.nodes.get(edge.from);
+        const toNode = this.nodes.get(edge.to);
+
+        if(!fromNode || !toNode) {
+            throw new Error(`Edge references non-existent node(s): ${edge.from}, ${edge.to}`);
+        }
+
+        const startKey = hexKey(fromNode.q, fromNode.r);
+        const goalKey = hexKey(toNode.q, toNode.r);
+
+        const frontier = new PriorityQueue<PathNode>();
+        frontier.enqueue(fromNode, 0);
+
+        // visited: key of a node -> the node we reached it from.
+        // The start marks itself so it is never re-enqueued.
+        const visited: Map<string, PathNode> = new Map();
+        visited.set(startKey, fromNode);
+
+        while(!frontier.isEmpty()) {
+            const { item: currentNode } = frontier.dequeue();
+            if(hexKey(currentNode.q, currentNode.r) === goalKey) {
+                break;
+            }
+
+            const neighbours = getNeighbours(currentNode);
+            for(const next of neighbours) {
+                const key = hexKey(next.q, next.r);
+                if(!visited.has(key)) {
+                    frontier.enqueue(next, this.getDistance(next, toNode));
+                    visited.set(key, currentNode);
+                }
+            }
+        }
+
+        return this.reconstructPath(visited, startKey, goalKey, toNode);
+    }
+
+    // Walks the visited (came-from) map backwards from the goal to the start,
+    // then reverses so the result reads start -> goal. Returns an empty array
+    // if the goal was never reached.
+    private reconstructPath(
+        cameFrom: Map<string, PathNode>,
+        startKey: string,
+        goalKey: string,
+        goal: PathNode,
+    ): PathNode[] {
+        if(!cameFrom.has(goalKey)) {
+            return [];
+        }
+
+        const path: PathNode[] = [];
+        let current: PathNode | undefined = goal;
+
+        while(current) {
+            const currentKey = hexKey(current.q, current.r);
+            path.push(current);
+            if(currentKey === startKey) {
+                break;
+            }
+            current = cameFrom.get(currentKey);
+        }
+
+        return path.reverse();
+    }
+
+    private getDistance(a: RadialCoordinates, b: RadialCoordinates): number {
+        return (Math.abs(a.q - b.q) + Math.abs(a.q + a.r - b.q - b.r) + Math.abs(a.r - b.r)) / 2;
     }
 
     public hasEdge(a: RadialCoordinates, b: RadialCoordinates): boolean {
