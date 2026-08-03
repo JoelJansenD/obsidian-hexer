@@ -30,6 +30,12 @@ export default class EditorCanvas {
             this._listeners.set('mousedown', listener);
         }
 
+        if (handlers.onLeftDoubleClick) {
+            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftDoubleClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
+            this._canvasEl.addEventListener('dblclick', listener);
+            this._listeners.set('dblclick', listener);
+        }
+
         if(handlers.onLeftDrag) {
             const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
             this._canvasEl.addEventListener('mousemove', listener);

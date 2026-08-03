@@ -13,6 +13,7 @@ export type ToolEventHandler = (data: HexerData, editorState: EditorState, coord
 
 export type RegisteredEvents = {
     onLeftClick?: ToolEventHandler;
+    onLeftDoubleClick?: ToolEventHandler;
     onLeftDrag?: ToolEventHandler;
 }
 

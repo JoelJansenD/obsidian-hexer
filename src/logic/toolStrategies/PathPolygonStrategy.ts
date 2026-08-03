@@ -32,6 +32,10 @@ export default class PathPolygonStrategy implements ToolStrategy {
         editorState.activePath.activeNode = radialCoordinates;
     }
 
+    public onLeftDoubleClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        // TODO: connect two existing nodes on double-click.
+    }
+
     private getPath(id: string, paths: Path[]): Path | null {
         return paths.find(path => path.id === id) || null;
     }
@@ -39,6 +43,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
     public getEvents(): RegisteredEvents {
         return {
             onLeftClick: this.onLeftClick.bind(this),
+            onLeftDoubleClick: this.onLeftDoubleClick.bind(this),
         };
     }
 
