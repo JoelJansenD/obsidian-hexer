@@ -59,3 +59,15 @@ Feature: Rivers and Roads
         When I double-click on the hex at 2,2
         Then an edge is added between the two clicked hexes
         But no hex is added to the river
+
+    Scenario: Splitting an existing path at a clicked hex
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 5 | 1 |
+        And I click on the hex at 5,1
+        When I click on the hex at 3,1
+        Then the edge between the hexes at 1,1 and 5,1 is removed
+        And an edge is added between the hexes at 1,1 and 3,1
+        And an edge is added between the hexes at 3,1 and 5,1
+        And the hex is selected

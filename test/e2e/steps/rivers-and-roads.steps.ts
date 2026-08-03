@@ -97,6 +97,20 @@ Then('an edge is added between the two clicked hexes', async function (this: Riv
     expect(river!.hasEdge(this.previouslyClickedHex!, this.lastClickedHex!)).toBe(true);
 });
 
+Then('an edge is added between the hexes at {int},{int} and {int},{int}', async function (this: RiversAndRoadsContext, aq: number, ar: number, bq: number, br: number) {
+    expect(this.selectedRiver).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    expect(river!.hasEdge({ q: aq, r: ar }, { q: bq, r: br })).toBe(true);
+});
+
+Then('the edge between the hexes at {int},{int} and {int},{int} is removed', async function (this: RiversAndRoadsContext, aq: number, ar: number, bq: number, br: number) {
+    expect(this.selectedRiver).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    expect(river!.hasEdge({ q: aq, r: ar }, { q: bq, r: br })).toBe(false);
+});
+
 Then('the hex is selected', async function (this: RiversAndRoadsContext) {
     expect(this.lastClickedHex).toBeDefined();
     const activeNode = await pathPage.getActiveNode();
