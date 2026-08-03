@@ -1,11 +1,10 @@
 import { Given, When } from "@wdio/cucumber-framework";
 import { obsidianPage } from 'wdio-obsidian-service';
 import { fileExplorer } from '../support/obsidian.page';
-import { CURRENT_VERSION } from '../../../src/logic/HexerData';
 import editorPage from "../support/editor.page";
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
 import { GlobalContext } from "../support/contexts/global.context";
-import { EXISTING_RIVER_ID } from "../support/fixture";
+import { buildHexerFileContent } from "../support/fixture";
 
 const HEXER_EXT = '.hexer.md';
 const EMPTY_HEX = { q: 5, r: 5 };
@@ -25,56 +24,9 @@ Given('I have opened a Hexer file', async function () {
     await browser.reloadObsidian({ vault: './test/vault' });
     await maximizeObsidianWindow();
 
-    const fileContent = [
-        '---',
-        'hexer:',
-        `  version: "${CURRENT_VERSION}"`,
-        '  size: 50',
-        '  hexes:',
-        '    "1,1":',
-        '      q: 1',
-        '      r: 1',
-        '      terrainColor: "#ff0000"',
-        '      icon:',
-        '        name: "dungeon-gate"',
-        '        color: "#00ff00"',
-        '    "2,1":',
-        '      q: 2',
-        '      r: 1',
-        '      terrainColor: "#ff0000"',
-        '      icon:',
-        '        name: "dungeon-gate"',
-        '        color: "#00ff00"',
-        '    "2,2":',
-        '      q: 2',
-        '      r: 2',
-        '      terrainColor: "#ff0000"',
-        '      icon:',
-        '        name: "dungeon-gate"',
-        '        color: "#00ff00"',
-        '    "3,1":',
-        '      q: 3',
-        '      r: 1',
-        '      terrainColor: "#ff0000"',
-        '      icon:',
-        '        name: "dungeon-gate"',
-        '        color: "#00ff00"',
-        '  rivers:',
-        `    - id: "${EXISTING_RIVER_ID}"`,
-        '      name: "Existing river"',
-        '      nodes:',
-        '        "1,1":',
-        '          q: 1',
-        '          r: 1',
-        '        "2,1":',
-        '          q: 2',
-        '          r: 1',
-        '      edges:',
-        '        - from: "1,1"',
-        '          to: "2,1"',
-        '---',
-        '',
-    ].join('\n');
+    // Rivers are defined per-scenario (see the "with the following nodes" steps),
+    // so the file opens with none.
+    const fileContent = buildHexerFileContent();
 
     await obsidianPage.write(`test${HEXER_EXT}`, fileContent);
     await fileExplorer.fileByExtension(HEXER_EXT).click();

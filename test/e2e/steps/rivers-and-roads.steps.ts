@@ -3,40 +3,50 @@ import { expect } from '@wdio/globals';
 import editorPage from '../support/editor.page';
 import pathPage from '../support/path.page';
 import { RiversAndRoadsContext } from '../support/contexts/rivers-and-roads.context';
-import { EXISTING_RIVER_ID } from '../support/fixture';
+import { RadialCoordinates } from '../../../src/logic/hexagon';
 import { hexKey } from '../../../src/logic/HexerData';
 
-// Far enough from the fixture river's nodes that a click on it can't be read as
-// connecting to one, so the scenario only exercises adding a node.
-const UNCONNECTED_HEX = { q: 5, r: 5 };
+// The data table shape for a river's nodes: a row per node with q and r columns.
+interface NodeTable {
+    hashes(): Array<{ q: string; r: string }>;
+}
 
-// A node the fixture river already has, so the active hex is an existing one
-// rather than one the scenario had to create first.
-const EXISTING_RIVER_HEX = { q: 1, r: 1 };
+function nodesFromTable(table: NodeTable): RadialCoordinates[] {
+    return table.hashes().map(row => ({ q: Number(row.q), r: Number(row.r) }));
+}
 
-// A neighbour of EXISTING_RIVER_HEX that no fixture edge touches — the fixture's
-// only edge runs from "1,1" to "2,1". Must keep q > 0: the canvas origin is its
-// top-left corner, so q = 0 maps to x = 0 (the left edge) and a click there
-// lands on the canvas boundary rather than inside it.
-const NEIGHBOURING_HEX = { q: 2, r: 0 };
+// Seeds the river, then re-selects the river layer and polygon tool: seeding
+// rebuilds the editor with default state, so the selections from the background
+// have to be re-applied before hexes can be clicked.
+async function seedRiverAndSelectTool(nodes: RadialCoordinates[]): Promise<string> {
+    const id = await pathPage.seedRiver(nodes);
+    await editorPage.selectLayer('river');
+    await editorPage.selectPaintTool('polygon');
+    return id;
+}
 
 When('I create a new river', async function (this: RiversAndRoadsContext) {
     await pathPage.createRiver();
     const rivers = await pathPage.getRivers();
-    this.selectedRiver = rivers.find(river => river.id !== EXISTING_RIVER_ID);
+    this.selectedRiver = rivers[0];
 });
 
-Given('I have a river', async function (this: RiversAndRoadsContext) {
-    const rivers = await pathPage.getRivers();
-    this.selectedRiver = rivers.find(river => river.id === EXISTING_RIVER_ID);
+Given('I have a river with the following nodes:', async function (this: RiversAndRoadsContext, table: NodeTable) {
+    const id = await seedRiverAndSelectTool(nodesFromTable(table));
+    this.selectedRiver = await pathPage.getRiver(id);
     expect(this.selectedRiver).toBeDefined();
 });
 
-Given('I am editing a river', async function (this: RiversAndRoadsContext) {
-    const rivers = await pathPage.getRivers();
-    this.selectedRiver = rivers.find(river => river.id === EXISTING_RIVER_ID);
+Given('I am editing a river with the following nodes:', async function (this: RiversAndRoadsContext, table: NodeTable) {
+    const nodes = nodesFromTable(table);
+    const id = await seedRiverAndSelectTool(nodes);
+    await pathPage.editRiver(id);
+    // Seeding from frontmatter leaves the app's active node null, a state a user
+    // could never reach. Click the last node so the active node reflects a user
+    // having drawn the nodes in order, leaving the final one selected.
+    await editorPage.clickHex(nodes[nodes.length - 1]);
+    this.selectedRiver = await pathPage.getRiver(id);
     expect(this.selectedRiver).toBeDefined();
-    await pathPage.editRiver(this.selectedRiver!.id);
 });
 
 When('I edit the river', async function (this: RiversAndRoadsContext) {
@@ -44,32 +54,23 @@ When('I edit the river', async function (this: RiversAndRoadsContext) {
     await pathPage.editRiver(this.selectedRiver!.id);
 });
 
-When('I click on a hex', async function (this: RiversAndRoadsContext) {
-    await editorPage.clickHex(UNCONNECTED_HEX);
-    this.lastClickedHex = UNCONNECTED_HEX;
-});
-
-Given('I have clicked on a hex', async function (this: RiversAndRoadsContext) {
-    await editorPage.clickHex(EXISTING_RIVER_HEX);
-    this.lastClickedHex = EXISTING_RIVER_HEX;
-});
-
-When('I click on another hex', async function (this: RiversAndRoadsContext) {
-    expect(this.lastClickedHex).toBeDefined();
-    await editorPage.clickHex(NEIGHBOURING_HEX);
+When('I click on the hex at {int},{int}', async function (this: RiversAndRoadsContext, q: number, r: number) {
+    const hex = { q, r };
+    await editorPage.clickHex(hex);
     this.previouslyClickedHex = this.lastClickedHex;
-    this.lastClickedHex = NEIGHBOURING_HEX;
+    this.lastClickedHex = hex;
 });
 
-When('I click on a hex that is already part of the river', async function (this: RiversAndRoadsContext) {
-    await editorPage.clickHex(EXISTING_RIVER_HEX);
-    this.lastClickedHex = EXISTING_RIVER_HEX;
+When('I double-click on the hex at {int},{int}', async function (this: RiversAndRoadsContext, q: number, r: number) {
+    const hex = { q, r };
+    await editorPage.doubleClickHex(hex);
+    this.previouslyClickedHex = this.lastClickedHex;
+    this.lastClickedHex = hex;
 });
 
 Then('a new river is created', async function () {
     const rivers = await pathPage.getRivers();
-    const newRivers = rivers.filter(river => river.id !== EXISTING_RIVER_ID);
-    expect(newRivers.length).toBe(1);
+    expect(rivers.length).toBe(1);
 });
 
 Then('the river is selected', async function (this: RiversAndRoadsContext) {
@@ -109,4 +110,13 @@ Then('no edge is added', async function (this: RiversAndRoadsContext) {
     // `selectedRiver` was read before the hex was clicked, so its edges are the
     // baseline the click must not have changed.
     expect(river!.edges.length).toBe(this.selectedRiver!.edges.length);
+});
+
+Then('no hex is added to the river', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    // `selectedRiver` was read before the hex was clicked, so its nodes are the
+    // baseline the click must not have changed.
+    expect(river!.nodes.size).toBe(this.selectedRiver!.nodes.size);
 });

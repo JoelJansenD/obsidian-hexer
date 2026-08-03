@@ -10,27 +10,52 @@ Feature: Rivers and Roads
         When I create a new river
         Then a new river is created
         And the river is selected
-    
+
     Scenario: Editing a river
-        Given I have a river
+        Given I have a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
         When I edit the river
         Then the river is selected
 
     Scenario: Adding a hex to a river
-        Given I am editing a river
-        When I click on a hex
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+        When I click on the hex at 5,5
         Then the hex is added to the river
-        And no edge is added
+        But no edge is added
 
     Scenario: Drawing an edge to an existing hex
-        Given I am editing a river
-        And I have clicked on a hex
-        When I click on another hex
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+        And I click on the hex at 1,1
+        When I click on the hex at 2,0
         Then the hex is added to the river
         And an edge is added between the two clicked hexes
 
     Scenario: Selecting an existing hex in a river
-        Given I am editing a river
-        When I click on a hex that is already part of the river
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+            | 2 | 2 |
+        When I click on the hex at 1,1
         Then the hex is selected
+        But no hex is added to the river
         And no edge is added
+
+    Scenario: Connecting two existing hexes by double-clicking
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+            | 2 | 2 |
+        And I click on the hex at 1,1
+        When I double-click on the hex at 2,2
+        Then an edge is added between the two clicked hexes
+        But no hex is added to the river
