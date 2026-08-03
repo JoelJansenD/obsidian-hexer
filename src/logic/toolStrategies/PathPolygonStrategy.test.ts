@@ -97,3 +97,77 @@ describe('onLeftClick', () => {
     });
 
 });
+
+describe('onDoubleLeftClick', () => {
+    it('connects two existing nodes on double-click', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addNode({q: 0, r: 0});
+        targetPath.addNode({q: 1, r: 0});
+        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: {q: 1, r: 0} } };
+        
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+        strategyToTest['previousNode'] = {q: 0, r: 0};
+
+        // Act
+        strategyToTest.onLeftDoubleClick(data, editorState, {q: 1, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(true);
+    });
+    
+    it('does not do anything if there is no active path', () => {
+        // Arrange
+        const editorState = {...defaultEditorState, activePath: null };
+        const data = createHexerData();
+        data.rivers.push(new Path('Empty river'));
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDoubleClick(data, editorState, {q: 0, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.edges.length).toBe(0);
+    });
+    
+    it('does not do anything if there is no active node', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDoubleClick(data, editorState, {q: 0, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.edges.length).toBe(0);
+    });
+    
+    it('does not do anything if the same node is clicked', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addNode({q: 0, r: 0});
+        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: {q: 0, r: 0} } };
+        
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+        strategyToTest['previousNode'] = {q: 0, r: 0};
+
+        // Act
+        strategyToTest.onLeftDoubleClick(data, editorState, {q: 0, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.edges).not.toContainEqual({ from: {q: 0, r: 0}, to: {q: 0, r: 0} })
+    });
+});
