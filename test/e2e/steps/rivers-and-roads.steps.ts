@@ -61,6 +61,11 @@ When('I click on another hex', async function (this: RiversAndRoadsContext) {
     this.lastClickedHex = NEIGHBOURING_HEX;
 });
 
+When('I click on a hex that is already part of the river', async function (this: RiversAndRoadsContext) {
+    await editorPage.clickHex(EXISTING_RIVER_HEX);
+    this.lastClickedHex = EXISTING_RIVER_HEX;
+});
+
 Then('a new river is created', async function () {
     const rivers = await pathPage.getRivers();
     const newRivers = rivers.filter(river => river.id !== EXISTING_RIVER_ID);
@@ -89,6 +94,12 @@ Then('an edge is added between the two clicked hexes', async function (this: Riv
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
     expect(river!.hasEdge(this.previouslyClickedHex!, this.lastClickedHex!)).toBe(true);
+});
+
+Then('the hex is selected', async function (this: RiversAndRoadsContext) {
+    expect(this.lastClickedHex).toBeDefined();
+    const activeNode = await pathPage.getActiveNode();
+    expect(activeNode).toEqual({ q: this.lastClickedHex!.q, r: this.lastClickedHex!.r });
 });
 
 Then('no edge is added', async function (this: RiversAndRoadsContext) {

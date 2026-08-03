@@ -1,8 +1,29 @@
+import { RadialCoordinates } from "../../../src/logic/hexagon";
 import { Path, PathEdge, PathNode } from "../../../src/logic/path";
 
 class PathPage {
     async createRiver() {
         await this.selectAndClick('[data-role="add-river"]');
+    }
+
+    /**
+     * The node currently selected in the active path, or null when none is.
+     * The editor and its state are private, so reach through the view the same
+     * way getPaths reaches hexerData.
+     */
+    async getActiveNode(): Promise<RadialCoordinates | null> {
+        return browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                editor?: {
+                    _editorState?: {
+                        activePath?: { activeNode?: { q: number; r: number } | null } | null;
+                    };
+                };
+            } | undefined;
+            const activeNode = view?.editor?._editorState?.activePath?.activeNode;
+            return activeNode ? { q: activeNode.q, r: activeNode.r } : null;
+        });
     }
 
     async editRiver(id: string) {

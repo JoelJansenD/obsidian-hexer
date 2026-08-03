@@ -28,3 +28,9 @@ Feature: Rivers and Roads
         When I click on another hex
         Then the hex is added to the river
         And an edge is added between the two clicked hexes
+
+    Scenario: Selecting an existing hex in a river
+        Given I am editing a river
+        When I click on a hex that is already part of the river
+        Then the hex is selected
+        And no edge is added
