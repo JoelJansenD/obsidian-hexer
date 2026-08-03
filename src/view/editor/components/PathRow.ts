@@ -6,7 +6,7 @@ interface PathRowOptions {
     editMode: boolean;
     path: Path;
     onEdit?: (pathId: string) => void;
-    onSave?: (path: Path) => void;
+    onSave?: () => void;
 }
 
 export default class PathRow {
@@ -31,7 +31,7 @@ export default class PathRow {
             editButton.dataset.role = 'save-path';
             editButton.appendChild(createElement(Check, { width: 16, height: 16 }));
             editButton.addEventListener('click', () => {
-                this._options.onSave?.(this._options.path);
+                this._options.onSave?.();
             });
         }
         else {

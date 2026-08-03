@@ -95,14 +95,7 @@ export default class PathSidebarSection extends EditorSidebarSection {
         this.renderPaths();
     }
 
-    private savePath(path: Path) {
-        const data = this._componentOptions.getData();
-        const paths = this._pathOptions.getPaths(data);
-        const index = paths.findIndex(p => p.id === path.id);
-        if (index !== -1) {
-            paths[index] = path;
-            this._componentOptions.setData(data);
-        }
+    private savePath() {
         this.setActivePath(null);
         this.renderPaths();
     }
