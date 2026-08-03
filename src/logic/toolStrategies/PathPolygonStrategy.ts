@@ -1,7 +1,7 @@
-import { EditorState, Layer, PaintTool } from "../EditorState";
+import { EditorPathState, EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
-import { HexerData, HexMap } from "../HexerData";
-import { Path, PathNode } from "../path";
+import { HexerData } from "../HexerData";
+import { Path, PathEdge, PathNode } from "../path";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class PathPolygonStrategy implements ToolStrategy {
@@ -28,9 +28,13 @@ export default class PathPolygonStrategy implements ToolStrategy {
             return;
         }
 
-        targetPath.addNode(radialCoordinates);
-        if(editorState.activePath.activeNode) {
-            targetPath.addEdge(editorState.activePath.activeNode, radialCoordinates);
+        // Break up any crossing paths to connect to the new node
+        const crossingPaths = targetPath.getCrossingEdgesAtCoordinates(radialCoordinates);
+        if(crossingPaths.length > 0) {
+            this.handleCrossingPaths(crossingPaths, targetPath, radialCoordinates);
+        }
+        else {
+            this.handleNewNode(targetPath, radialCoordinates, editorState.activePath);
         }
 
         editorState.activePath.activeNode = radialCoordinates;
@@ -66,6 +70,27 @@ export default class PathPolygonStrategy implements ToolStrategy {
 
     private getPath(id: string, paths: Path[]): Path | null {
         return paths.find(path => path.id === id) || null;
+    }
+
+    private handleCrossingPaths(crossingPaths: { edge: PathEdge; nodes: PathNode[]; }[], targetPath: Path, radialCoordinates: RadialCoordinates) {
+        crossingPaths.forEach(crossing => {
+            const fromNode = targetPath.getNode(crossing.edge.from);
+            const toNode = targetPath.getNode(crossing.edge.to);
+            if (!fromNode || !toNode) {
+                return;
+            }
+
+            targetPath.removeEdge(fromNode, toNode);
+            targetPath.addEdge(fromNode, radialCoordinates);
+            targetPath.addEdge(radialCoordinates, toNode);
+        });
+    }
+
+    private handleNewNode(targetPath: Path, radialCoordinates: RadialCoordinates, activePath: EditorPathState) {
+        targetPath.addNode(radialCoordinates);
+        if (activePath.activeNode) {
+            targetPath.addEdge(activePath.activeNode, radialCoordinates);
+        }
     }
 
     public getEvents(): RegisteredEvents {

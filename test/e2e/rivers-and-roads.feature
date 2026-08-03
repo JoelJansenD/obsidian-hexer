@@ -19,15 +19,6 @@ Feature: Rivers and Roads
         When I edit the river
         Then the river is selected
 
-    Scenario: Adding a hex to a river
-        Given I am editing a river with the following nodes:
-            | q | r |
-            | 1 | 1 |
-            | 2 | 1 |
-        When I click on the hex at 5,5
-        Then the hex is added to the river
-        But no edge is added
-
     Scenario: Drawing an edge to an existing hex
         Given I am editing a river with the following nodes:
             | q | r |

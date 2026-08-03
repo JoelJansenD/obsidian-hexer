@@ -83,6 +83,18 @@ export class Path implements PathData {
             .filter((node): node is PathNode => node !== undefined);
     }
 
+    public getCrossingEdgesAtCoordinates(coordinates: RadialCoordinates): { edge: PathEdge, nodes: PathNode[] }[] {
+        const key = hexKey(coordinates.q, coordinates.r);
+        const result: { edge: PathEdge, nodes: PathNode[] }[] = [];
+        this.edges.forEach(edge => {
+            const fullPath = this.getFullEdgePath(edge);
+            if (fullPath.some(node => hexKey(node.q, node.r) === key)) {
+                result.push({edge: edge, nodes: fullPath});
+            }
+        });
+        return result;
+    }
+
     public getFullEdgePath(edge: PathEdge): PathNode[] {
         const fromNode = this.nodes.get(edge.from);
         const toNode = this.nodes.get(edge.to);
@@ -121,8 +133,10 @@ export class Path implements PathData {
         return this.reconstructPath(visited, startKey, goalKey, toNode);
     }
 
-    public getNode(coordinates: RadialCoordinates): PathNode | undefined {
-        const key = hexKey(coordinates.q, coordinates.r);
+    public getNode(key: string): PathNode | undefined;
+    public getNode(coordinates: RadialCoordinates): PathNode | undefined;
+    public getNode(arg: string | RadialCoordinates): PathNode | undefined {
+        const key = typeof(arg) === 'string' ? arg : hexKey(arg.q, arg.r);
         return this.nodes.get(key);
     }
 

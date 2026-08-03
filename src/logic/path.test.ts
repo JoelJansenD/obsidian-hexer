@@ -145,6 +145,22 @@ describe('Path', () => {
         });
     });
 
+    describe('getCrossingEdgesAtCoordinates', () => {
+        it('returns all edges that cross the given coordinates', () => {
+            // Arrange
+            const path = new Path('Crossing test');
+            path.addEdge({ q: 0, r: 0 }, { q: 2, r: 0 });
+            path.addEdge({ q: 2, r: 0}, { q: 2, r: 2 });
+
+            // Act
+            const crossingEdges = path.getCrossingEdgesAtCoordinates({ q: 1, r: 0 });
+
+            // Assert
+            expect(crossingEdges.length).toBe(1);
+            expect(crossingEdges[0].edge).toEqual({ from: '0,0', to: '2,0' });
+        });
+    });
+
     describe('getNode', () => {
         it('returns the node if it exists', () => {
             // Arrange
