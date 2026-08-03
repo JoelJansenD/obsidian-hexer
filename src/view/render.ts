@@ -89,7 +89,6 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
     context.strokeStyle = path.id === activePath?.path.id ? '#ffcc00' : '#ff0000';
     for(const edge of edges) {
         const pathNodes = path.getFullEdgePath(edge);
-        console.log(pathNodes);
         context.beginPath();
         for(let i = 0; i < pathNodes.length; i++) {
             const point = radialCoordinatesToPoint(pathNodes[i], size);

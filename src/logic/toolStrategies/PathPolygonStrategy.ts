@@ -20,6 +20,11 @@ export default class PathPolygonStrategy implements ToolStrategy {
             throw new Error(`Active path '${editorState.activePath.path.name}' with id ${editorState.activePath.path.id} not found in data.`);
         }
 
+        if(targetPath.getNode(radialCoordinates)) {
+            editorState.activePath.activeNode = radialCoordinates;
+            return;
+        }
+
         targetPath.addNode(radialCoordinates);
         if(editorState.activePath.activeNode) {
             targetPath.addEdge(editorState.activePath.activeNode, radialCoordinates);

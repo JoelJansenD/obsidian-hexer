@@ -145,6 +145,30 @@ describe('Path', () => {
         });
     });
 
+    describe('getNode', () => {
+        it('returns the node if it exists', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const node = path.getNode({ q: 0, r: 0 });
+
+            // Assert
+            expect(node).toEqual({ q: 0, r: 0 });
+        });
+
+        it('returns undefined if the node does not exist', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const node = path.getNode({ q: 2, r: 0 });
+
+            // Assert
+            expect(node).toBeUndefined();
+        });
+    });
+
     describe('hasEdge', () => {
         it('returns true if the edge exists', () => {
             // Arrange

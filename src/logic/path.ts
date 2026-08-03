@@ -121,6 +121,11 @@ export class Path implements PathData {
         return this.reconstructPath(visited, startKey, goalKey, toNode);
     }
 
+    public getNode(coordinates: RadialCoordinates): PathNode | undefined {
+        const key = hexKey(coordinates.q, coordinates.r);
+        return this.nodes.get(key);
+    }
+
     // Walks the visited (came-from) map backwards from the goal to the start,
     // then reverses so the result reads start -> goal. Returns an empty array
     // if the goal was never reached.
