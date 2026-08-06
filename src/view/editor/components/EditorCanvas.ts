@@ -52,7 +52,7 @@ export default class EditorCanvas {
 
     public requestRender() {
         if(this._renderRequested) {
-            return false;
+            return;
         }
 
         this._renderRequested = true;

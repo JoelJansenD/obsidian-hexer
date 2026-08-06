@@ -15,8 +15,9 @@ These projects are compiled into the distributed `main.js`.
 - Source: <https://github.com/lucide-icons/lucide>
 - License: ISC
 
-Obsidian Hexer uses the Lucide icons `brush`, `chevron-down`, `eraser`,
-`mouse-pointer-2`, `mountain`, `paint-bucket`, `pentagon` and `shapes`.
+Obsidian Hexer uses the Lucide icons `brush`, `check`, `chevron-down`,
+`droplets`, `eraser`, `mountain`, `mouse-pointer-2`, `paint-bucket`,
+`pencil-line`, `pentagon`, `plus`, `route` and `shapes`.
 
 ```
 ISC License

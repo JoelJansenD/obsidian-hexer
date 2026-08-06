@@ -2,7 +2,7 @@ import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HEXER_ICONS } from "../logic/icon";
-import { Path, PathNode, PathType } from "../logic/path";
+import { Path, PathEdge, PathNode, PathType } from "../logic/path";
 
 export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
@@ -113,11 +113,11 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
 
         for(const node of nodes.values()) {
             const center = radialCoordinatesToPoint(node, size);
-            const isActive = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
+            const isActiveNode = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
 
             context.beginPath();
             context.arc(center.x, center.y, nodeRadius, 0, Math.PI * 2);
-            context.fillStyle = isActive ? '#ffcc00' : '#ffffff';
+            context.fillStyle = isActiveNode ? '#ffcc00' : '#ffffff';
             context.fill();
             context.stroke();
         }
@@ -138,8 +138,14 @@ function buildPathPolylines(path: Path): PathNode[][] {
     // nodeKey -> incident edges, as { edgeIndex, otherKey }.
     const adjacency = new Map<string, { edgeIndex: number, otherKey: string }[]>();
     edges.forEach((edge, index) => {
-        (adjacency.get(edge.from) ?? adjacency.set(edge.from, []).get(edge.from)!).push({ edgeIndex: index, otherKey: edge.to });
-        (adjacency.get(edge.to) ?? adjacency.set(edge.to, []).get(edge.to)!).push({ edgeIndex: index, otherKey: edge.from });
+        const getOrSetAdjacency = (node: string) => {
+            if(!adjacency.has(node)) {
+                adjacency.set(node, []);
+            }
+            return adjacency.get(node)!;
+        };
+        getOrSetAdjacency(edge.from).push({ edgeIndex: index, otherKey: edge.to });
+        getOrSetAdjacency(edge.to).push({ edgeIndex: index, otherKey: edge.from });
     });
 
     const usedEdges = new Set<number>();
@@ -191,7 +197,6 @@ function buildPathPolylines(path: Path): PathNode[][] {
         }
     }
 
-    // Any edges left over belong to pure loops (every node degree 2).
     edges.forEach((edge, index) => {
         if(!usedEdges.has(index)) {
             polylines.push(walkChain(edge.from, index));
