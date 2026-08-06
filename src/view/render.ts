@@ -2,7 +2,7 @@ import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HEXER_ICONS } from "../logic/icon";
-import { Path } from "../logic/path";
+import { Path, PathType } from "../logic/path";
 
 export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
@@ -16,8 +16,11 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
         drawIcon(context, hex, data.size);
     }
 
-    for(const path of [...data.rivers, ...data.roads]) {
-        drawPath(context, path, data.size, editorState.activePath);
+    for(const path of data.rivers) {
+        drawPath(context, path, data.size, editorState.activePath, 'river');
+    }
+    for(const path of data.roads) {
+        drawPath(context, path, data.size, editorState.activePath, 'road');
     }
 }
 
@@ -82,29 +85,27 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number)
     context.restore();
 }
 
-function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null) {
+function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null, type: PathType) {
     context.save();
 
     const isActive = path.id === activePath?.path.id;
     const edges = path.edges;
     context.strokeStyle = path.color;
+    context.lineWidth = size * 0.12;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
     if(isActive) {
         context.shadowColor = path.color;
         context.shadowBlur = size * 0.4;
     }
-    
+
+    // Both sweep in smooth, broad curves; rivers bend far harder than roads.
+    const amplitude = type === 'river' ? size * 0.18 : size * 0.1;
+    const wavelength = type === 'river' ? size * 2.0 : size * 1.6;
+
     for(const edge of edges) {
-        const pathNodes = path.getFullEdgePath(edge);
-        context.beginPath();
-        for(let i = 0; i < pathNodes.length; i++) {
-            const point = radialCoordinatesToPoint(pathNodes[i], size);
-            if(i === 0) {
-                context.moveTo(point.x, point.y);
-            } else {
-                context.lineTo(point.x, point.y);
-            }
-        }
-        context.stroke();
+        const points = path.getFullEdgePath(edge).map(node => radialCoordinatesToPoint(node, size));
+        drawWavyLine(context, points, amplitude, wavelength);
     }
 
     if(isActive) {
@@ -124,4 +125,43 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
     }
 
     context.restore();
+}
+
+// Draws a polyline with a continuous perpendicular sine displacement so the
+// straight hex-to-hex segments read as a flowing, curved path.
+function drawWavyLine(context: CanvasRenderingContext2D, points: { x: number, y: number }[], amplitude: number, wavelength: number) {
+    if(points.length < 2) {
+        return;
+    }
+
+    const stepsPerSegment = 8;
+    let distance = 0;
+    let started = false;
+
+    context.beginPath();
+    for(let i = 0; i < points.length - 1; i++) {
+        const a = points[i];
+        const b = points[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const segmentLength = Math.hypot(dx, dy) || 1;
+        // Unit vector perpendicular to the segment.
+        const perpX = -dy / segmentLength;
+        const perpY = dx / segmentLength;
+        for(let step = (i === 0 ? 0 : 1); step <= stepsPerSegment; step++) {
+            const t = step / stepsPerSegment;
+            const along = distance + segmentLength * t;
+            const offset = Math.sin((along / wavelength) * Math.PI * 2) * amplitude;
+            const x = a.x + dx * t + perpX * offset;
+            const y = a.y + dy * t + perpY * offset;
+            if(started) {
+                context.lineTo(x, y);
+            } else {
+                context.moveTo(x, y);
+                started = true;
+            }
+        }
+        distance += segmentLength;
+    }
+    context.stroke();
 }

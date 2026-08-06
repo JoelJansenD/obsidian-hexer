@@ -105,16 +105,27 @@ export default class PathSidebarSection extends EditorSidebarSection {
 
     private savePath(path: Path) {
         const data = this._componentOptions.getData();
-        const targetRiver = data.rivers.findIndex(r => r.id === path.id);
-        if(targetRiver !== -1) {
-            data.rivers[targetRiver] = path;
-        }
-        else {
-            const targetRoad = data.roads.findIndex(r => r.id === path.id);
-            if(targetRoad !== -1) {
-                data.roads[targetRoad] = path;
-            }
-        }
+        this.changeRiver(data, path) || this.changeRoad(data, path);
         this._componentOptions.setData(data);
+    }
+
+    private changeRiver(data: HexerData, path: Path) {
+        const targetRiver = data.rivers.findIndex(r => r.id === path.id);
+        if(targetRiver === -1) {
+            return false;
+        }
+        
+        data.rivers[targetRiver] = new Path({...data.rivers[targetRiver], color: path.color});
+        return true;
+    }
+
+    private changeRoad(data: HexerData, path: Path) {
+        const targetRoad = data.roads.findIndex(r => r.id === path.id);
+        if(targetRoad === -1) {
+            return false;
+        }
+
+        data.roads[targetRoad] = new Path({...data.roads[targetRoad], color: path.color});
+        return true;
     }
 }
