@@ -41,7 +41,6 @@ export default class PathPolygonStrategy implements ToolStrategy {
     }
 
     public onLeftDoubleClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        console.log('onLeftDoubleClick', this.previousNode, editorState.activePath?.activeNode );
         if(!editorState.activePath || !editorState.activePath.activeNode) {
             return;
         }

@@ -50,7 +50,7 @@ export default class EditorCanvas {
         this._listeners.clear();
     }
 
-    private requestRender() {
+    public requestRender() {
         if(this._renderRequested) {
             return false;
         }

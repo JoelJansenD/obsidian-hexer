@@ -42,6 +42,8 @@ export default class Editor {
         if(strategy) {
             this._canvas.registerEvents(strategy);
         }
+
+        this._canvas.requestRender();
     }
 
     private build() {
