@@ -85,8 +85,14 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number)
 function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null) {
     context.save();
 
+    const isActive = path.id === activePath?.path.id;
     const edges = path.edges;
-    context.strokeStyle = path.id === activePath?.path.id ? '#ffcc00' : '#ff0000';
+    context.strokeStyle = path.color;
+    if(isActive) {
+        context.shadowColor = path.color;
+        context.shadowBlur = size * 0.4;
+    }
+    
     for(const edge of edges) {
         const pathNodes = path.getFullEdgePath(edge);
         context.beginPath();
@@ -101,7 +107,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
         context.stroke();
     }
 
-    if(path.id === activePath?.path.id) {
+    if(isActive) {
         const nodes = path.nodes;
         const nodeRadius = size * 0.15;
 

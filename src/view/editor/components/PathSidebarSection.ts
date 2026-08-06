@@ -4,6 +4,7 @@ import PathRow from "./PathRow";
 import { HexerData } from "../../../logic/HexerData";
 import { ComponentOptions } from "../Editor";
 import { Path, PathType } from "../../../logic/path";
+import { EditorState } from "../../../logic/EditorState";
 
 interface PathSidebarSectionOptions {
     icon: IconNode;
@@ -55,7 +56,8 @@ export default class PathSidebarSection extends EditorSidebarSection {
 
     private renderPaths() {
         const data = this._componentOptions.getData();
-        const activePath = this._componentOptions.getEditorState().activePath;
+        const state = this._componentOptions.getEditorState()
+        const activePath = state.activePath;
         this._pathsEl.empty();
         this._pathOptions.getPaths(data).forEach(path => {
             new PathRow(this._pathsEl, {
@@ -63,7 +65,8 @@ export default class PathSidebarSection extends EditorSidebarSection {
                 editMode: activePath?.path.id === path.id,
                 path,
                 onEdit: this.editPath.bind(this),
-                onSave: this.savePath.bind(this)
+                onFinish: this.closePath.bind(this),
+                onSave: (() => this.savePath(path)).bind(this)
             });
         });
     }
@@ -95,8 +98,23 @@ export default class PathSidebarSection extends EditorSidebarSection {
         this.renderPaths();
     }
 
-    private savePath() {
+    private closePath() {
         this.setActivePath(null);
         this.renderPaths();
+    }
+
+    private savePath(path: Path) {
+        const data = this._componentOptions.getData();
+        const targetRiver = data.rivers.findIndex(r => r.id === path.id);
+        if(targetRiver !== -1) {
+            data.rivers[targetRiver] = path;
+        }
+        else {
+            const targetRoad = data.roads.findIndex(r => r.id === path.id);
+            if(targetRoad !== -1) {
+                data.roads[targetRoad] = path;
+            }
+        }
+        this._componentOptions.setData(data);
     }
 }

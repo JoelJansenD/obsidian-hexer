@@ -42,7 +42,6 @@ export default class Editor {
         if(strategy) {
             this._canvas.registerEvents(strategy);
         }
-
         this._canvas.requestRender();
     }
 
@@ -52,7 +51,11 @@ export default class Editor {
         const componentOptions: ComponentOptions = {
             ...this._dataOptions,
             getEditorState: () => this._editorState,
-            setEditorState: ((state: EditorState) => this.setEditorState(state))
+            setEditorState: state => this.setEditorState(state),
+            setData: data => {
+                this._dataOptions.setData(data);
+                this._canvas.requestRender();
+            }
         };
         this._canvas = new EditorCanvas(editorEl, componentOptions);
         this._sidebar = new EditorSidebar(editorEl, componentOptions);

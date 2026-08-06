@@ -17,6 +17,7 @@ export interface PathData {
     name: string;
     nodes: PathNodeMap;
     edges: PathEdge[];
+    color: string;
 }
 
 export class Path implements PathData {
@@ -24,6 +25,7 @@ export class Path implements PathData {
     public name: string;
     public nodes: PathNodeMap;
     public edges: PathEdge[];
+    public color: string;
 
     constructor(name: string);
     constructor(state: PathData);
@@ -33,6 +35,7 @@ export class Path implements PathData {
             this.name = arg;
             this.nodes = new Map();
             this.edges = [];
+            this.color = '#ff0000';
             return;
         }
 
@@ -40,6 +43,7 @@ export class Path implements PathData {
         this.name = arg.name;
         this.nodes = arg.nodes;
         this.edges = arg.edges ?? [];
+        this.color = arg.color;
     }
 
     // Undirected: an edge between a and b is added once, and the endpoints are
@@ -67,7 +71,7 @@ export class Path implements PathData {
             nodes.set(key, { ...node });
         }
         const edges = this.edges.map(edge => ({ ...edge }));
-        return new Path({ id: this.id, name: this.name, nodes, edges });
+        return new Path({ id: this.id, name: this.name, nodes, edges, color: this.color });
     }
 
     // Returns the coordinates of every node directly connected to the given node.
