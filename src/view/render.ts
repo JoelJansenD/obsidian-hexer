@@ -96,7 +96,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
     context.lineJoin = 'round';
     if(isActive) {
         context.shadowColor = path.color;
-        context.shadowBlur = size * 0.4;
+        context.shadowBlur = size * 0.15;
     }
 
     // Both sweep in smooth, broad curves; rivers bend far harder than roads.
@@ -127,14 +127,25 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
     context.restore();
 }
 
-// Draws a polyline with a continuous perpendicular sine displacement so the
-// straight hex-to-hex segments read as a flowing, curved path.
+// Draws a polyline with a perpendicular sine displacement so the straight
+// hex-to-hex segments read as a flowing, curved path. The displacement is
+// tapered to zero at both endpoints so an edge always starts and ends exactly
+// on its node points, letting adjacent edges of the same path join seamlessly.
 function drawWavyLine(context: CanvasRenderingContext2D, points: { x: number, y: number }[], amplitude: number, wavelength: number) {
     if(points.length < 2) {
         return;
     }
 
     const stepsPerSegment = 8;
+    // Total length of the polyline, used to place the endpoint taper window.
+    let totalLength = 0;
+    for(let i = 0; i < points.length - 1; i++) {
+        totalLength += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+    }
+    if(totalLength === 0) {
+        return;
+    }
+
     let distance = 0;
     let started = false;
 
@@ -151,7 +162,9 @@ function drawWavyLine(context: CanvasRenderingContext2D, points: { x: number, y:
         for(let step = (i === 0 ? 0 : 1); step <= stepsPerSegment; step++) {
             const t = step / stepsPerSegment;
             const along = distance + segmentLength * t;
-            const offset = Math.sin((along / wavelength) * Math.PI * 2) * amplitude;
+            // Sine envelope: 0 at both endpoints, 1 at the middle.
+            const taper = Math.sin((along / totalLength) * Math.PI);
+            const offset = Math.sin((along / wavelength) * Math.PI * 2) * amplitude * taper;
             const x = a.x + dx * t + perpX * offset;
             const y = a.y + dy * t + perpY * offset;
             if(started) {
