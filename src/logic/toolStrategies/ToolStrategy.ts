@@ -22,18 +22,20 @@ export interface ToolStrategy {
     getEvents: () => RegisteredEvents;
 }
 
-const toolStrategies: ToolStrategy[] = [
-    new IconBrushStrategy(),
-    new IconBucketStrategy(),
-    new IconEraserStrategy(),
-    new PathPolygonStrategy(),
-    new TerrainBrushStrategy(),
-    new TerrainBucketStrategy(),
-    new TerrainEraserStrategy()
+export type ToolStrategyFactory = () => ToolStrategy;
+const toolStrategyFactories: ToolStrategyFactory[] = [
+    () => new IconBrushStrategy(),
+    () => new IconBucketStrategy(),
+    () => new IconEraserStrategy(),
+    () => new PathPolygonStrategy(),
+    () => new TerrainBrushStrategy(),
+    () => new TerrainBucketStrategy(),
+    () => new TerrainEraserStrategy()
 ];
 
 export function resolveToolStrategy(layer: Layer, tool: PaintTool): ToolStrategy | null {
-    for (const strategy of toolStrategies) {
+    for (const createStrategy of toolStrategyFactories) {
+        const strategy = createStrategy();
         if (strategy.canBeApplied(layer, tool)) {
             return strategy;
         }
