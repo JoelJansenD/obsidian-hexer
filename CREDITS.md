@@ -43,7 +43,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 - License: MIT
 
 A number of Lucide icons are derived from the Feather project. Of the icons used
-by this plugin, `chevron-down` is one of them.
+by this plugin, `check`, `chevron-down` and `plus` are derived from Feather.
 
 ```
 The MIT License (MIT)

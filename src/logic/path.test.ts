@@ -15,7 +15,8 @@ describe('Path', () => {
             edges: [ {
                 from: '0,0',
                 to: '1,0'
-            } ]
+            } ],
+            color: '#ff0000'
         };
     });
 
