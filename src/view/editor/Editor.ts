@@ -5,7 +5,7 @@ import EditorCanvas from "./components/EditorCanvas";
 import EditorSidebar from "./components/EditorSidebar";
 
 export interface DataOptions {
-    getData: () => HexerData,
+    getDataClone: () => HexerData,
     setData: (data: HexerData) => void,
 }
 

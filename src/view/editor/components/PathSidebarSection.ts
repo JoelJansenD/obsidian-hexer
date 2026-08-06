@@ -4,7 +4,6 @@ import PathRow from "./PathRow";
 import { HexerData } from "../../../logic/HexerData";
 import { ComponentOptions } from "../Editor";
 import { Path, PathType } from "../../../logic/path";
-import { EditorState } from "../../../logic/EditorState";
 
 interface PathSidebarSectionOptions {
     icon: IconNode;
@@ -55,14 +54,14 @@ export default class PathSidebarSection extends EditorSidebarSection {
     }
 
     private renderPaths() {
-        const data = this._componentOptions.getData();
+        const data = this._componentOptions.getDataClone();
         const state = this._componentOptions.getEditorState()
         const activePath = state.activePath;
         this._pathsEl.empty();
         this._pathOptions.getPaths(data).forEach(path => {
             new PathRow(this._pathsEl, {
-                disableEdit: activePath !== null && activePath.path.id !== path.id,
-                editMode: activePath?.path.id === path.id,
+                disableEdit: activePath !== null && activePath.pathId !== path.id,
+                editMode: activePath?.pathId === path.id,
                 path,
                 onEdit: this.editPath.bind(this),
                 onFinish: this.closePath.bind(this),
@@ -77,13 +76,13 @@ export default class PathSidebarSection extends EditorSidebarSection {
             state.activePath = null;
         }
         else {
-            state.activePath = { path: path, activeNode: null };
+            state.activePath = { pathId: path.id, activeNode: null };
         }
         this._componentOptions.setEditorState(state);
     }
 
     private createPath() {
-        const data = this._componentOptions.getData();
+        const data = this._componentOptions.getDataClone();
         const newPath = new Path(this._pathOptions.newPathLabel);
         this._pathOptions.getPaths(data).push(newPath);
         this._componentOptions.setData(data);
@@ -92,7 +91,7 @@ export default class PathSidebarSection extends EditorSidebarSection {
     }
 
     private editPath(pathId: string) {
-        const data = this._componentOptions.getData();
+        const data = this._componentOptions.getDataClone();
         const path = this._pathOptions.getPaths(data).find(p => p.id === pathId) ?? null;
         this.setActivePath(path);
         this.renderPaths();
@@ -104,28 +103,13 @@ export default class PathSidebarSection extends EditorSidebarSection {
     }
 
     private savePath(path: Path) {
-        const data = this._componentOptions.getData();
-        this.changeRiver(data, path) || this.changeRoad(data, path);
+        const data = this._componentOptions.getDataClone();
+        const target = [...data.rivers, ...data.roads].find(p => p.id === path.id);
+        if(!target) {
+            return;
+        }
+
+        target.color = path.color;
         this._componentOptions.setData(data);
-    }
-
-    private changeRiver(data: HexerData, path: Path) {
-        const targetRiver = data.rivers.findIndex(r => r.id === path.id);
-        if(targetRiver === -1) {
-            return false;
-        }
-        
-        data.rivers[targetRiver] = new Path({...data.rivers[targetRiver], color: path.color});
-        return true;
-    }
-
-    private changeRoad(data: HexerData, path: Path) {
-        const targetRoad = data.roads.findIndex(r => r.id === path.id);
-        if(targetRoad === -1) {
-            return false;
-        }
-
-        data.roads[targetRoad] = new Path({...data.roads[targetRoad], color: path.color});
-        return true;
     }
 }

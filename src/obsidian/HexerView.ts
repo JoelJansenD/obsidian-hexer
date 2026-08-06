@@ -45,7 +45,7 @@ export class HexerView extends TextFileView {
         if (!this.editor) {
             this.contentEl.empty();
             this.editor = new Editor(this.contentEl, {
-                getData: () => this.hexerData.clone(),
+                getDataClone: () => this.hexerData.clone(),
                 setData: (data: HexerData) => this.setHexerData(data)
             });
         }

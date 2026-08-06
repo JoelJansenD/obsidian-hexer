@@ -88,7 +88,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number)
 function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null, type: PathType) {
     context.save();
 
-    const isActive = path.id === activePath?.path.id;
+    const isActive = path.id === activePath?.pathId;
     context.strokeStyle = path.color;
     context.lineWidth = size * 0.12;
     context.lineCap = 'round';

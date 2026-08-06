@@ -1,5 +1,5 @@
 import { Icon } from "./icon";
-import { Path, PathNode } from "./path";
+import { PathNode } from "./path";
 
 export type Layer = 'terrain' | 'icon' | 'river' | 'road';
 export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser' | 'polygon';
@@ -14,6 +14,6 @@ export interface EditorState {
 }
 
 export interface EditorPathState {
-    path: Path;
+    pathId: string;
     activeNode: PathNode | null;
 }

@@ -58,7 +58,7 @@ export default class EditorCanvas {
         this._renderRequested = true;
         requestAnimationFrame(() => {
             this._renderRequested = false;
-            render(this._context, this._dataOptions.getData(), this._dataOptions.getEditorState());
+            render(this._context, this._dataOptions.getDataClone(), this._dataOptions.getEditorState());
         });
     }
 
@@ -103,7 +103,7 @@ export default class EditorCanvas {
     }
 
     private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {
-        const data = this._dataOptions.getData();
+        const data = this._dataOptions.getDataClone();
         const rect = this._canvasEl.getBoundingClientRect();
         const canvasX = e.clientX - rect.left;
         const canvasY = e.clientY - rect.top;

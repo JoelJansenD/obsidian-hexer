@@ -32,18 +32,18 @@ describe('onLeftClick', () => {
 
     it('throws an exception if the active path is not found in the data', () => {
         // Arrange
-        const editorState = {...defaultEditorState, activePath: { path: new Path('Nonexistent path'), activeNode: null } };
+        const editorState = {...defaultEditorState, activePath: { pathId: new Path('Nonexistent path').id, activeNode: null } };
         const data = defaultHexerData.clone();
 
         // Act & Assert
         expect(() => {
             strategyToTest.onLeftClick(data, editorState, {q: 0, r: 0});
-        }).toThrow(`Active path 'Nonexistent path' with id ${editorState.activePath.path.id} not found in data.`);
+        }).toThrow(`Active path with id ${editorState.activePath.pathId} not found in data.`);
     });
 
     it('adds a node to the active path when a path is active and marks it as active', () => {
         // Arrange
-        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: null } };
         const data = defaultHexerData.clone();
 
         // Act
@@ -58,7 +58,7 @@ describe('onLeftClick', () => {
 
     it('adds and selectes a node when another node is already active and adds an edge between them', () => {
         // Arrange
-        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: null } };
         const data = defaultHexerData.clone();
         strategyToTest.onLeftClick(data, editorState, {q: 0, r: 0});
 
@@ -76,7 +76,7 @@ describe('onLeftClick', () => {
 
     it('splits a path into two when a node is added that already exists in the path', () => {
         // Arrange
-        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: null } };
         const data = defaultHexerData.clone();
         strategyToTest.onLeftClick(data, editorState, {q: 0, r: 0});
         strategyToTest.onLeftClick(data, editorState, {q: 5, r: 0});
@@ -104,7 +104,7 @@ describe('onDoubleLeftClick', () => {
         const targetPath = new Path('Empty river');
         targetPath.addNode({q: 0, r: 0});
         targetPath.addNode({q: 1, r: 0});
-        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: {q: 1, r: 0} } };
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 1, r: 0} } };
         
         const data = createHexerData();
         data.rivers.push(targetPath);
@@ -138,7 +138,7 @@ describe('onDoubleLeftClick', () => {
     it('does not do anything if there is no active node', () => {
         // Arrange
         const targetPath = new Path('Empty river');
-        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: null } };
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: null } };
         const data = createHexerData();
         data.rivers.push(targetPath);
         const strategyToTest = new PathPolygonStrategy();
@@ -155,7 +155,7 @@ describe('onDoubleLeftClick', () => {
         // Arrange
         const targetPath = new Path('Empty river');
         targetPath.addNode({q: 0, r: 0});
-        const editorState = {...defaultEditorState, activePath: { path: targetPath, activeNode: {q: 0, r: 0} } };
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 0, r: 0} } };
         
         const data = createHexerData();
         data.rivers.push(targetPath);

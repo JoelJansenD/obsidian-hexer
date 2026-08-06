@@ -59,9 +59,9 @@ export default class PathPolygonStrategy implements ToolStrategy {
         }
 
         const allPaths = [...data.rivers, ...data.roads];
-        const targetPath = this.getPath(editorState.activePath.path.id, allPaths);
+        const targetPath = this.getPath(editorState.activePath.pathId, allPaths);
         if(!targetPath) {
-            throw new Error(`Active path '${editorState.activePath.path.name}' with id ${editorState.activePath.path.id} not found in data.`);
+            throw new Error(`Active path with id ${editorState.activePath.pathId} not found in data.`);
         }
 
         return targetPath;
