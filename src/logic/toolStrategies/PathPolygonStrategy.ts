@@ -53,8 +53,23 @@ export default class PathPolygonStrategy implements ToolStrategy {
         targetPath.addEdge(this.previousNode, editorState.activePath.activeNode);        
     }
 
-    public onLeftDrag(_data: HexerData, _editorState: EditorState, _radialCoordinates: RadialCoordinates) {
-        throw new Error('Not implemented');
+    public onLeftDrag(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        if(!editorState.activePath || !editorState.activePath.activeNode) {
+            return;
+        }
+
+        const activePath = this.getActivePath(editorState, data);
+        const activeNode = editorState.activePath.activeNode;
+
+        if(pathNodeEquals(activeNode, radialCoordinates)) {
+            return;
+        }
+
+        // If moving is successful, update the active node to the new coordinates so
+        // that the node can be moved again in the next drag event.
+        if(activePath.moveNode(activeNode, radialCoordinates)) {
+            editorState.activePath.activeNode = radialCoordinates;
+        }
     }
 
     public onRightClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
