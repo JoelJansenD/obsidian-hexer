@@ -75,6 +75,18 @@ When('I right-click on the hex at {int},{int}', async function (this: RiversAndR
     this.lastClickedHex = hex;
 });
 
+When('I drag the node at {int},{int} to the hex at {int},{int}', async function (this: RiversAndRoadsContext, fq: number, fr: number, tq: number, tr: number) {
+    expect(this.selectedRiver).toBeDefined();
+    const from = { q: fq, r: fr };
+    const to = { q: tq, r: tr };
+    // Capture the node's neighbours before the drag, since the assertions need to
+    // know which edges should have moved with it.
+    this.nodesConnectedToDragged = this.selectedRiver!.getConnectedNodes(from);
+    await editorPage.dragAcrossHexes([from, to]);
+    this.draggedFromHex = from;
+    this.draggedToHex = to;
+});
+
 Then('a new river is created', async function () {
     const rivers = await pathPage.getRivers();
     expect(rivers.length).toBe(1);
@@ -167,5 +179,33 @@ Then('the following nodes are still present:', async function (this: RiversAndRo
     expect(river).toBeDefined();
     for (const node of nodesFromTable(table)) {
         expect(river!.nodes.has(hexKey(node.q, node.r))).toBe(true);
+    }
+});
+
+Then('the node is moved to the hex at {int},{int}', async function (this: RiversAndRoadsContext, q: number, r: number) {
+    expect(this.selectedRiver).toBeDefined();
+    expect(this.draggedFromHex).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    // The node now sits on the target hex...
+    expect(river!.nodes.has(hexKey(q, r))).toBe(true);
+    // ...and no longer on the hex it was dragged from.
+    expect(river!.nodes.has(hexKey(this.draggedFromHex!.q, this.draggedFromHex!.r))).toBe(false);
+});
+
+Then('all edges for the node are updated', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    expect(this.draggedFromHex).toBeDefined();
+    expect(this.draggedToHex).toBeDefined();
+    expect(this.nodesConnectedToDragged).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    // No edge is left pointing at the node's old hex...
+    const oldKey = hexKey(this.draggedFromHex!.q, this.draggedFromHex!.r);
+    const staleEdges = river!.edges.filter(edge => edge.from === oldKey || edge.to === oldKey);
+    expect(staleEdges.length).toBe(0);
+    // ...and every neighbour it had is now connected to it at the target hex.
+    for (const neighbour of this.nodesConnectedToDragged!) {
+        expect(river!.hasEdge(this.draggedToHex!, neighbour)).toBe(true);
     }
 });

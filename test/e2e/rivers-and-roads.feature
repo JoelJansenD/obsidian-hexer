@@ -76,3 +76,13 @@ Feature: Rivers and Roads
             | q | r |
             | 1 | 1 |
             | 2 | 2 |
+
+    Scenario: Dragging a node to another hex
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+            | 2 | 2 |
+        When I drag the node at 2,1 to the hex at 3,0
+        Then the node is moved to the hex at 3,0
+        And all edges for the node are updated
