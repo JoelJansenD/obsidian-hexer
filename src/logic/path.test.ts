@@ -351,6 +351,61 @@ describe('Path', () => {
         });
     });
 
+    describe('moveNode', () => {
+        it('moves a node if it exists and the new coordinates are free', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const result = path.moveNode({ q: 0, r: 0 }, { q: 2, r: 0 });
+
+            // Assert
+            expect(result).toBe(true);
+            expect(path.nodes.get('0,0')).toBeUndefined();
+            expect(path.nodes.get('2,0')).toEqual({ q: 2, r: 0 });
+            expect(path.edges[0]).toEqual({ from: '2,0', to: '1,0' });
+        });
+
+        it('does not move a node if it does not exist', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const result = path.moveNode({ q: 2, r: 0 }, { q: 3, r: 0 });
+
+            // Assert
+            expect(result).toBe(false);
+            expect(path.nodes.get('2,0')).toBeUndefined();
+            expect(path.nodes.get('3,0')).toBeUndefined();
+        });
+
+        it('does not move a node if the new coordinates are already occupied', () => {
+            // Arrange
+            const path = new Path(data);
+            path.addNode({ q: 2, r: 0 });
+
+            // Act
+            const result = path.moveNode({ q: 0, r: 0 }, { q: 2, r: 0 });
+
+            // Assert
+            expect(result).toBe(false);
+            expect(path.nodes.get('0,0')).toEqual({ q: 0, r: 0 });
+            expect(path.nodes.get('2,0')).toEqual({ q: 2, r: 0 });
+        });
+
+        it('does not move a node if the new coordinates are the same as the old coordinates', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const result = path.moveNode({ q: 0, r: 0 }, { q: 0, r: 0 });
+
+            // Assert
+            expect(result).toBe(false);
+            expect(path.nodes.get('0,0')).toEqual({ q: 0, r: 0 });
+        });
+    });
+
     describe('removeEdge', () => {
         it('removes an edge if it exists', () => {
             // Arrange

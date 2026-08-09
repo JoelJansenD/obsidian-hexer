@@ -85,6 +85,7 @@ export class Path implements PathData {
             .map(edge => (edge.from === key ? edge.to : edge.from));
 
         return neighbourKeys
+            .filter(neighbourKey => this.nodes.has(neighbourKey))
             .map(neighbourKey => ({... this.nodes.get(neighbourKey)}))
             .filter((node): node is PathNode => node !== undefined);
     }
@@ -141,6 +142,41 @@ export class Path implements PathData {
 
     public isEmpty(): boolean {
         return this.edges.length === 0 && this.nodes.size === 0;
+    }
+
+    /**
+     * Moves a present node at oldCoordinates to newCoordinates.
+     * @returns true if the move was successful, false if the node at oldCoordinates does not exist or if a node already exists at newCoordinates.
+     */
+    public moveNode(oldCoordinates: RadialCoordinates, newCoordinates: RadialCoordinates): boolean {
+        const oldKey = hexKey(oldCoordinates.q, oldCoordinates.r);
+        const newKey = hexKey(newCoordinates.q, newCoordinates.r);
+
+        if(oldKey === newKey) {
+            return false;
+        }
+
+        if (!this.nodes.has(oldKey)) {
+            return false;
+        }
+
+        if(this.nodes.has(newKey)) {
+            return false;
+        }
+
+        this.nodes.delete(oldKey);
+        this.nodes.set(newKey, { q: newCoordinates.q, r: newCoordinates.r });
+
+        this.edges.forEach(edge => {
+            if (edge.from === oldKey) {
+                edge.from = newKey;
+            } 
+            else if (edge.to === oldKey) {
+                edge.to = newKey;
+            }
+        });
+
+        return true;
     }
 
     public removeEdge(a: RadialCoordinates, b: RadialCoordinates): void {

@@ -172,6 +172,103 @@ describe('onDoubleLeftClick', () => {
     });
 });
 
+describe('onLeftDrag', () => {
+    it('moves the active node to the dragged hex and updates its edges', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        targetPath.addEdge({q: 1, r: 0}, {q: 1, r: 1});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 1, r: 0} } };
+
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDrag(data, editorState, {q: 2, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(1, 0))).toBe(false);
+        expect(river.nodes.has(hexKey(2, 0))).toBe(true);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(false);
+        expect(river.hasEdge({q: 1, r: 0}, {q: 1, r: 1})).toBe(false);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 2, r: 0})).toBe(true);
+        expect(river.hasEdge({q: 2, r: 0}, {q: 1, r: 1})).toBe(true);
+        expect(editorState.activePath.activeNode).toEqual({q: 2, r: 0});
+    });
+
+    it('does nothing if there is no active path', () => {
+        // Arrange
+        const editorState = {...defaultEditorState, activePath: null };
+        const data = createHexerData();
+        data.rivers.push(new Path('Empty river'));
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDrag(data, editorState, {q: 0, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.size).toBe(0);
+    });
+
+    it('does nothing if there is no active node', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: null } };
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDrag(data, editorState, {q: 0, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.size).toBe(0);
+    });
+
+    it('does nothing if the dragged hex is the same as the active node', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addNode({q: 0, r: 0});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 0, r: 0} } };
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDrag(data, editorState, {q: 0, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(0, 0))).toBe(true);
+        expect(editorState.activePath.activeNode).toEqual({q: 0, r: 0});
+    });
+
+    it('does nothing if the movement on the path is not valid', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 0, r: 0} } };
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        // We move 0,0 to 1,0 which is invalid, causing no changes
+        strategyToTest.onLeftDrag(data, editorState, {q: 1, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(0, 0))).toBe(true);
+        expect(river.nodes.has(hexKey(1, 0))).toBe(true);
+        expect(editorState.activePath.activeNode).toEqual({q: 0, r: 0});
+    });
+});
+
 describe('onRightClick', () => {
     it('removes the right-clicked node and every edge attached to it', () => {
         // Arrange
