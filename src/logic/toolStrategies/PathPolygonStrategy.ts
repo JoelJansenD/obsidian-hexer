@@ -54,6 +54,10 @@ export default class PathPolygonStrategy implements ToolStrategy {
     }
 
     public onRightClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        if(!editorState.activePath) {
+            return;
+        }
+        
         const activePath = this.getActivePath(editorState, data);
         const node = activePath.getNode(radialCoordinates);
         if (!node) {
