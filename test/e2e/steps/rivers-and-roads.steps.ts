@@ -54,6 +54,18 @@ When('I edit the river', async function (this: RiversAndRoadsContext) {
     await pathPage.editRiver(this.selectedRiver!.id);
 });
 
+When('I edit the river\'s information', async function (this: RiversAndRoadsContext) {
+    return 'pending';
+});
+
+When('I change the name to {string}', async function (this: RiversAndRoadsContext, name: string) {
+    return 'pending';
+});
+
+When('I attach a note to the river', async function (this: RiversAndRoadsContext) {
+    return 'pending';
+});
+
 When('I click on the hex at {int},{int}', async function (this: RiversAndRoadsContext, q: number, r: number) {
     const hex = { q, r };
     await editorPage.clickHex(hex);
@@ -97,6 +109,14 @@ Then('the river is selected', async function (this: RiversAndRoadsContext) {
     expect(this.selectedRiver).toBeDefined();
     const pathEl = await pathPage.getRiverElement(this.selectedRiver!.id);
     await expect(pathEl).toHaveAttribute('data-editing', 'true');
+});
+
+Then('the river is updated with the new name', async function (this: RiversAndRoadsContext) {
+    return 'pending';
+});
+
+Then('I can view the attached note', async function (this: RiversAndRoadsContext) {
+    return 'pending';
 });
 
 Then('the hex is added to the river', async function (this: RiversAndRoadsContext) {
