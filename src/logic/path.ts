@@ -85,6 +85,7 @@ export class Path implements PathData {
             .map(edge => (edge.from === key ? edge.to : edge.from));
 
         return neighbourKeys
+            .filter(neighbourKey => this.nodes.has(neighbourKey))
             .map(neighbourKey => ({... this.nodes.get(neighbourKey)}))
             .filter((node): node is PathNode => node !== undefined);
     }

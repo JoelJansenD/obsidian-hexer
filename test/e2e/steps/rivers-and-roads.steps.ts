@@ -79,6 +79,7 @@ When('I drag the node at {int},{int} to the hex at {int},{int}', async function 
     expect(this.selectedRiver).toBeDefined();
     const from = { q: fq, r: fr };
     const to = { q: tq, r: tr };
+    expect(this.selectedRiver!.nodes.has(hexKey(fq, fr))).toBe(true);
     // Capture the node's neighbours before the drag, since the assertions need to
     // know which edges should have moved with it.
     this.nodesConnectedToDragged = this.selectedRiver!.getConnectedNodes(from);
