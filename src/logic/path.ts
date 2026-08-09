@@ -140,11 +140,15 @@ export class Path implements PathData {
         return this.edges.some(edge => sameEdge(edge, from, to));
     }
 
+    public isEmpty(): boolean {
+        return this.edges.length === 0 && this.nodes.size === 0;
+    }
+
     /**
      * Moves a present node at oldCoordinates to newCoordinates.
      * @returns true if the move was successful, false if the node at oldCoordinates does not exist or if a node already exists at newCoordinates.
      */
-    public moveNode(oldCoordinates: RadialCoordinates, newCoordinates: RadialCoordinates) {
+    public moveNode(oldCoordinates: RadialCoordinates, newCoordinates: RadialCoordinates): boolean {
         const oldKey = hexKey(oldCoordinates.q, oldCoordinates.r);
         const newKey = hexKey(newCoordinates.q, newCoordinates.r);
 
@@ -173,10 +177,6 @@ export class Path implements PathData {
         });
 
         return true;
-    }
-
-    public isEmpty(): boolean {
-        return this.edges.length === 0 && this.nodes.size === 0;
     }
 
     public removeEdge(a: RadialCoordinates, b: RadialCoordinates): void {
