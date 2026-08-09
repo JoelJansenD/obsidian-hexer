@@ -10,6 +10,7 @@ export interface SerializedPath {
     name: string;
     nodes: Record<string, PathNode>;
     edges: PathEdge[];
+    color: string;
 }
 
 export interface HexerFrontmatter {
@@ -50,7 +51,8 @@ export function serializePath(path: Path): SerializedPath {
         id: path.id,
         name: path.name,
         nodes: Object.fromEntries(path.nodes),
-        edges: path.edges
+        edges: path.edges,
+        color: path.color
     };
 }
 
@@ -59,6 +61,7 @@ function deserializePath(path: SerializedPath): Path {
         id: path.id,
         name: path.name,
         nodes: new Map(Object.entries(path.nodes ?? {})),
-        edges: path.edges ?? []
+        edges: path.edges ?? [],
+        color: path.color
     });
 }

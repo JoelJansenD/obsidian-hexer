@@ -15,7 +15,8 @@ describe('Path', () => {
             edges: [ {
                 from: '0,0',
                 to: '1,0'
-            } ]
+            } ],
+            color: '#ff0000'
         };
     });
 
@@ -142,6 +143,140 @@ describe('Path', () => {
             // Assert
             expect(neighbours.length).toBe(1);
             expect(neighbours).toContainEqual({q: 0, r: 0});
+        });
+    });
+
+    describe('getCrossingEdgesAtCoordinates', () => {
+        it('returns all edges that cross the given coordinates', () => {
+            // Arrange
+            const path = new Path('Crossing test');
+            path.addEdge({ q: 0, r: 0 }, { q: 2, r: 0 });
+            path.addEdge({ q: 2, r: 0}, { q: 2, r: 2 });
+
+            // Act
+            const crossingEdges = path.getCrossingEdgesAtCoordinates({ q: 1, r: 0 });
+
+            // Assert
+            expect(crossingEdges.length).toBe(1);
+            expect(crossingEdges[0].edge).toEqual({ from: '0,0', to: '2,0' });
+        });
+    });
+
+    describe('getFullEdgePath', () => {
+        it('returns both endpoints for an edge between neighbours', () => {
+            // Arrange
+            const path = new Path('Neighbours');
+            path.addEdge({ q: 0, r: 0 }, { q: 1, r: 0 });
+
+            // Act
+            const fullPath = path.getFullEdgePath(path.edges[0]);
+
+            // Assert
+            expect(fullPath).toEqual([
+                { q: 0, r: 0 },
+                { q: 1, r: 0 }
+            ]);
+        });
+
+        it('fills in every hex between the endpoints', () => {
+            // Arrange
+            const path = new Path('Straight');
+            path.addEdge({ q: 0, r: 0 }, { q: 3, r: 0 });
+
+            // Act
+            const fullPath = path.getFullEdgePath(path.edges[0]);
+
+            // Assert
+            expect(fullPath).toEqual([
+                { q: 0, r: 0 },
+                { q: 1, r: 0 },
+                { q: 2, r: 0 },
+                { q: 3, r: 0 }
+            ]);
+        });
+
+        it('rounds to a contiguous run of hexes when the line is not axis aligned', () => {
+            // Arrange
+            const path = new Path('Diagonal');
+            path.addEdge({ q: 0, r: 0 }, { q: 2, r: 1 });
+
+            // Act
+            const fullPath = path.getFullEdgePath(path.edges[0]);
+
+            // Assert
+            expect(fullPath).toEqual([
+                { q: 0, r: 0 },
+                { q: 1, r: 0 },
+                { q: 1, r: 1 },
+                { q: 2, r: 1 }
+            ]);
+        });
+
+        it('walks the path in the direction the edge is stored', () => {
+            // Arrange
+            const path = new Path('Reversed');
+            path.addEdge({ q: 3, r: 0 }, { q: 0, r: 0 });
+
+            // Act
+            const fullPath = path.getFullEdgePath(path.edges[0]);
+
+            // Assert
+            expect(fullPath).toEqual([
+                { q: 3, r: 0 },
+                { q: 2, r: 0 },
+                { q: 1, r: 0 },
+                { q: 0, r: 0 }
+            ]);
+        });
+
+        it('returns a single hex when both endpoints are the same node', () => {
+            // Arrange
+            // addEdge rejects self-edges, so the edge is added directly.
+            const path = new Path('Self');
+            path.addNode({ q: 0, r: 0 });
+            path.edges.push({ from: '0,0', to: '0,0' });
+
+            // Act
+            const fullPath = path.getFullEdgePath(path.edges[0]);
+
+            // Assert
+            expect(fullPath).toEqual([{ q: 0, r: 0 }]);
+        });
+
+        it('throws if the edge references a node that does not exist', () => {
+            // Arrange
+            const path = new Path('Dangling');
+            path.addNode({ q: 0, r: 0 });
+            path.edges.push({ from: '0,0', to: '1,0' });
+
+            // Act & Assert
+            expect(() => {
+                path.getFullEdgePath(path.edges[0]);
+            }).toThrow('Edge references non-existent node(s): 0,0, 1,0');
+        });
+    });
+
+    describe('getNode', () => {
+        it('returns the node if it exists', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const node = path.getNode({ q: 0, r: 0 });
+
+            // Assert
+            expect(node).toEqual({ q: 0, r: 0 });
+        });
+
+        it('returns undefined if the node does not exist', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const node = path.getNode({ q: 2, r: 0 });
+
+            // Assert
+            expect(node).toBeUndefined();
         });
     });
 

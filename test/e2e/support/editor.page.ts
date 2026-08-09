@@ -34,6 +34,28 @@ class EditorPage {
         await this.logHexerState('after clickHex');
     }
 
+    async doubleClickHex(coordinates: RadialCoordinates) {
+        const size = await this.getHexSize();
+        const { x, y } = radialCoordinatesToPoint(coordinates, size);
+        const { width, height } = await this.canvas.getSize();
+
+        const offset = { x: Math.round(x - width / 2), y: Math.round(y - height / 2) };
+        console.debug('[hexer-e2e] doubleClickHex', JSON.stringify({
+            coordinates, size, canvas: { width, height }, absolutePoint: { x, y }, offsetFromCentre: offset,
+        }));
+
+        // element.doubleClick() can't be offset, and the canvas maps clicks from
+        // its top-left corner, so drive two quick down/up pairs at the re-based
+        // point via the pointer action API.
+        await browser.action('pointer', { parameters: { pointerType: 'mouse' } })
+            .move({ origin: this.canvas, x: offset.x, y: offset.y })
+            .down({ button: 0 }).up({ button: 0 })
+            .down({ button: 0 }).up({ button: 0 })
+            .perform();
+
+        await this.logHexerState('after doubleClickHex');
+    }
+
     async dragAcrossHexes(hexes: RadialCoordinates[]) {
         const size = await this.getHexSize();
         const { width, height } = await this.canvas.getSize();

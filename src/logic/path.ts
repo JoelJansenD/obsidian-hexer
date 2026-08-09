@@ -1,5 +1,5 @@
 import { hexKey } from "./HexerData";
-import { RadialCoordinates } from "./hexagon";
+import { RadialCoordinates, roundRadialCoordinates } from "./hexagon";
 
 export type PathType = 'river' | 'road';
 
@@ -17,6 +17,7 @@ export interface PathData {
     name: string;
     nodes: PathNodeMap;
     edges: PathEdge[];
+    color: string;
 }
 
 export class Path implements PathData {
@@ -24,6 +25,7 @@ export class Path implements PathData {
     public name: string;
     public nodes: PathNodeMap;
     public edges: PathEdge[];
+    public color: string;
 
     constructor(name: string);
     constructor(state: PathData);
@@ -33,6 +35,7 @@ export class Path implements PathData {
             this.name = arg;
             this.nodes = new Map();
             this.edges = [];
+            this.color = '#ff0000';
             return;
         }
 
@@ -40,6 +43,7 @@ export class Path implements PathData {
         this.name = arg.name;
         this.nodes = arg.nodes;
         this.edges = arg.edges ?? [];
+        this.color = arg.color;
     }
 
     // Undirected: an edge between a and b is added once, and the endpoints are
@@ -67,7 +71,7 @@ export class Path implements PathData {
             nodes.set(key, { ...node });
         }
         const edges = this.edges.map(edge => ({ ...edge }));
-        return new Path({ id: this.id, name: this.name, nodes, edges });
+        return new Path({ id: this.id, name: this.name, nodes, edges, color: this.color });
     }
 
     // Returns the coordinates of every node directly connected to the given node.
@@ -80,6 +84,50 @@ export class Path implements PathData {
         return neighbourKeys
             .map(neighbourKey => ({... this.nodes.get(neighbourKey)}))
             .filter((node): node is PathNode => node !== undefined);
+    }
+
+    public getCrossingEdgesAtCoordinates(coordinates: RadialCoordinates): { edge: PathEdge, nodes: PathNode[] }[] {
+        const key = hexKey(coordinates.q, coordinates.r);
+        const result: { edge: PathEdge, nodes: PathNode[] }[] = [];
+        this.edges.forEach(edge => {
+            const fullPath = this.getFullEdgePath(edge);
+            if (fullPath.some(node => hexKey(node.q, node.r) === key)) {
+                result.push({edge: edge, nodes: fullPath});
+            }
+        });
+        return result;
+    }
+
+    public getFullEdgePath(edge: PathEdge): PathNode[] {
+        const fromNode = this.nodes.get(edge.from);
+        const toNode = this.nodes.get(edge.to);
+
+        if(!fromNode || !toNode) {
+            throw new Error(`Edge references non-existent node(s): ${edge.from}, ${edge.to}`);
+        }
+
+        // Walk the straight hex line between the endpoints: sample distance + 1
+        // evenly spaced points along the line and round each to the nearest hex.
+        const steps = this.getDistance(fromNode, toNode);
+        const path: PathNode[] = [];
+        for(let i = 0; i <= steps; i++) {
+            const t = steps === 0 ? 0 : i / steps;
+            const q = fromNode.q + (toNode.q - fromNode.q) * t;
+            const r = fromNode.r + (toNode.r - fromNode.r) * t;
+            path.push(roundRadialCoordinates(q, r));
+        }
+        return path;
+    }
+
+    public getNode(key: string): PathNode | undefined;
+    public getNode(coordinates: RadialCoordinates): PathNode | undefined;
+    public getNode(arg: string | RadialCoordinates): PathNode | undefined {
+        const key = typeof(arg) === 'string' ? arg : hexKey(arg.q, arg.r);
+        return this.nodes.get(key);
+    }
+
+    private getDistance(a: RadialCoordinates, b: RadialCoordinates): number {
+        return (Math.abs(a.q - b.q) + Math.abs(a.q + a.r - b.q - b.r) + Math.abs(a.r - b.r)) / 2;
     }
 
     public hasEdge(a: RadialCoordinates, b: RadialCoordinates): boolean {

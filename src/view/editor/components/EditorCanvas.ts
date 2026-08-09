@@ -30,6 +30,12 @@ export default class EditorCanvas {
             this._listeners.set('mousedown', listener);
         }
 
+        if (handlers.onLeftDoubleClick) {
+            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftDoubleClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
+            this._canvasEl.addEventListener('dblclick', listener);
+            this._listeners.set('dblclick', listener);
+        }
+
         if(handlers.onLeftDrag) {
             const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
             this._canvasEl.addEventListener('mousemove', listener);
@@ -44,15 +50,15 @@ export default class EditorCanvas {
         this._listeners.clear();
     }
 
-    private requestRender() {
+    public requestRender() {
         if(this._renderRequested) {
-            return false;
+            return;
         }
 
         this._renderRequested = true;
         requestAnimationFrame(() => {
             this._renderRequested = false;
-            render(this._context, this._dataOptions.getData());
+            render(this._context, this._dataOptions.getDataClone(), this._dataOptions.getEditorState());
         });
     }
 
@@ -97,7 +103,7 @@ export default class EditorCanvas {
     }
 
     private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {
-        const data = this._dataOptions.getData();
+        const data = this._dataOptions.getDataClone();
         const rect = this._canvasEl.getBoundingClientRect();
         const canvasX = e.clientX - rect.left;
         const canvasY = e.clientY - rect.top;

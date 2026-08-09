@@ -54,28 +54,35 @@ export default class PathSidebarSection extends EditorSidebarSection {
     }
 
     private renderPaths() {
-        const data = this._componentOptions.getData();
-        const activePath = this._componentOptions.getEditorState().activePath;
+        const data = this._componentOptions.getDataClone();
+        const state = this._componentOptions.getEditorState()
+        const activePath = state.activePath;
         this._pathsEl.empty();
         this._pathOptions.getPaths(data).forEach(path => {
             new PathRow(this._pathsEl, {
-                disableEdit: activePath !== null && activePath.id !== path.id,
-                editMode: activePath?.id === path.id,
+                disableEdit: activePath !== null && activePath.pathId !== path.id,
+                editMode: activePath?.pathId === path.id,
                 path,
                 onEdit: this.editPath.bind(this),
-                onSave: this.savePath.bind(this)
+                onFinish: this.closePath.bind(this),
+                onSave: (() => this.savePath(path)).bind(this)
             });
         });
     }
 
     private setActivePath(path: Path | null) {
         const state = this._componentOptions.getEditorState();
-        state.activePath = path;
+        if(path === null) {
+            state.activePath = null;
+        }
+        else {
+            state.activePath = { pathId: path.id, activeNode: null };
+        }
         this._componentOptions.setEditorState(state);
     }
 
     private createPath() {
-        const data = this._componentOptions.getData();
+        const data = this._componentOptions.getDataClone();
         const newPath = new Path(this._pathOptions.newPathLabel);
         this._pathOptions.getPaths(data).push(newPath);
         this._componentOptions.setData(data);
@@ -84,21 +91,25 @@ export default class PathSidebarSection extends EditorSidebarSection {
     }
 
     private editPath(pathId: string) {
-        const data = this._componentOptions.getData();
+        const data = this._componentOptions.getDataClone();
         const path = this._pathOptions.getPaths(data).find(p => p.id === pathId) ?? null;
         this.setActivePath(path);
         this.renderPaths();
     }
 
-    private savePath(path: Path) {
-        const data = this._componentOptions.getData();
-        const paths = this._pathOptions.getPaths(data);
-        const index = paths.findIndex(p => p.id === path.id);
-        if (index !== -1) {
-            paths[index] = path;
-            this._componentOptions.setData(data);
-        }
+    private closePath() {
         this.setActivePath(null);
         this.renderPaths();
+    }
+
+    private savePath(path: Path) {
+        const data = this._componentOptions.getDataClone();
+        const target = [...data.rivers, ...data.roads].find(p => p.id === path.id);
+        if(!target) {
+            return;
+        }
+
+        target.color = path.color;
+        this._componentOptions.setData(data);
     }
 }

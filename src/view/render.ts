@@ -1,8 +1,10 @@
+import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HEXER_ICONS } from "../logic/icon";
+import { Path, PathEdge, PathNode, PathType } from "../logic/path";
 
-export default function render(context: CanvasRenderingContext2D, data: HexerData) {
+export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
     context.save();
     context.setTransform(1, 0, 0, 1, 0, 0);
@@ -12,6 +14,13 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     for(const hex of data.hexes.values()) {
         drawHex(context, hex, data.size);
         drawIcon(context, hex, data.size);
+    }
+
+    for(const path of data.rivers) {
+        drawPath(context, path, data.size, editorState.activePath, 'river');
+    }
+    for(const path of data.roads) {
+        drawPath(context, path, data.size, editorState.activePath, 'road');
     }
 }
 
@@ -74,4 +83,177 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number)
     });
 
     context.restore();
+}
+
+function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null, type: PathType) {
+    context.save();
+
+    const isActive = path.id === activePath?.pathId;
+    context.strokeStyle = path.color;
+    context.lineWidth = size * 0.12;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    if(isActive) {
+        context.shadowColor = path.color;
+        context.shadowBlur = size * 0.15;
+    }
+
+    // Both sweep in smooth, broad curves; rivers bend far harder than roads.
+    const amplitude = type === 'river' ? size * 0.18 : size * 0.1;
+    const wavelength = type === 'river' ? size * 2.0 : size * 1.6;
+
+    for(const polyline of buildPathPolylines(path)) {
+        const points = polyline.map(node => radialCoordinatesToPoint(node, size));
+        drawWavyLine(context, points, amplitude, wavelength);
+    }
+
+    if(isActive) {
+        const nodes = path.nodes;
+        const nodeRadius = size * 0.15;
+
+        for(const node of nodes.values()) {
+            const center = radialCoordinatesToPoint(node, size);
+            const isActiveNode = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
+
+            context.beginPath();
+            context.arc(center.x, center.y, nodeRadius, 0, Math.PI * 2);
+            context.fillStyle = isActiveNode ? '#ffcc00' : '#ffffff';
+            context.fill();
+            context.stroke();
+        }
+    }
+
+    context.restore();
+}
+
+// Traces a path's edge graph into connected chains of hex points. Degree-2
+// nodes are followed through so a run of edges becomes one continuous polyline;
+// each junction (degree != 2) and each loop starts a fresh chain.
+function buildPathPolylines(path: Path): PathNode[][] {
+    const edges = path.edges;
+    if(edges.length === 0) {
+        return [];
+    }
+
+    // nodeKey -> incident edges, as { edgeIndex, otherKey }.
+    const adjacency = new Map<string, { edgeIndex: number, otherKey: string }[]>();
+    edges.forEach((edge, index) => {
+        const getOrSetAdjacency = (node: string) => {
+            if(!adjacency.has(node)) {
+                adjacency.set(node, []);
+            }
+            return adjacency.get(node)!;
+        };
+        getOrSetAdjacency(edge.from).push({ edgeIndex: index, otherKey: edge.to });
+        getOrSetAdjacency(edge.to).push({ edgeIndex: index, otherKey: edge.from });
+    });
+
+    const usedEdges = new Set<number>();
+
+    // Expands an edge into its hex points, oriented to start at `startKey`.
+    const edgePoints = (edgeIndex: number, startKey: string): PathNode[] => {
+        const full = path.getFullEdgePath(edges[edgeIndex]);
+        return edges[edgeIndex].from === startKey ? full : full.slice().reverse();
+    };
+
+    // Walks a maximal chain from `startKey` along `firstEdgeIndex`, continuing
+    // through degree-2 nodes until it hits a junction, a dead end, or a used edge.
+    const walkChain = (startKey: string, firstEdgeIndex: number): PathNode[] => {
+        const points: PathNode[] = [];
+        let currentKey = startKey;
+        let edgeIndex = firstEdgeIndex;
+        while(true) {
+            usedEdges.add(edgeIndex);
+            const segment = edgePoints(edgeIndex, currentKey);
+            // Drop the shared node on continuation to avoid duplicating it.
+            points.push(...(points.length === 0 ? segment : segment.slice(1)));
+
+            const nextKey = edges[edgeIndex].from === currentKey ? edges[edgeIndex].to : edges[edgeIndex].from;
+            const neighbours = adjacency.get(nextKey) ?? [];
+            if(neighbours.length !== 2) {
+                break;
+            }
+            const next = neighbours.find(n => !usedEdges.has(n.edgeIndex));
+            if(!next) {
+                break;
+            }
+            currentKey = nextKey;
+            edgeIndex = next.edgeIndex;
+        }
+        return points;
+    };
+
+    const polylines: PathNode[][] = [];
+
+    // Chains anchored at endpoints and junctions (degree != 2).
+    for(const [nodeKey, neighbours] of adjacency) {
+        if(neighbours.length === 2) {
+            continue;
+        }
+        for(const neighbour of neighbours) {
+            if(!usedEdges.has(neighbour.edgeIndex)) {
+                polylines.push(walkChain(nodeKey, neighbour.edgeIndex));
+            }
+        }
+    }
+
+    edges.forEach((edge, index) => {
+        if(!usedEdges.has(index)) {
+            polylines.push(walkChain(edge.from, index));
+        }
+    });
+
+    return polylines;
+}
+
+// Draws a polyline with a perpendicular sine displacement so the straight
+// hex-to-hex segments read as a flowing, curved path. The displacement is
+// tapered to zero at both endpoints so an edge always starts and ends exactly
+// on its node points, letting adjacent edges of the same path join seamlessly.
+function drawWavyLine(context: CanvasRenderingContext2D, points: { x: number, y: number }[], amplitude: number, wavelength: number) {
+    if(points.length < 2) {
+        return;
+    }
+
+    const stepsPerSegment = 8;
+    // Total length of the polyline, used to place the endpoint taper window.
+    let totalLength = 0;
+    for(let i = 0; i < points.length - 1; i++) {
+        totalLength += Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+    }
+    if(totalLength === 0) {
+        return;
+    }
+
+    let distance = 0;
+    let started = false;
+
+    context.beginPath();
+    for(let i = 0; i < points.length - 1; i++) {
+        const a = points[i];
+        const b = points[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const segmentLength = Math.hypot(dx, dy) || 1;
+        // Unit vector perpendicular to the segment.
+        const perpX = -dy / segmentLength;
+        const perpY = dx / segmentLength;
+        for(let step = (i === 0 ? 0 : 1); step <= stepsPerSegment; step++) {
+            const t = step / stepsPerSegment;
+            const along = distance + segmentLength * t;
+            // Sine envelope: 0 at both endpoints, 1 at the middle.
+            const taper = Math.sin((along / totalLength) * Math.PI);
+            const offset = Math.sin((along / wavelength) * Math.PI * 2) * amplitude * taper;
+            const x = a.x + dx * t + perpX * offset;
+            const y = a.y + dy * t + perpY * offset;
+            if(started) {
+                context.lineTo(x, y);
+            } else {
+                context.moveTo(x, y);
+                started = true;
+            }
+        }
+        distance += segmentLength;
+    }
+    context.stroke();
 }
