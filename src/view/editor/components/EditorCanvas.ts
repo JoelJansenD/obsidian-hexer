@@ -25,8 +25,16 @@ export default class EditorCanvas {
     public registerEvents(strategy: ToolStrategy) {
         const handlers = strategy.getEvents();
 
-        if (handlers.onLeftClick) {
-            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
+        if (handlers.onLeftClick || handlers.onRightClick) {
+            const listener: EventListener = (e) => {
+                const event = e as MouseEvent;
+                if(handlers.onLeftClick && event.button === LEFT_MOUSE_BUTTON_CLICK) {
+                    this.invokeMouseClickHandler(handlers.onLeftClick, event, LEFT_MOUSE_BUTTON_CLICK);
+                }
+                else if(handlers.onRightClick && event.button === RIGHT_MOUSE_BUTTON_CLICK) {
+                    this.invokeMouseClickHandler(handlers.onRightClick, event, RIGHT_MOUSE_BUTTON_CLICK);
+                }
+            };
             this._canvasEl.addEventListener('mousedown', listener);
             this._listeners.set('mousedown', listener);
         }
@@ -41,12 +49,6 @@ export default class EditorCanvas {
             const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
             this._canvasEl.addEventListener('mousemove', listener);
             this._listeners.set('mousemove', listener);
-        }
-
-        if(handlers.onRightClick) {
-            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onRightClick!, e as MouseEvent, RIGHT_MOUSE_BUTTON_CLICK);
-            this._canvasEl.addEventListener('mousedown', listener);
-            this._listeners.set('mousedown-right', listener);
         }
     }
 
