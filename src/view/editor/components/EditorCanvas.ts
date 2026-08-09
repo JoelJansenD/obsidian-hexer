@@ -5,6 +5,7 @@ import { ComponentOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
 const LEFT_MOUSE_BUTTON_CLICK = 0;
+const RIGHT_MOUSE_BUTTON_CLICK = 2;
 
 const LEFT_MOUSE_BUTTON_DRAG = 1;
 
@@ -24,8 +25,18 @@ export default class EditorCanvas {
     public registerEvents(strategy: ToolStrategy) {
         const handlers = strategy.getEvents();
 
-        if (handlers.onLeftClick) {
-            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
+        if (handlers.onLeftClick || handlers.onRightClick) {
+            const listener: EventListener = (e) => {
+                e.preventDefault();
+                
+                const event = e as MouseEvent;
+                if(handlers.onLeftClick && event.button === LEFT_MOUSE_BUTTON_CLICK) {
+                    this.invokeMouseClickHandler(handlers.onLeftClick, event, LEFT_MOUSE_BUTTON_CLICK);
+                }
+                else if(handlers.onRightClick && event.button === RIGHT_MOUSE_BUTTON_CLICK) {
+                    this.invokeMouseClickHandler(handlers.onRightClick, event, RIGHT_MOUSE_BUTTON_CLICK);
+                }
+            };
             this._canvasEl.addEventListener('mousedown', listener);
             this._listeners.set('mousedown', listener);
         }

@@ -1,7 +1,7 @@
 import { EditorPathState, EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
-import { Path, PathEdge, PathNode } from "../path";
+import { Path, PathEdge, PathNode, pathNodeEquals } from "../path";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class PathPolygonStrategy implements ToolStrategy {
@@ -40,7 +40,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         editorState.activePath.activeNode = radialCoordinates;
     }
 
-    public onLeftDoubleClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+    public onLeftDoubleClick(data: HexerData, editorState: EditorState, _: RadialCoordinates) {
         if(!editorState.activePath || !editorState.activePath.activeNode) {
             return;
         }
@@ -51,6 +51,29 @@ export default class PathPolygonStrategy implements ToolStrategy {
 
         const targetPath = this.getActivePath(editorState, data);
         targetPath.addEdge(this.previousNode, editorState.activePath.activeNode);        
+    }
+
+    public onRightClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        if(!editorState.activePath) {
+            return;
+        }
+
+        const activePath = this.getActivePath(editorState, data);
+        const node = activePath.getNode(radialCoordinates);
+        if (!node) {
+            return;
+        }
+
+        // To prevent resurrecting the deleted node, active and previous nodes must be cleared if they are the same as the deleted node.
+        if(pathNodeEquals(node, editorState.activePath.activeNode)) {
+            editorState.activePath.activeNode = null;
+        }
+
+        if(pathNodeEquals(node, this.previousNode)) {
+            this.previousNode = null;
+        }
+
+        activePath.removeNode(node);
     }
 
     private getActivePath(editorState: EditorState, data: HexerData): Path {
@@ -96,6 +119,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         return {
             onLeftClick: this.onLeftClick.bind(this),
             onLeftDoubleClick: this.onLeftDoubleClick.bind(this),
+            onRightClick: this.onRightClick.bind(this),
         };
     }
 
