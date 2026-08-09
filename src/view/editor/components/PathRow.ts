@@ -1,20 +1,26 @@
 import { Check, createElement, File, PencilLine, Settings } from "lucide";
 import { Path } from "../../../logic/path";
+import { ObsidianInterop } from "../../ObsidianInterop";
 
 interface PathRowOptions {
     disableEdit: boolean;
     editMode: boolean;
     path: Path;
+    obsidian: ObsidianInterop;
     onEdit?: (pathId: string) => void;
     onFinish?: () => void;
     onSave?: () => void;
+    /** Persists the path after it has been edited in the settings dialog. */
+    onSettingsSave?: (path: Path) => void;
 }
 
 export default class PathRow {
     editButton!: HTMLDivElement;
     settingsOrViewButton!: HTMLDivElement;
 
-    constructor(private _parentEl: HTMLElement, private _options: PathRowOptions) {
+    constructor(
+        private _parentEl: HTMLElement,
+        private _options: PathRowOptions) {
         this.render();
     }
 
@@ -52,6 +58,12 @@ export default class PathRow {
         this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
         this.settingsOrViewButton.dataset.role = 'path-settings';
         this.settingsOrViewButton.appendChild(createElement(Settings, { width: 16, height: 16 }));
+        this.settingsOrViewButton.addEventListener('click', () => {
+            this._options.obsidian.openPathSettings({
+                path: this._options.path,
+                onSave: edited => this._options.onSettingsSave?.(edited),
+            });
+        });
 
         this.editButton = rowEl.createDiv({  cls: 'hexer-path-row-button' });
         this.editButton.dataset.role = 'save-path';

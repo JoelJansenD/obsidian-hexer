@@ -2,6 +2,7 @@ import { parseYaml, stringifyYaml, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
 import { FRONTMATTER_REGEX, fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
+import PathSettingsModal from './modals/PathSettingsModal';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
@@ -44,10 +45,15 @@ export class HexerView extends TextFileView {
     private renderEditor(): void {
         if (!this.editor) {
             this.contentEl.empty();
-            this.editor = new Editor(this.contentEl, {
-                getDataClone: () => this.hexerData.clone(),
-                setData: (data: HexerData) => this.setHexerData(data)
-            });
+            this.editor = new Editor(
+                this.contentEl,
+                {
+                    getDataClone: () => this.hexerData.clone(),
+                    setData: (data: HexerData) => this.setHexerData(data)
+                },
+                {
+                    openPathSettings: options => new PathSettingsModal(this.app, options).open(),
+                });
         }
     }
 

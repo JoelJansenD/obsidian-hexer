@@ -1,6 +1,7 @@
 import { EditorState } from "../../logic/EditorState";
 import { HexerData } from "../../logic/HexerData";
 import { resolveToolStrategy } from "../../logic/toolStrategies/ToolStrategy";
+import { ObsidianInterop } from "../ObsidianInterop";
 import EditorCanvas from "./components/EditorCanvas";
 import EditorSidebar from "./components/EditorSidebar";
 
@@ -12,6 +13,7 @@ export interface DataOptions {
 export interface ComponentOptions extends DataOptions {
     getEditorState: () => EditorState,
     setEditorState: (state: EditorState) => void,
+    obsidian: ObsidianInterop,
 }
 
 export default class Editor {
@@ -30,7 +32,11 @@ export default class Editor {
         activePath: null
     };
 
-    constructor(private _parentEl: HTMLElement, private _dataOptions: DataOptions) {
+    constructor(
+        private _parentEl: HTMLElement,
+        private _dataOptions: DataOptions,
+        private _obsidian: ObsidianInterop,
+    ) {
         this.build();
     }
 
@@ -50,6 +56,7 @@ export default class Editor {
 
         const componentOptions: ComponentOptions = {
             ...this._dataOptions,
+            obsidian: this._obsidian,
             getEditorState: () => this._editorState,
             setEditorState: state => this.setEditorState(state),
             setData: data => {
