@@ -156,7 +156,7 @@ describe('onDoubleLeftClick', () => {
         const targetPath = new Path('Empty river');
         targetPath.addNode({q: 0, r: 0});
         const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 0, r: 0} } };
-        
+
         const data = createHexerData();
         data.rivers.push(targetPath);
 
@@ -169,5 +169,29 @@ describe('onDoubleLeftClick', () => {
         // Assert
         const river = data.rivers[0];
         expect(river.edges).not.toContainEqual({ from: {q: 0, r: 0}, to: {q: 0, r: 0} })
+    });
+});
+
+describe('onRightClick', () => {
+    it('removes the right-clicked node and every edge attached to it', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        targetPath.addEdge({q: 1, r: 0}, {q: 1, r: 1});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 1, r: 0} } };
+
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onRightClick(data, editorState, {q: 1, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(1, 0))).toBe(false);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(false);
+        expect(river.hasEdge({q: 1, r: 0}, {q: 1, r: 1})).toBe(false);
     });
 });

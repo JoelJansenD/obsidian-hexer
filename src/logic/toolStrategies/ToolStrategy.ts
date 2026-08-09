@@ -15,6 +15,7 @@ export type RegisteredEvents = {
     onLeftClick?: ToolEventHandler;
     onLeftDoubleClick?: ToolEventHandler;
     onLeftDrag?: ToolEventHandler;
+    onRightClick?: ToolEventHandler;
 }
 
 export interface ToolStrategy {
