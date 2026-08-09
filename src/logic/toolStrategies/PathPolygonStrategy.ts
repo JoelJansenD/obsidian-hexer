@@ -53,6 +53,10 @@ export default class PathPolygonStrategy implements ToolStrategy {
         targetPath.addEdge(this.previousNode, editorState.activePath.activeNode);        
     }
 
+    public onLeftDrag(_data: HexerData, _editorState: EditorState, _radialCoordinates: RadialCoordinates) {
+        throw new Error('Not implemented');
+    }
+
     public onRightClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         if(!editorState.activePath) {
             return;
@@ -119,6 +123,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         return {
             onLeftClick: this.onLeftClick.bind(this),
             onLeftDoubleClick: this.onLeftDoubleClick.bind(this),
+            onLeftDrag: this.onLeftDrag.bind(this),
             onRightClick: this.onRightClick.bind(this),
         };
     }

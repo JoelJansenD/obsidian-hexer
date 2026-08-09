@@ -172,6 +172,34 @@ describe('onDoubleLeftClick', () => {
     });
 });
 
+describe('onLeftDrag', () => {
+    it('moves the active node to the dragged hex and updates its edges', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        targetPath.addEdge({q: 1, r: 0}, {q: 1, r: 1});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 1, r: 0} } };
+
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onLeftDrag(data, editorState, {q: 2, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(1, 0))).toBe(false);
+        expect(river.nodes.has(hexKey(2, 0))).toBe(true);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(false);
+        expect(river.hasEdge({q: 1, r: 0}, {q: 1, r: 1})).toBe(false);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 2, r: 0})).toBe(true);
+        expect(river.hasEdge({q: 2, r: 0}, {q: 1, r: 1})).toBe(true);
+        expect(editorState.activePath.activeNode).toEqual({q: 2, r: 0});
+    });
+});
+
 describe('onRightClick', () => {
     it('removes the right-clicked node and every edge attached to it', () => {
         // Arrange
