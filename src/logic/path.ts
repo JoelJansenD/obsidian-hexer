@@ -147,6 +147,10 @@ export class Path implements PathData {
         const oldKey = hexKey(oldCoordinates.q, oldCoordinates.r);
         const newKey = hexKey(newCoordinates.q, newCoordinates.r);
 
+        if(oldKey === newKey) {
+            return false;
+        }
+
         if (!this.nodes.has(oldKey)) {
             return false;
         }

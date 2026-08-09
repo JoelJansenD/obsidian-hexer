@@ -392,6 +392,18 @@ describe('Path', () => {
             expect(path.nodes.get('0,0')).toEqual({ q: 0, r: 0 });
             expect(path.nodes.get('2,0')).toEqual({ q: 2, r: 0 });
         });
+
+        it('does not move a node if the new coordinates are the same as the old coordinates', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const result = path.moveNode({ q: 0, r: 0 }, { q: 0, r: 0 });
+
+            // Assert
+            expect(result).toBe(false);
+            expect(path.nodes.get('0,0')).toEqual({ q: 0, r: 0 });
+        });
     });
 
     describe('removeEdge', () => {
