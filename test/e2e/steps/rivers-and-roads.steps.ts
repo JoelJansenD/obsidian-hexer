@@ -160,3 +160,12 @@ Then('all edges attached to the hex are removed', async function (this: RiversAn
     const attachedEdges = river!.edges.filter(edge => edge.from === key || edge.to === key);
     expect(attachedEdges.length).toBe(0);
 });
+
+Then('the following nodes are still present:', async function (this: RiversAndRoadsContext, table: NodeTable) {
+    expect(this.selectedRiver).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    for (const node of nodesFromTable(table)) {
+        expect(river!.nodes.has(hexKey(node.q, node.r))).toBe(true);
+    }
+});

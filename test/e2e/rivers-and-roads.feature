@@ -72,3 +72,7 @@ Feature: Rivers and Roads
         When I right-click on the hex at 2,1
         Then the hex is removed from the river
         And all edges attached to the hex are removed
+        But the following nodes are still present:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 2 |
