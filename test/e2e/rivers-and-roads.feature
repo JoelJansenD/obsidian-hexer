@@ -19,6 +19,17 @@ Feature: Rivers and Roads
         When I edit the river
         Then the river is selected
 
+    Scenario: Editing a river's information
+        Given I have a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+        When I edit the river's information
+        And I change the name to "Silverflow River"
+        And I attach a note to the river
+        Then the river is updated with the new name
+        And I can view the attached note
+
     Scenario: Drawing an edge to an existing hex
         Given I am editing a river with the following nodes:
             | q | r |
