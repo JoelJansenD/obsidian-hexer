@@ -27,6 +27,8 @@ export default class EditorCanvas {
 
         if (handlers.onLeftClick || handlers.onRightClick) {
             const listener: EventListener = (e) => {
+                e.preventDefault();
+                
                 const event = e as MouseEvent;
                 if(handlers.onLeftClick && event.button === LEFT_MOUSE_BUTTON_CLICK) {
                     this.invokeMouseClickHandler(handlers.onLeftClick, event, LEFT_MOUSE_BUTTON_CLICK);
