@@ -159,11 +159,8 @@ export class Path implements PathData {
             return false;
         }
 
-        const node = this.nodes.get(oldKey)!;
         this.nodes.delete(oldKey);
-        node.q = newCoordinates.q;
-        node.r = newCoordinates.r;
-        this.nodes.set(newKey, node);
+        this.nodes.set(newKey, { q: newCoordinates.q, r: newCoordinates.r });
 
         this.edges.forEach(edge => {
             if (edge.from === oldKey) {
