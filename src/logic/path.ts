@@ -168,7 +168,8 @@ export class Path implements PathData {
         this.edges.forEach(edge => {
             if (edge.from === oldKey) {
                 edge.from = newKey;
-            } else if (edge.to === oldKey) {
+            } 
+            else if (edge.to === oldKey) {
                 edge.to = newKey;
             }
         });
