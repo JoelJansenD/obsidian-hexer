@@ -1,4 +1,4 @@
-import { Check, createElement, PencilLine } from "lucide";
+import { Check, createElement, File, PencilLine, Settings } from "lucide";
 import { Path } from "../../../logic/path";
 
 interface PathRowOptions {
@@ -11,6 +11,9 @@ interface PathRowOptions {
 }
 
 export default class PathRow {
+    editButton!: HTMLDivElement;
+    settingsOrViewButton!: HTMLDivElement;
+
     constructor(private _parentEl: HTMLElement, private _options: PathRowOptions) {
         this.render();
     }
@@ -33,24 +36,41 @@ export default class PathRow {
 
         rowEl.createSpan({ text: this._options.path.name, cls: "hexer-path-row-name" });
 
-        const editButton = rowEl.createDiv({  cls: 'hexer-path-row-edit-button' });
 
         if(this._options.disableEdit) {
-            editButton.style.display = 'none';
+            this.editButton.style.display = 'none';
         }
         else if(this._options.editMode) {
-            editButton.dataset.role = 'save-path';
-            editButton.appendChild(createElement(Check, { width: 16, height: 16 }));
-            editButton.addEventListener('click', () => {
-                this._options.onFinish?.();
-            });
+            this.renderEditModeButtons(rowEl);
         }
         else {
-            editButton.dataset.role = 'edit-path';
-            editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
-            editButton.addEventListener('click', () => {
-                this._options.onEdit?.(this._options.path.id);
-            });
+            this.renderViewModeButtons(rowEl);
         }
+    }
+
+    private renderEditModeButtons(rowEl: HTMLDivElement) {
+        this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
+        this.settingsOrViewButton.dataset.role = 'path-settings';
+        this.settingsOrViewButton.appendChild(createElement(Settings, { width: 16, height: 16 }));
+
+        this.editButton = rowEl.createDiv({  cls: 'hexer-path-row-button' });
+        this.editButton.dataset.role = 'save-path';
+        this.editButton.appendChild(createElement(Check, { width: 16, height: 16 }));
+        this.editButton.addEventListener('click', () => {
+            this._options.onFinish?.();
+        });
+    }
+
+    private renderViewModeButtons(rowEl: HTMLDivElement) {
+        this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
+        this.settingsOrViewButton.dataset.role = 'view-file';
+        this.settingsOrViewButton.appendChild(createElement(File, { width: 16, height: 16 }));
+
+        this.editButton = rowEl.createDiv({  cls: 'hexer-path-row-button' });
+        this.editButton.dataset.role = 'edit-path';
+        this.editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
+        this.editButton.addEventListener('click', () => {
+            this._options.onEdit?.(this._options.path.id);
+        });
     }
 }
