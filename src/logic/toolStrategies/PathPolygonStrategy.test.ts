@@ -194,4 +194,48 @@ describe('onRightClick', () => {
         expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(false);
         expect(river.hasEdge({q: 1, r: 0}, {q: 1, r: 1})).toBe(false);
     });
+
+    it('does not resurrect the removed node on the next left click when it was the active node', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 1, r: 0} } };
+
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onRightClick(data, editorState, {q: 1, r: 0});
+        strategyToTest.onLeftClick(data, editorState, {q: 2, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(1, 0))).toBe(false);
+        expect(river.hasEdge({q: 1, r: 0}, {q: 2, r: 0})).toBe(false);
+    });
+
+    it('does not resurrect the removed node on a following double-click when it was the previous node', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: {q: 0, r: 0} } };
+
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+        // The node about to be removed is the one a later double-click would connect from.
+        strategyToTest['previousNode'] = {q: 1, r: 0};
+
+        // Act: remove the previous node, then double-click to connect.
+        strategyToTest.onRightClick(data, editorState, {q: 1, r: 0});
+        strategyToTest.onLeftDoubleClick(data, editorState, {q: 0, r: 0});
+
+        // Assert: the deleted node must stay gone, not be re-added as an edge endpoint.
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(1, 0))).toBe(false);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(false);
+    });
 });
