@@ -195,6 +195,27 @@ describe('onRightClick', () => {
         expect(river.hasEdge({q: 1, r: 0}, {q: 1, r: 1})).toBe(false);
     });
 
+    it('does nothing if the right-clicked node does not exist in the active path', () => {
+        // Arrange
+        const targetPath = new Path('Empty river');
+        targetPath.addEdge({q: 0, r: 0}, {q: 1, r: 0});
+        const editorState = {...defaultEditorState, activePath: { pathId: targetPath.id, activeNode: null } };
+        const data = createHexerData();
+        data.rivers.push(targetPath);
+
+        const strategyToTest = new PathPolygonStrategy();
+
+        // Act
+        strategyToTest.onRightClick(data, editorState, {q: 2, r: 0});
+
+        // Assert
+        const river = data.rivers[0];
+        expect(river.nodes.has(hexKey(0, 0))).toBe(true);
+        expect(river.nodes.has(hexKey(1, 0))).toBe(true);
+        expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(true);
+    });
+        
+
     it('does not resurrect the removed node on the next left click when it was the active node', () => {
         // Arrange
         const targetPath = new Path('Empty river');
@@ -226,14 +247,13 @@ describe('onRightClick', () => {
         data.rivers.push(targetPath);
 
         const strategyToTest = new PathPolygonStrategy();
-        // The node about to be removed is the one a later double-click would connect from.
         strategyToTest['previousNode'] = {q: 1, r: 0};
 
-        // Act: remove the previous node, then double-click to connect.
+        // Act
         strategyToTest.onRightClick(data, editorState, {q: 1, r: 0});
         strategyToTest.onLeftDoubleClick(data, editorState, {q: 0, r: 0});
 
-        // Assert: the deleted node must stay gone, not be re-added as an edge endpoint.
+        // Assert
         const river = data.rivers[0];
         expect(river.nodes.has(hexKey(1, 0))).toBe(false);
         expect(river.hasEdge({q: 0, r: 0}, {q: 1, r: 0})).toBe(false);
