@@ -68,6 +68,13 @@ When('I double-click on the hex at {int},{int}', async function (this: RiversAnd
     this.lastClickedHex = hex;
 });
 
+When('I right-click on the hex at {int},{int}', async function (this: RiversAndRoadsContext, q: number, r: number) {
+    const hex = { q, r };
+    await editorPage.rightClickHex(hex);
+    this.previouslyClickedHex = this.lastClickedHex;
+    this.lastClickedHex = hex;
+});
+
 Then('a new river is created', async function () {
     const rivers = await pathPage.getRivers();
     expect(rivers.length).toBe(1);
@@ -133,4 +140,23 @@ Then('no hex is added to the river', async function (this: RiversAndRoadsContext
     // `selectedRiver` was read before the hex was clicked, so its nodes are the
     // baseline the click must not have changed.
     expect(river!.nodes.size).toBe(this.selectedRiver!.nodes.size);
+});
+
+Then('the hex is removed from the river', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    expect(this.lastClickedHex).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    const key = hexKey(this.lastClickedHex!.q, this.lastClickedHex!.r);
+    expect(river!.nodes.has(key)).toBe(false);
+});
+
+Then('all edges attached to the hex are removed', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    expect(this.lastClickedHex).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    const key = hexKey(this.lastClickedHex!.q, this.lastClickedHex!.r);
+    const attachedEdges = river!.edges.filter(edge => edge.from === key || edge.to === key);
+    expect(attachedEdges.length).toBe(0);
 });

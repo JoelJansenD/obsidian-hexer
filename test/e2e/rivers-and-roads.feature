@@ -62,3 +62,13 @@ Feature: Rivers and Roads
         And an edge is added between the hexes at 1,1 and 3,1
         And an edge is added between the hexes at 3,1 and 5,1
         And the hex is selected
+
+    Scenario: Removing a node from a river
+        Given I am editing a river with the following nodes:
+            | q | r |
+            | 1 | 1 |
+            | 2 | 1 |
+            | 2 | 2 |
+        When I right-click on the hex at 2,1
+        Then the hex is removed from the river
+        And all edges attached to the hex are removed
