@@ -11,6 +11,11 @@ export class HexerPlugin extends Plugin {
     async onload(): Promise<void> {
         this.registerView(VIEW_TYPE_HEXER, (leaf) => new HexerView(leaf));
 
+        this.registerHoverLinkSource(VIEW_TYPE_HEXER, {
+            display: 'Hexer',
+            defaultMod: false,
+        });
+
         this.addRibbonIcon('hexagon', 'Open Hexer', () => {
             void this.activateView();
         });

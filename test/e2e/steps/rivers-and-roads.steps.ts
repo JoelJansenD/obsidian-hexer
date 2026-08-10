@@ -2,6 +2,8 @@ import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import editorPage from '../support/editor.page';
 import pathPage from '../support/path.page';
+import pathSettingsPage from '../support/pathSettings.page';
+import { createNote } from '../support/obsidian.page';
 import { RiversAndRoadsContext } from '../support/contexts/rivers-and-roads.context';
 import { RadialCoordinates } from '../../../src/logic/hexagon';
 import { hexKey } from '../../../src/logic/HexerData';
@@ -54,6 +56,26 @@ When('I edit the river', async function (this: RiversAndRoadsContext) {
     await pathPage.editRiver(this.selectedRiver!.id);
 });
 
+When('I edit the river\'s information', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    await pathPage.editRiverInformation(this.selectedRiver!.id);
+});
+
+When('I change the name to {string}', async function (this: RiversAndRoadsContext, name: string) {
+    await pathSettingsPage.setName(name);
+    this.expectedName = name;
+});
+
+When('I attach a note to the river', async function (this: RiversAndRoadsContext) {
+    // Attaching is the last edit in the dialog, so this step also commits it: pick
+    // the note, then save, leaving the assertions to read the persisted path.
+    const notePath = 'Silverflow River.md';
+    await createNote(notePath, '# Silverflow River\n');
+    await pathSettingsPage.attachNote('Silverflow River');
+    await pathSettingsPage.save();
+    this.attachedNotePath = notePath;
+});
+
 When('I click on the hex at {int},{int}', async function (this: RiversAndRoadsContext, q: number, r: number) {
     const hex = { q, r };
     await editorPage.clickHex(hex);
@@ -97,6 +119,22 @@ Then('the river is selected', async function (this: RiversAndRoadsContext) {
     expect(this.selectedRiver).toBeDefined();
     const pathEl = await pathPage.getRiverElement(this.selectedRiver!.id);
     await expect(pathEl).toHaveAttribute('data-editing', 'true');
+});
+
+Then('the river is updated with the new name', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    expect(this.expectedName).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    expect(river!.name).toBe(this.expectedName);
+});
+
+Then('I can view the attached note', async function (this: RiversAndRoadsContext) {
+    expect(this.selectedRiver).toBeDefined();
+    expect(this.attachedNotePath).toBeDefined();
+    const river = await pathPage.getRiver(this.selectedRiver!.id);
+    expect(river).toBeDefined();
+    expect(river!.filePath).toBe(this.attachedNotePath);
 });
 
 Then('the hex is added to the river', async function (this: RiversAndRoadsContext) {

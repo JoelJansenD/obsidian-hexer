@@ -63,9 +63,11 @@ export default class PathSidebarSection extends EditorSidebarSection {
                 disableEdit: activePath !== null && activePath.pathId !== path.id,
                 editMode: activePath?.pathId === path.id,
                 path,
+                obsidian: this._componentOptions.obsidian,
                 onEdit: this.editPath.bind(this),
                 onFinish: this.closePath.bind(this),
-                onSave: (() => this.savePath(path)).bind(this)
+                onSave: (() => this.savePath(path)).bind(this),
+                onSettingsSave: this.savePathSettings.bind(this)
             });
         });
     }
@@ -111,5 +113,19 @@ export default class PathSidebarSection extends EditorSidebarSection {
 
         target.color = path.color;
         this._componentOptions.setData(data);
+    }
+
+    private savePathSettings(edited: Path) {
+        const data = this._componentOptions.getDataClone();
+        const target = [...data.rivers, ...data.roads].find(p => p.id === edited.id);
+        if(!target) {
+            return;
+        }
+
+        target.name = edited.name;
+        target.filePath = edited.filePath;
+        
+        this._componentOptions.setData(data);
+        this.renderPaths();
     }
 }

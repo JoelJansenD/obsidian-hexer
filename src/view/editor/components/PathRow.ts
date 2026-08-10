@@ -1,17 +1,26 @@
-import { Check, createElement, PencilLine } from "lucide";
+import { Check, createElement, File, PencilLine, Settings } from "lucide";
 import { Path } from "../../../logic/path";
+import { ObsidianInterop } from "../../ObsidianInterop";
 
 interface PathRowOptions {
     disableEdit: boolean;
     editMode: boolean;
     path: Path;
+    obsidian: ObsidianInterop;
     onEdit?: (pathId: string) => void;
     onFinish?: () => void;
     onSave?: () => void;
+    /** Persists the path after it has been edited in the settings dialog. */
+    onSettingsSave?: (path: Path) => void;
 }
 
 export default class PathRow {
-    constructor(private _parentEl: HTMLElement, private _options: PathRowOptions) {
+    editButton!: HTMLDivElement;
+    settingsOrViewButton!: HTMLDivElement;
+
+    constructor(
+        private _parentEl: HTMLElement,
+        private _options: PathRowOptions) {
         this.render();
     }
 
@@ -33,24 +42,63 @@ export default class PathRow {
 
         rowEl.createSpan({ text: this._options.path.name, cls: "hexer-path-row-name" });
 
-        const editButton = rowEl.createDiv({  cls: 'hexer-path-row-edit-button' });
-
-        if(this._options.disableEdit) {
-            editButton.style.display = 'none';
-        }
-        else if(this._options.editMode) {
-            editButton.dataset.role = 'save-path';
-            editButton.appendChild(createElement(Check, { width: 16, height: 16 }));
-            editButton.addEventListener('click', () => {
-                this._options.onFinish?.();
-            });
+        if(this._options.editMode) {
+            this.renderEditModeButtons(rowEl);
         }
         else {
-            editButton.dataset.role = 'edit-path';
-            editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
-            editButton.addEventListener('click', () => {
-                this._options.onEdit?.(this._options.path.id);
+            this.renderViewModeButtons(rowEl);
+        }
+        
+        if(this._options.disableEdit) {
+            this.editButton.style.display = 'none';
+        }
+    }
+
+    private renderEditModeButtons(rowEl: HTMLDivElement) {
+        this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
+        this.settingsOrViewButton.dataset.role = 'path-settings';
+        this.settingsOrViewButton.appendChild(createElement(Settings, { width: 16, height: 16 }));
+        this.settingsOrViewButton.addEventListener('click', () => {
+            this._options.obsidian.openPathSettings({
+                path: this._options.path,
+                onSave: edited => {
+                    this._options.onSettingsSave?.(edited)
+                },
+            });
+        });
+
+        this.editButton = rowEl.createDiv({  cls: 'hexer-path-row-button' });
+        this.editButton.dataset.role = 'save-path';
+        this.editButton.appendChild(createElement(Check, { width: 16, height: 16 }));
+        this.editButton.addEventListener('click', () => {
+            this._options.onFinish?.();
+        });
+    }
+
+    private renderViewModeButtons(rowEl: HTMLDivElement) {
+        const filePath = this._options.path.filePath;
+        if(filePath) {
+            this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
+            this.settingsOrViewButton.dataset.role = 'view-file';
+            this.settingsOrViewButton.appendChild(createElement(File, { width: 16, height: 16 }));
+            this.settingsOrViewButton.addEventListener('mouseover', event => {
+                this._options.obsidian.showFilePreview({
+                    filePath,
+                    event,
+                    targetEl: this.settingsOrViewButton,
+                });
+            });
+
+            this.settingsOrViewButton.addEventListener('click', event => {
+                this._options.obsidian.openFile(filePath, event);
             });
         }
+
+        this.editButton = rowEl.createDiv({  cls: 'hexer-path-row-button' });
+        this.editButton.dataset.role = 'edit-path';
+        this.editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
+        this.editButton.addEventListener('click', () => {
+            this._options.onEdit?.(this._options.path.id);
+        });
     }
 }
