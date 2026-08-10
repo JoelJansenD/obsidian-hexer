@@ -2,7 +2,7 @@
 import { createComponentOptions } from "../../../__test/defaultEditorState";
 import EditorTools from "./EditorTools";
 
-const button = (parent: HTMLElement, tool: string) =>
+const getToolButton = (parent: HTMLElement, tool: string) =>
     parent.querySelector<HTMLElement>(`.hexer-tools-button[data-hexer-paint-tool="${tool}"]`)!;
 
 describe('EditorTools', () => {
@@ -11,7 +11,7 @@ describe('EditorTools', () => {
         const componentOptions = createComponentOptions();
         const parent = document.createElement('div');
         new EditorTools(parent, componentOptions);
-        const buttonEl = button(parent, tool);
+        const buttonEl = getToolButton(parent, tool);
 
         // Act
         buttonEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -31,13 +31,13 @@ describe('EditorTools', () => {
 
         // Act
         new EditorTools(parent, createComponentOptions());
-        const selectButton = button(parent, 'select');
+        const selectButton = getToolButton(parent, 'select');
 
         // Assert
         expect(selectButton.classList.contains('active')).toBe(true);
-        expect(button(parent, 'brush').classList.contains('active')).toBe(false);
-        expect(button(parent, 'bucket').classList.contains('active')).toBe(false);
-        expect(button(parent, 'eraser').classList.contains('active')).toBe(false);
-        expect(button(parent, 'polygon').classList.contains('active')).toBe(false);
+        expect(getToolButton(parent, 'brush').classList.contains('active')).toBe(false);
+        expect(getToolButton(parent, 'bucket').classList.contains('active')).toBe(false);
+        expect(getToolButton(parent, 'eraser').classList.contains('active')).toBe(false);
+        expect(getToolButton(parent, 'polygon').classList.contains('active')).toBe(false);
     });
 });
