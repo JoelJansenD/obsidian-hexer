@@ -16,7 +16,8 @@ describe('Path', () => {
                 from: '0,0',
                 to: '1,0'
             } ],
-            color: '#ff0000'
+            color: '#ff0000',
+            filePath: null
         };
     });
 
