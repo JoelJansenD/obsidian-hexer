@@ -19,13 +19,13 @@ export default class EditorSidebar {
 
         const terrainSection = this.buildTerrain(this._sidebarEl);
         this._sections.set('terrain', terrainSection);
+        terrainSection.setExpanded(true);
 
         const iconSection = this.buildIcon(this._sidebarEl);
         this._sections.set('icon', iconSection);
 
         const riverSection = this.buildRivers(this._sidebarEl);
         this._sections.set('river', riverSection);
-        riverSection.setExpanded(true);
 
         const roadSection = this.buildRoads(this._sidebarEl);
         this._sections.set('road', roadSection);
