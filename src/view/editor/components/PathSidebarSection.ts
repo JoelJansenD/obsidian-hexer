@@ -123,7 +123,8 @@ export default class PathSidebarSection extends EditorSidebarSection {
         }
 
         target.name = edited.name;
-        target.color = edited.color;
+        target.filePath = edited.filePath;
+        
         this._componentOptions.setData(data);
         this.renderPaths();
     }

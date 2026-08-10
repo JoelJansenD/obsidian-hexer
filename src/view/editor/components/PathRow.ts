@@ -42,15 +42,15 @@ export default class PathRow {
 
         rowEl.createSpan({ text: this._options.path.name, cls: "hexer-path-row-name" });
 
-
-        if(this._options.disableEdit) {
-            this.editButton.style.display = 'none';
-        }
-        else if(this._options.editMode) {
+        if(this._options.editMode) {
             this.renderEditModeButtons(rowEl);
         }
         else {
             this.renderViewModeButtons(rowEl);
+        }
+        
+        if(this._options.disableEdit) {
+            this.editButton.style.display = 'none';
         }
     }
 
@@ -61,7 +61,9 @@ export default class PathRow {
         this.settingsOrViewButton.addEventListener('click', () => {
             this._options.obsidian.openPathSettings({
                 path: this._options.path,
-                onSave: edited => this._options.onSettingsSave?.(edited),
+                onSave: edited => {
+                    this._options.onSettingsSave?.(edited)
+                },
             });
         });
 
