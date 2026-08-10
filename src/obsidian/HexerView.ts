@@ -1,8 +1,9 @@
-import { parseYaml, stringifyYaml, TextFileView } from 'obsidian';
+import { Keymap, parseYaml, stringifyYaml, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
 import { FRONTMATTER_REGEX, fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
 import PathSettingsModal from './modals/PathSettingsModal';
+import { FilePreviewOptions } from '../view/ObsidianInterop';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
@@ -53,6 +54,8 @@ export class HexerView extends TextFileView {
                 },
                 {
                     openPathSettings: options => new PathSettingsModal(this.app, options).open(),
+                    showFilePreview: options => this.showFilePreview(options),
+                    openFile: (filePath, event) => this.openFile(filePath, event),
                 });
         }
     }
@@ -77,6 +80,21 @@ export class HexerView extends TextFileView {
 
         const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
         return fromFrontmatter(frontmatter);
+    }
+
+    private openFile(filePath: string, event: MouseEvent): void {
+        void this.app.workspace.openLinkText(filePath, this.file?.path ?? '', Keymap.isModEvent(event));
+    }
+
+    private showFilePreview({ filePath, event, targetEl }: FilePreviewOptions): void {
+        this.app.workspace.trigger('hover-link', {
+            event,
+            source: VIEW_TYPE_HEXER,
+            hoverParent: this,
+            targetEl,
+            linktext: filePath,
+            sourcePath: this.file?.path ?? '',
+        });
     }
 
     async onClose(): Promise<void> {

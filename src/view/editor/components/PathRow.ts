@@ -76,9 +76,23 @@ export default class PathRow {
     }
 
     private renderViewModeButtons(rowEl: HTMLDivElement) {
-        this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
-        this.settingsOrViewButton.dataset.role = 'view-file';
-        this.settingsOrViewButton.appendChild(createElement(File, { width: 16, height: 16 }));
+        const filePath = this._options.path.filePath;
+        if(filePath) {
+            this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-path-row-button' });
+            this.settingsOrViewButton.dataset.role = 'view-file';
+            this.settingsOrViewButton.appendChild(createElement(File, { width: 16, height: 16 }));
+            this.settingsOrViewButton.addEventListener('mouseover', event => {
+                this._options.obsidian.showFilePreview({
+                    filePath,
+                    event,
+                    targetEl: this.settingsOrViewButton,
+                });
+            });
+
+            this.settingsOrViewButton.addEventListener('click', event => {
+                this._options.obsidian.openFile(filePath, event);
+            });
+        }
 
         this.editButton = rowEl.createDiv({  cls: 'hexer-path-row-button' });
         this.editButton.dataset.role = 'edit-path';
