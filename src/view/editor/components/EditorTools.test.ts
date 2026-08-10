@@ -23,6 +23,18 @@ const button = (parent: HTMLElement, tool: string) =>
     parent.querySelector<HTMLElement>(`.hexer-tools-button[data-hexer-paint-tool="${tool}"]`)!;
 
 describe('EditorTools', () => {
+    it.each([ 'select', 'brush', 'bucket', 'eraser', 'polygon' ])('has a button for %s', (tool: string) => {
+        // Arrange
+        const parent = document.createElement('div');
+        new EditorTools(parent, createComponentOptions(baseState()));
+
+        // Act
+        const buttonEl = button(parent, tool);
+
+        // Assert
+        expect(buttonEl).toBeDefined();
+    });
+
     it('marks the brush button as active when clicked', () => {
         // Arrange
         const parent = document.createElement('div');
@@ -35,5 +47,21 @@ describe('EditorTools', () => {
         // Assert
         expect(brushButton.classList.contains('active')).toBe(true);
         expect(button(parent, 'select').classList.contains('active')).toBe(false);
+    });
+
+    it('initializes with an active select button', () => {
+        // Arrange
+        const parent = document.createElement('div');
+
+        // Act
+        new EditorTools(parent, createComponentOptions(baseState()));
+        const selectButton = button(parent, 'select');
+
+        // Assert
+        expect(selectButton.classList.contains('active')).toBe(true);
+        expect(button(parent, 'brush').classList.contains('active')).toBe(false);
+        expect(button(parent, 'bucket').classList.contains('active')).toBe(false);
+        expect(button(parent, 'eraser').classList.contains('active')).toBe(false);
+        expect(button(parent, 'polygon').classList.contains('active')).toBe(false);
     });
 });

@@ -10,5 +10,10 @@ export default defineConfig({
         // Registers Obsidian's HTMLElement DOM helpers (createEl, createDiv, ...).
         // The setup guards on HTMLElement, so it is a no-op under the node environment.
         setupFiles: ['./test/obsidian-dom.setup.ts'],
+        coverage: {
+            provider: 'v8',
+            include: ['src/**/*.ts'],
+            exclude: ['src/**/*.test.ts', 'src/__test/**/*.ts'],
+        }
     },
 });
