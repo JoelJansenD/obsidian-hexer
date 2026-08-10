@@ -51,6 +51,15 @@ class PathPage {
         await this.selectAndClick(`[data-path-id="${id}"] [data-role="edit-path"]`);
     }
 
+    /**
+     * Opens the settings dialog for a river: the settings gear only exists while
+     * the row is in edit mode, so enter edit mode first, then click it.
+     */
+    async editRiverInformation(id: string) {
+        await this.editRiver(id);
+        await this.selectAndClick(`[data-path-id="${id}"] [data-role="path-settings"]`);
+    }
+
     public async getRiverElement(id: string) {
         return browser.$(`[data-path-id="${id}"]`);
     }
@@ -75,6 +84,8 @@ class PathPage {
                     name: string;
                     nodes?: Map<string, PathNode>;
                     edges?: PathEdge[];
+                    filePath?: string | null;
+                    color?: string;
                 }>>;
             } | undefined;
             return (view?.hexerData?.[key] ?? []).map((path) => ({
@@ -82,6 +93,8 @@ class PathPage {
                 name: path.name,
                 nodes: path.nodes ? Object.fromEntries(path.nodes) : {},
                 edges: path.edges ?? [],
+                filePath: path.filePath ?? null,
+                color: path.color || '#ff0000',
             }));
         }, 'rivers');
         console.debug(`[hexer-e2e] getPaths (rivers)`, JSON.stringify(paths));
@@ -90,6 +103,8 @@ class PathPage {
             name: path.name,
             nodes: new Map(Object.entries(path.nodes)),
             edges: path.edges,
+            filePath: path.filePath,
+            color: path.color,
         }));
     }
 

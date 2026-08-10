@@ -13,9 +13,12 @@ export default class PathSettingsModal extends Modal {
 
         new Setting(this.contentEl)
             .setName('Name')
-            .addText(text => text
-                .setValue(this.path.name)
-                .onChange(value => this.path.name = value));
+            .addText(text => {
+                text
+                    .setValue(this.path.name)
+                    .onChange(value => this.path.name = value);
+                text.inputEl.dataset.hexerSetting = 'path-name';
+            });
 
         new Setting(this.contentEl)
             .setName('File')
@@ -27,6 +30,7 @@ export default class PathSettingsModal extends Modal {
                         this.path.filePath = null;
                         search.setValue('');
                     });
+                search.inputEl.dataset.hexerSetting = 'path-file';
 
                 const suggest = new FileSuggest(this.app, search.inputEl);
                 suggest.onSelect(file => {
@@ -37,15 +41,18 @@ export default class PathSettingsModal extends Modal {
                     suggest.close();
                 });
             });
-        
+
         new Setting(this.contentEl)
-            .addButton(button => button
-                .setButtonText('Save')
-                .setCta()
-                .onClick(() => {
-                    this._options.onSave?.(this.path);
-                    this.close();
-                }));
+            .addButton(button => {
+                button
+                    .setButtonText('Save')
+                    .setCta()
+                    .onClick(() => {
+                        this._options.onSave?.(this.path);
+                        this.close();
+                    });
+                button.buttonEl.dataset.role = 'save-path-settings';
+            });
     }
 }
 

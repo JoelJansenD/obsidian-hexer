@@ -5,6 +5,10 @@ export interface RiversAndRoadsContext {
     lastClickedHex?: RadialCoordinates;
     previouslyClickedHex?: RadialCoordinates;
     selectedRiver?: Path;
+    // The name typed into the settings dialog, checked once the path is saved.
+    expectedName?: string;
+    // Vault path of the note attached via the settings dialog.
+    attachedNotePath?: string;
     draggedFromHex?: RadialCoordinates;
     draggedToHex?: RadialCoordinates;
     // The dragged node's neighbours, captured before the drag so its edges can be
