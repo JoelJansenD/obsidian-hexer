@@ -15,7 +15,10 @@ const defaultEditorState: EditorState = {
 export default defaultEditorState;
 
 export const createComponentOptions = (overrides: Partial<EditorState> = {}): ComponentOptions => {
-    let state: EditorState = { ...defaultEditorState, ...overrides };
+    let state: EditorState = {
+        ...defaultEditorState,
+        ...overrides,
+    };
     let data = createHexerData();
     return {
         getDataClone: () => data,
