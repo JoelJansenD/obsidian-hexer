@@ -26,7 +26,7 @@ describe('Sections', () => {
             road: null,
             terrain: null,
         };
-        const { parent } = createSidebar();
+        const { parent, componentOptions } = createSidebar();
 
         for (const layer of Object.keys(layers) as Layer[]) {
             const headerEl = parent.querySelector(`[data-hexer-layer="${layer}"]`);
@@ -36,6 +36,7 @@ describe('Sections', () => {
             // The class lives on the section wrapper, not on the header that was clicked.
             const sectionEl = headerEl!.closest('.hexer-sidebar-section');
             expect(sectionEl!.classList.contains('is-expanded')).toBe(true);
+            expect(componentOptions.setEditorState).toHaveBeenLastCalledWith(expect.objectContaining({ activeLayer: layer }));
         }
     });
 });
