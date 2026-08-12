@@ -1,3 +1,4 @@
+import { HexerData } from "../logic/HexerData";
 import { EditorState } from "../logic/EditorState"
 import { ComponentOptions } from "../view/editor/Editor"
 import createHexerData from "./createHexerData";
@@ -14,12 +15,12 @@ const defaultEditorState: EditorState = {
 };
 export default defaultEditorState;
 
-export const createComponentOptions = (overrides: Partial<EditorState> = {}): ComponentOptions => {
+export const createComponentOptions = (overrides: Partial<EditorState> = {}, initialData?: HexerData): ComponentOptions => {
     let state: EditorState = {
         ...defaultEditorState,
         ...overrides,
     };
-    let data = createHexerData();
+    let data = initialData ?? createHexerData();
     return {
         getDataClone: () => data,
         setData: vi.fn(next => data = next),
