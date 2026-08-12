@@ -4,6 +4,7 @@ import createHexerData from "../../../__test/createHexerData";
 import { createComponentOptions } from "../../../__test/defaultEditorState";
 import { Path } from "../../../logic/path";
 import { ObsidianInterop, PathSettingsOptions } from "../../ObsidianInterop";
+import { ComponentOptions } from "../Editor";
 import PathSidebarSection from "./PathSidebarSection";
 
 const createPath = (name: string, color: string) => {
@@ -17,14 +18,14 @@ const createPathSection = (paths: Path[]) => {
     const openPathSettings = vi.fn<(options: PathSettingsOptions) => void>();
     componentOptions.obsidian = { openPathSettings } as unknown as ObsidianInterop;
     const parent = document.createElement('div');
-    new PathSidebarSection(parent, componentOptions, {
+    const section = new PathSidebarSection(parent, componentOptions, {
         icon: Droplets,
         type: 'river',
         label: 'Rivers',
         newPathLabel: 'New river',
         getPaths: data => data.rivers,
     });
-    return { parent, componentOptions, openPathSettings };
+    return { parent, componentOptions, openPathSettings, section };
 };
 
 const readRows = (parent: HTMLElement) =>
@@ -240,5 +241,44 @@ describe('Configuration modal', () => {
 
         // Assert
         expect(getRow(parent, paths[0]).querySelector('[data-role="view-file"]')).not.toBeNull();
+    });
+});
+
+describe('Refreshing', () => {
+    const clearActivePath = (componentOptions: ComponentOptions) => {
+        const state = componentOptions.getEditorState();
+        state.activePath = null;
+        componentOptions.setEditorState(state);
+    };
+
+    it('closes edit mode when the active path is cleared elsewhere', () => {
+        // Arrange
+        const { parent, componentOptions, section } = createPathSection([]);
+        clickAddPath(parent);
+        const newPath = componentOptions.getDataClone().rivers[0];
+        expect(getRow(parent, newPath).dataset.editing).toBe('true');
+        clearActivePath(componentOptions);
+
+        // Act
+        section.refresh();
+
+        // Assert
+        const rowEl = getRow(parent, newPath);
+        expect(rowEl.dataset.editing).toBe('false');
+        expect(getColourInput(parent, newPath).disabled).toBe(true);
+        expect(rowEl.querySelector<HTMLElement>('[data-role="edit-path"]')!.style.display).not.toBe('none');
+    });
+
+    it('renders each path once', () => {
+        // Arrange
+        const { parent, componentOptions, section } = createPathSection([]);
+        clickAddPath(parent);
+        clearActivePath(componentOptions);
+
+        // Act
+        section.refresh();
+
+        // Assert
+        expect(readRows(parent).map(row => row.name)).toEqual(['New river']);
     });
 });
