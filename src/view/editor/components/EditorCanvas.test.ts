@@ -76,7 +76,8 @@ describe('requestRender', () => {
         const { canvas } = createCanvas();
         vi.useFakeTimers();
         vi.advanceTimersToNextFrame();
-        vi.mocked(render).mockClear(); // Clear the call from the previous frame
+         // Clear the call from the initial call in the resize observer
+        vi.mocked(render).mockClear();
 
         // Act
         canvas.requestRender();
@@ -91,7 +92,8 @@ describe('requestRender', () => {
         const _ = createCanvas();
         vi.useFakeTimers();
         vi.advanceTimersToNextFrame();
-        vi.mocked(render).mockClear(); // Clear the call from the previous frame
+         // Clear the call from the initial call in the resize observer
+        vi.mocked(render).mockClear();
 
         // Assert
         vi.advanceTimersToNextFrame();
@@ -103,7 +105,8 @@ describe('requestRender', () => {
         const { canvas } = createCanvas();
         vi.useFakeTimers();
         vi.advanceTimersToNextFrame();
-        vi.mocked(render).mockClear(); // Clear the call from the previous frame
+         // Clear the call from the initial call in the resize observer
+        vi.mocked(render).mockClear();
 
         // Act
         canvas.requestRender();
