@@ -3,6 +3,7 @@ import createHexerData from "../../../__test/createHexerData";
 import { createComponentOptions } from "../../../__test/defaultEditorState";
 import { RegisteredEvents, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import EditorCanvas from "./EditorCanvas";
+import render from "../../render";
 
 // happy-dom has no canvas context, so keep the renderer out of the way.
 vi.mock('../../render', () => ({ default: vi.fn() }));
@@ -32,35 +33,48 @@ const createStrategy = (events: RegisteredEvents): ToolStrategy => ({
     getEvents: () => events,
 });
 
-describe('EditorCanvas', () => {
-    describe('registerEvents', () => {
-        it.each(HANDLER_CASES)('invokes $handler on $event', ({ handler, event, eventInit }) => {
-            // Arrange
-            const { canvas, canvasEl } = createCanvas();
-            const toolEventHandler = vi.fn();
-            canvas.registerEvents(createStrategy({ [handler]: toolEventHandler }));
+describe('registerEvents', () => {
+    it.each(HANDLER_CASES)('invokes $handler on $event', ({ handler, event, eventInit }) => {
+        // Arrange
+        const { canvas, canvasEl } = createCanvas();
+        const toolEventHandler = vi.fn();
+        canvas.registerEvents(createStrategy({ [handler]: toolEventHandler }));
 
-            // Act
-            canvasEl.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, ...eventInit }));
+        // Act
+        canvasEl.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, ...eventInit }));
 
-            // Assert
-            expect(toolEventHandler).toHaveBeenCalledOnce();
-        });
+        // Assert
+        expect(toolEventHandler).toHaveBeenCalledOnce();
     });
+});
 
-    describe('unregisterEvents', () => {
-        it.each(HANDLER_CASES)('stops invoking $handler on $event', ({ handler, event, eventInit }) => {
-            // Arrange
-            const { canvas, canvasEl } = createCanvas();
-            const toolEventHandler = vi.fn();
-            canvas.registerEvents(createStrategy({ [handler]: toolEventHandler }));
+describe('unregisterEvents', () => {
+    it.each(HANDLER_CASES)('stops invoking $handler on $event', ({ handler, event, eventInit }) => {
+        // Arrange
+        const { canvas, canvasEl } = createCanvas();
+        const toolEventHandler = vi.fn();
+        canvas.registerEvents(createStrategy({ [handler]: toolEventHandler }));
 
-            // Act
-            canvas.unregisterEvents();
-            canvasEl.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, ...eventInit }));
+        // Act
+        canvas.unregisterEvents();
+        canvasEl.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, ...eventInit }));
 
-            // Assert
-            expect(toolEventHandler).not.toHaveBeenCalled();
-        });
+        // Assert
+        expect(toolEventHandler).not.toHaveBeenCalled();
+    });
+});
+
+describe('requestRender', () => {
+    it('does not render if render has already been requested', () => {
+        // Arrange
+        const { canvas } = createCanvas();
+        vi.useFakeTimers();
+
+        // Act
+        canvas.requestRender();
+
+        // Assert
+        vi.advanceTimersToNextFrame();
+        expect(vi.mocked(render)).toHaveBeenCalledOnce();
     });
 });
