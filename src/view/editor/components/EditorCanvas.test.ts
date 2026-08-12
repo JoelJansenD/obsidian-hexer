@@ -71,12 +71,43 @@ describe('unregisterEvents', () => {
 });
 
 describe('requestRender', () => {
-    it('does not render if render has already been requested', () => {
+    it('renders if render has been requested', () => {
         // Arrange
         const { canvas } = createCanvas();
         vi.useFakeTimers();
+        vi.advanceTimersToNextFrame();
+        vi.mocked(render).mockClear(); // Clear the call from the previous frame
 
         // Act
+        canvas.requestRender();
+
+        // Assert
+        vi.advanceTimersToNextFrame();
+        expect(vi.mocked(render)).toHaveBeenCalledOnce();
+    });
+
+    it('does not render if render has not been requested', () => {
+        // Arrange
+        const { canvas } = createCanvas();
+        vi.useFakeTimers();
+        vi.advanceTimersToNextFrame();
+        vi.mocked(render).mockClear(); // Clear the call from the previous frame
+
+        // Assert
+        vi.advanceTimersToNextFrame();
+        expect(vi.mocked(render)).not.toHaveBeenCalled();
+    });
+
+    it('renders once if render has been requested multiple times', () => {
+        // Arrange
+        const { canvas } = createCanvas();
+        vi.useFakeTimers();
+        vi.advanceTimersToNextFrame();
+        vi.mocked(render).mockClear(); // Clear the call from the previous frame
+
+        // Act
+        canvas.requestRender();
+        canvas.requestRender();
         canvas.requestRender();
 
         // Assert
