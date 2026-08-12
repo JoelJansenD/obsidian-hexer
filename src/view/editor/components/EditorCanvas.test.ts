@@ -39,6 +39,12 @@ const stubClientSize = (el: HTMLElement, width: number, height: number) => {
     Object.defineProperty(el, 'clientHeight', { value: height, configurable: true });
 };
 
+afterEach(() => {
+    // Some tests use fake timers, which are configured per test
+    // Reset these timers for tests that don't use them
+    vi.useRealTimers();
+});
+
 describe('registerEvents', () => {
     it.each(HANDLER_CASES)('invokes $handler on $event', ({ handler, event, eventInit }) => {
         // Arrange
