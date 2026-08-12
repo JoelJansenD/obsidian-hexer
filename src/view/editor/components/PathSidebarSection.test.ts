@@ -48,6 +48,12 @@ const clickButton = (parent: HTMLElement, path: Path, role: string) => {
     buttonEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 };
 
+const clickAddPath = (parent: HTMLElement) => {
+    const buttonEl = parent.querySelector('[data-role="add-river"]');
+    expect(buttonEl).not.toBeNull();
+    buttonEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+};
+
 const pickColour = (parent: HTMLElement, path: Path, colour: string) => {
     const inputEl = getColourInput(parent, path);
     inputEl.value = colour;
@@ -72,6 +78,41 @@ describe('Rows', () => {
             { name: 'Mudbrook', colour: '#8b4513' },
             { name: 'Frostrun', colour: '#00ffee' },
         ]);
+    });
+});
+
+describe('Adding a path', () => {
+    it('appends a path named after the configured label', () => {
+        // Arrange
+        const { parent, componentOptions } = createPathSection([]);
+
+        // Act
+        clickAddPath(parent);
+
+        // Assert
+        expect(componentOptions.setData).toHaveBeenCalled();
+        expect(componentOptions.getDataClone().rivers.length).toBe(1);
+        expect(componentOptions.getDataClone().rivers[0].name).toBe('New river');
+        expect(readRows(parent).length).toBe(1);
+        expect(readRows(parent)[0].name).toBe('New river');
+        expect(getRow(parent, componentOptions.getDataClone().rivers[0]).dataset.editing).toBe('true');
+    });
+
+    it('opens the new path in edit mode', () => {
+        // Arrange
+        const paths = [createPath('Silverflow', '#1122ff')];
+        const { parent, componentOptions } = createPathSection(paths);
+
+        // Act
+        clickAddPath(parent);
+
+        // Assert
+        const rivers = componentOptions.getDataClone().rivers;
+        const newPath = rivers[rivers.length - 1];
+        expect(componentOptions.getEditorState().activePath).toEqual({ pathId: newPath.id, activeNode: null });
+        expect(getRow(parent, newPath).dataset.editing).toBe('true');
+        expect(getColourInput(parent, newPath).disabled).toBe(false);
+        expect(getRow(parent, paths[0]).dataset.editing).toBe('false');
     });
 });
 
