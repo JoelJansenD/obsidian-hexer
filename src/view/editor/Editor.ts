@@ -40,6 +40,11 @@ export default class Editor {
         this.build();
     }
 
+    /** Tears down the editor's components before the editor is discarded. */
+    public destroy() {
+        this._canvas.destroy();
+    }
+
     public setEditorState(state: EditorState) {
         this._editorState = state;
         this._canvas.unregisterEvents();

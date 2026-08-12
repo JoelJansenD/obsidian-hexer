@@ -76,6 +76,22 @@ describe('unregisterEvents', () => {
     });
 });
 
+describe('destroy', () => {
+    it.each(HANDLER_CASES)('stops invoking $handler on $event', ({ handler, event, eventInit }) => {
+        // Arrange
+        const { canvas, canvasEl } = createCanvas();
+        const toolEventHandler = vi.fn();
+        canvas.registerEvents(createStrategy({ [handler]: toolEventHandler }));
+
+        // Act
+        canvas.destroy();
+        canvasEl.dispatchEvent(new MouseEvent(event, { bubbles: true, cancelable: true, ...eventInit }));
+
+        // Assert
+        expect(toolEventHandler).not.toHaveBeenCalled();
+    });
+});
+
 describe('requestRender', () => {
     it('renders if render has been requested', () => {
         // Arrange
@@ -129,20 +145,36 @@ describe('resize observer', () => {
     // happy-dom's ResizeObserver is a documented no-op: observe() does nothing and
     // the callback never fires. Swap in a fake that hands the callback to the test
     // so it can drive a resize itself.
-    let triggerResize: () => void = () => {
+    const notConstructed = () => {
         throw new Error('ResizeObserver was never constructed');
     };
+    let triggerResize: () => void = notConstructed;
     let observeSpy = vi.fn();
+    let disconnectSpy = vi.fn();
 
     beforeEach(() => {
+        // Reset, so a test that never builds a canvas fails loudly instead of
+        // driving the previous test's callback.
+        triggerResize = notConstructed;
         observeSpy = vi.fn();
+        disconnectSpy = vi.fn();
         vi.stubGlobal('ResizeObserver', class {
+            connected = true;
             observe = observeSpy;
             unobserve = vi.fn();
-            disconnect = vi.fn();
+            // Modelled on the real observer: once disconnected the callback no
+            // longer fires, so a leaked observer shows up as a resize that still
+            // reaches the canvas.
+            disconnect = () => {
+                this.connected = false;
+                disconnectSpy();
+            };
 
             constructor(callback: ResizeObserverCallback) {
-                triggerResize = () => callback([], this as unknown as ResizeObserver);
+                triggerResize = () => {
+                    if (!this.connected) return;
+                    callback([], this as unknown as ResizeObserver);
+                };
             }
         });
 
@@ -167,6 +199,33 @@ describe('resize observer', () => {
 
         // Assert
         expect(observeSpy).toHaveBeenCalledWith(canvasEl);
+    });
+
+    it('disconnects the observer when the canvas is destroyed', () => {
+        // Arrange
+        const { canvas } = createCanvas();
+
+        // Act
+        canvas.destroy();
+
+        // Assert
+        expect(disconnectSpy).toHaveBeenCalledOnce();
+    });
+
+    it('stops resizing and rendering once the canvas is destroyed', () => {
+        // Arrange
+        const { canvas, canvasEl } = createCanvas();
+        stubClientSize(canvasEl, 640, 480);
+        canvas.destroy();
+        const widthBeforeResize = canvasEl.width;
+
+        // Act
+        triggerResize();
+        vi.advanceTimersToNextFrame();
+
+        // Assert
+        expect(canvasEl.width).toBe(widthBeforeResize);
+        expect(vi.mocked(render)).not.toHaveBeenCalled();
     });
 
     it('matches the backing store to the display size on resize', () => {

@@ -39,6 +39,7 @@ export class HexerView extends TextFileView {
     }
 
     clear(): void {
+        this.editor?.destroy();
         this.editor = undefined;
         this.contentEl.empty();
     }
@@ -98,6 +99,8 @@ export class HexerView extends TextFileView {
     }
 
     async onClose(): Promise<void> {
+        this.editor?.destroy();
+        this.editor = undefined;
         this.contentEl.empty();
     }
 }
