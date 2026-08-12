@@ -10,11 +10,17 @@ const createSidebar = () => {
     return { parent, componentOptions };
 };
 
+const getSection = (parent: HTMLElement, layer: Layer) => {
+    const headerEl = parent.querySelector(`[data-hexer-layer="${layer}"]`);
+    expect(headerEl).not.toBeNull();
+    return headerEl!.closest('.hexer-sidebar-section')!;
+};
+
 const selectLayer = (parent: HTMLElement, layer: Layer) => {
     const headerEl = parent.querySelector(`[data-hexer-layer="${layer}"]`);
     expect(headerEl).not.toBeNull();
     headerEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    return headerEl!.closest('.hexer-sidebar-section')!;
+    return getSection(parent, layer);
 };
 
 const pickColour = (parent: HTMLElement, field: string, colour: string) => {
@@ -25,11 +31,21 @@ const pickColour = (parent: HTMLElement, field: string, colour: string) => {
 };
 
 describe('Layers', () => {
+    it('opens the terrain layer by default', () => {
+        // Act
+        const { parent } = createSidebar();
+
+        // Assert
+        expect(getSection(parent, 'terrain').classList.contains('is-expanded')).toBe(true);
+        expect(parent.querySelectorAll('.hexer-sidebar-section.is-expanded')).toHaveLength(1);
+    });
+
     it('switches between layers when selected', () => {
         const layers: Record<Layer, null> = {
             icon: null,
             river: null,
             road: null,
+            // Terrain cannot be first because it is open by default, so test it later
             terrain: null,
         };
         const { parent, componentOptions } = createSidebar();
