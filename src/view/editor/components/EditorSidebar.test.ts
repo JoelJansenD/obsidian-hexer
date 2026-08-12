@@ -10,7 +10,13 @@ const createSidebar = () => {
     return { parent, componentOptions };
 };
 
-/** Sets a colour input's value and fires the `input` event the palette listens for. */
+const selectLayer = (parent: HTMLElement, layer: Layer) => {
+    const headerEl = parent.querySelector(`[data-hexer-layer="${layer}"]`);
+    expect(headerEl).not.toBeNull();
+    headerEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    return headerEl!.closest('.hexer-sidebar-section')!;
+};
+
 const pickColour = (parent: HTMLElement, field: string, colour: string) => {
     const inputEl = parent.querySelector<HTMLInputElement>(`[data-hexer-colour-field-target="${field}"]`);
     expect(inputEl).not.toBeNull();
@@ -26,20 +32,26 @@ describe('Layers', () => {
             road: null,
             terrain: null,
         };
-        const allLayers = Object.keys(layers) as Layer[];
         const { parent, componentOptions } = createSidebar();
 
-        for (const layer of allLayers) {
-            const headerEl = parent.querySelector(`[data-hexer-layer="${layer}"]`);
-            expect(headerEl).not.toBeNull();
-            headerEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-
+        for (const layer of Object.keys(layers) as Layer[]) {
+            const sectionEl = selectLayer(parent, layer);
+            expect(sectionEl.classList.contains('is-expanded')).toBe(true);
             expect(componentOptions.setEditorState).toHaveBeenLastCalledWith(expect.objectContaining({ activeLayer: layer }));
-            for (const otherLayer of allLayers) {
-                const sectionEl = parent.querySelector(`[data-hexer-layer="${otherLayer}"]`)!.closest('.hexer-sidebar-section');
-                expect(sectionEl!.classList.contains('is-expanded')).toBe(otherLayer === layer);
-            }
         }
+    });
+
+    it('closes the previously selected layer', () => {
+        // Arrange
+        const { parent } = createSidebar();
+        const iconSectionEl = selectLayer(parent, 'icon');
+
+        // Act
+        const riverSectionEl = selectLayer(parent, 'river');
+
+        // Assert
+        expect(riverSectionEl.classList.contains('is-expanded')).toBe(true);
+        expect(iconSectionEl.classList.contains('is-expanded')).toBe(false);
     });
 });
 
