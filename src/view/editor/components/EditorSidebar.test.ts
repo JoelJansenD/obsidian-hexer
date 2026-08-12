@@ -18,25 +18,27 @@ const pickColour = (parent: HTMLElement, field: string, colour: string) => {
     inputEl!.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
-describe('Sections', () => {
-    it('switches between sections when selected', () => {
+describe('Layers', () => {
+    it('switches between layers when selected', () => {
         const layers: Record<Layer, null> = {
             icon: null,
             river: null,
             road: null,
             terrain: null,
         };
+        const allLayers = Object.keys(layers) as Layer[];
         const { parent, componentOptions } = createSidebar();
 
-        for (const layer of Object.keys(layers) as Layer[]) {
+        for (const layer of allLayers) {
             const headerEl = parent.querySelector(`[data-hexer-layer="${layer}"]`);
             expect(headerEl).not.toBeNull();
             headerEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
-            // The class lives on the section wrapper, not on the header that was clicked.
-            const sectionEl = headerEl!.closest('.hexer-sidebar-section');
-            expect(sectionEl!.classList.contains('is-expanded')).toBe(true);
             expect(componentOptions.setEditorState).toHaveBeenLastCalledWith(expect.objectContaining({ activeLayer: layer }));
+            for (const otherLayer of allLayers) {
+                const sectionEl = parent.querySelector(`[data-hexer-layer="${otherLayer}"]`)!.closest('.hexer-sidebar-section');
+                expect(sectionEl!.classList.contains('is-expanded')).toBe(otherLayer === layer);
+            }
         }
     });
 });
