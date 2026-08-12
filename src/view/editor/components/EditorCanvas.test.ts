@@ -88,7 +88,7 @@ describe('requestRender', () => {
 
     it('does not render if render has not been requested', () => {
         // Arrange
-        const { canvas } = createCanvas();
+        const _ = createCanvas();
         vi.useFakeTimers();
         vi.advanceTimersToNextFrame();
         vi.mocked(render).mockClear(); // Clear the call from the previous frame
