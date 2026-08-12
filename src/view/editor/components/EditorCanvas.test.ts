@@ -33,6 +33,12 @@ const createStrategy = (events: RegisteredEvents): ToolStrategy => ({
     getEvents: () => events,
 });
 
+// happy-dom performs no layout, so clientWidth/clientHeight are always 0.
+const stubClientSize = (el: HTMLElement, width: number, height: number) => {
+    Object.defineProperty(el, 'clientWidth', { value: width, configurable: true });
+    Object.defineProperty(el, 'clientHeight', { value: height, configurable: true });
+};
+
 describe('registerEvents', () => {
     it.each(HANDLER_CASES)('invokes $handler on $event', ({ handler, event, eventInit }) => {
         // Arrange
@@ -75,6 +81,91 @@ describe('requestRender', () => {
 
         // Assert
         vi.advanceTimersToNextFrame();
+        expect(vi.mocked(render)).toHaveBeenCalledOnce();
+    });
+});
+
+describe('resize observer', () => {
+    // happy-dom's ResizeObserver is a documented no-op: observe() does nothing and
+    // the callback never fires. Swap in a fake that hands the callback to the test
+    // so it can drive a resize itself.
+    let triggerResize: () => void = () => {
+        throw new Error('ResizeObserver was never constructed');
+    };
+    let observeSpy = vi.fn();
+
+    beforeEach(() => {
+        observeSpy = vi.fn();
+        vi.stubGlobal('ResizeObserver', class {
+            observe = observeSpy;
+            unobserve = vi.fn();
+            disconnect = vi.fn();
+
+            constructor(callback: ResizeObserverCallback) {
+                triggerResize = () => callback([], this as unknown as ResizeObserver);
+            }
+        });
+
+        // Without a canvas adapter happy-dom returns null from getContext, and
+        // resizeCanvas calls setTransform on it.
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext')
+            .mockReturnValue({ setTransform: vi.fn() } as unknown as CanvasRenderingContext2D);
+
+        vi.useFakeTimers();
+        vi.mocked(render).mockClear();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    it('observes the canvas element', () => {
+        // Arrange, Act
+        const { canvasEl } = createCanvas();
+
+        // Assert
+        expect(observeSpy).toHaveBeenCalledWith(canvasEl);
+    });
+
+    it('matches the backing store to the display size on resize', () => {
+        // Arrange
+        const { canvasEl } = createCanvas();
+        stubClientSize(canvasEl, 300, 150);
+
+        // Act
+        triggerResize();
+
+        // Assert
+        expect(canvasEl.width).toBe(300);
+        expect(canvasEl.height).toBe(150);
+    });
+
+    it('scales the backing store by the device pixel ratio', () => {
+        // Arrange
+        const { canvasEl } = createCanvas();
+        stubClientSize(canvasEl, 300, 150);
+        vi.stubGlobal('devicePixelRatio', 2);
+
+        // Act
+        triggerResize();
+
+        // Assert
+        expect(canvasEl.width).toBe(600);
+        expect(canvasEl.height).toBe(300);
+    });
+
+    it('renders on resize', () => {
+        // Arrange
+        const { canvasEl } = createCanvas();
+        stubClientSize(canvasEl, 300, 150);
+
+        // Act
+        triggerResize();
+        vi.advanceTimersToNextFrame();
+
+        // Assert
         expect(vi.mocked(render)).toHaveBeenCalledOnce();
     });
 });
