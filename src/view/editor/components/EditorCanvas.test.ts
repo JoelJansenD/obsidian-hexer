@@ -22,7 +22,6 @@ const HANDLER_CASES = Object.entries(HANDLER_EVENTS)
 
 const createCanvas = () => {
     const componentOptions = createComponentOptions();
-    vi.mocked(componentOptions.getDataClone).mockImplementation(() => createHexerData());
     const parent = document.createElement('div');
     const canvas = new EditorCanvas(parent, componentOptions);
     return { canvas, canvasEl: parent.querySelector('canvas')! };
