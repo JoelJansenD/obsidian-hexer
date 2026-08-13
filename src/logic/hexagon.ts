@@ -14,6 +14,7 @@ export interface Point {
 export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
     icon: Icon | null;
+    factionId: string | null;
 };
 
 export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {

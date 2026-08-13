@@ -1,12 +1,7 @@
+import { Faction } from "../../../../logic/faction";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
 import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
-
-export interface Faction {
-    id: string;
-    name: string;
-    color: string;
-}
 
 export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
     constructor(

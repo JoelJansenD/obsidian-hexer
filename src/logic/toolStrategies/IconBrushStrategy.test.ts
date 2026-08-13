@@ -14,7 +14,7 @@ describe('onLeftClick', () => {
     it('paints an icon onto the target hexagon', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null, factionId: null });
         const data = createHexerData({ hexes: hexMap });
         const expectedIcon = {
             name: 'castle',
@@ -59,9 +59,9 @@ describe('onLeftDrag', () => {
     it('paints icons onto hexagons as the mouse moves across them', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: null });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: null });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: null, factionId: null });
+        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: null, factionId: null });
+        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: null, factionId: null });
         const data = createHexerData({ hexes: hexMap });
         const expectedIcon = {
             name: 'castle',
