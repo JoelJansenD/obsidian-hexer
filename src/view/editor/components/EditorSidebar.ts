@@ -36,9 +36,10 @@ export default class EditorSidebar {
     private buildRivers(sidebarEl: HTMLElement) {
         return new PathSidebarSection(sidebarEl, this._componentOptions, {
             icon: Droplets,
-            type: 'river',
+            layer: 'river',
             label: 'Rivers',
-            newPathLabel: 'New river',
+            addLabel: 'New river',
+            addRole: 'add-river',
             getPaths: data => data.rivers,
             onSelect: () => this.select('river'),
         });
@@ -47,9 +48,10 @@ export default class EditorSidebar {
     private buildRoads(sidebarEl: HTMLElement) {
         return new PathSidebarSection(sidebarEl, this._componentOptions, {
             icon: Route,
-            type: 'road',
+            layer: 'road',
             label: 'Roads',
-            newPathLabel: 'New road',
+            addLabel: 'New road',
+            addRole: 'add-road',
             getPaths: data => data.roads,
             onSelect: () => this.select('road'),
         });

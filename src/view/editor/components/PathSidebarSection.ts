@@ -1,74 +1,53 @@
-import { createElement, Plus, type IconNode } from "lucide";
-import EditorSidebarSection from "./EditorSidebarSection";
+import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 import PathRow from "./PathRow";
 import { HexerData } from "../../../logic/HexerData";
 import { ComponentOptions } from "../Editor";
-import { Path, PathType } from "../../../logic/path";
+import { Path } from "../../../logic/path";
 
-interface PathSidebarSectionOptions {
-    icon: IconNode;
-    label: string;
-    type: PathType;
-    /** Label for the add button and name given to a newly created path. */
-    newPathLabel: string;
+interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
     /** Selects the paths array (rivers or roads) this section manages. */
     getPaths: (data: HexerData) => Path[];
-    onSelect?: () => void;
 }
 
 /**
  * A sidebar section that lists the paths of a single layer (rivers or roads),
- * with an "add path" button. Shared by the river and road sections.
+ * with an "add path" button. Shared by the river and road sections; the generic
+ * list scaffolding lives in {@link EditorListSidebarSection}.
  */
-export default class PathSidebarSection extends EditorSidebarSection {
-    private _pathsEl!: HTMLDivElement;
-
+export default class PathSidebarSection extends EditorListSidebarSection<Path> {
     constructor(
         parentEl: HTMLElement,
-        private _componentOptions: ComponentOptions,
+        componentOptions: ComponentOptions,
         private _pathOptions: PathSidebarSectionOptions,
     ) {
-        super(parentEl, {
-            icon: _pathOptions.icon,
-            label: _pathOptions.label,
-            layer: _pathOptions.type,
-            onSelect: _pathOptions.onSelect,
-        });
-        this.buildPathContent();
+        super(parentEl, componentOptions, _pathOptions);
+        this.renderItems();
     }
 
-    private buildPathContent() {
-        const addPathButton = this.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
-        addPathButton.dataset.role = `add-${this._pathOptions.type}`;
-        addPathButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
-        addPathButton.createEl('span', { text: this._pathOptions.newPathLabel });
-        addPathButton.addEventListener('click', this.createPath.bind(this));
-
-        this._pathsEl = this.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        this.renderPaths();
+    protected getItems(data: HexerData): Path[] {
+        return this._pathOptions.getPaths(data);
     }
 
-    /** Re-renders the path list, e.g. after the active path is cleared elsewhere. */
-    public refresh() {
-        this.renderPaths();
-    }
-
-    private renderPaths() {
+    protected addItem() {
         const data = this._componentOptions.getDataClone();
-        const state = this._componentOptions.getEditorState()
-        const activePath = state.activePath;
-        this._pathsEl.empty();
-        this._pathOptions.getPaths(data).forEach(path => {
-            new PathRow(this._pathsEl, {
-                disableEdit: activePath !== null && activePath.pathId !== path.id,
-                editMode: activePath?.pathId === path.id,
-                path,
-                obsidian: this._componentOptions.obsidian,
-                onEdit: this.editPath.bind(this),
-                onFinish: this.closePath.bind(this),
-                onSave: (() => this.savePath(path)).bind(this),
-                onSettingsSave: this.savePathSettings.bind(this)
-            });
+        const newPath = new Path(this._pathOptions.addLabel);
+        this._pathOptions.getPaths(data).push(newPath);
+        this._componentOptions.setData(data);
+        this.setActivePath(newPath);
+        this.renderItems();
+    }
+
+    protected renderRow(listEl: HTMLElement, path: Path) {
+        const activePath = this._componentOptions.getEditorState().activePath;
+        new PathRow(listEl, {
+            disableEdit: activePath !== null && activePath.pathId !== path.id,
+            editMode: activePath?.pathId === path.id,
+            path,
+            obsidian: this._componentOptions.obsidian,
+            onEdit: this.editPath.bind(this),
+            onFinish: this.closePath.bind(this),
+            onSave: (() => this.savePath(path)).bind(this),
+            onSettingsSave: this.savePathSettings.bind(this)
         });
     }
 
@@ -83,25 +62,16 @@ export default class PathSidebarSection extends EditorSidebarSection {
         this._componentOptions.setEditorState(state);
     }
 
-    private createPath() {
-        const data = this._componentOptions.getDataClone();
-        const newPath = new Path(this._pathOptions.newPathLabel);
-        this._pathOptions.getPaths(data).push(newPath);
-        this._componentOptions.setData(data);
-        this.setActivePath(newPath);
-        this.renderPaths();
-    }
-
     private editPath(pathId: string) {
         const data = this._componentOptions.getDataClone();
         const path = this._pathOptions.getPaths(data).find(p => p.id === pathId) ?? null;
         this.setActivePath(path);
-        this.renderPaths();
+        this.renderItems();
     }
 
     private closePath() {
         this.setActivePath(null);
-        this.renderPaths();
+        this.renderItems();
     }
 
     private savePath(path: Path) {
@@ -124,8 +94,8 @@ export default class PathSidebarSection extends EditorSidebarSection {
 
         target.name = edited.name;
         target.filePath = edited.filePath;
-        
+
         this._componentOptions.setData(data);
-        this.renderPaths();
+        this.renderItems();
     }
 }

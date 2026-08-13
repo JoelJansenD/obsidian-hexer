@@ -1,7 +1,7 @@
 import { ChevronDown, createElement, type IconNode } from 'lucide';
 import { Layer } from '../../../logic/EditorState';
 
-interface EditorSidebarSectionOptions {
+export interface EditorSidebarSectionOptions {
     icon?: IconNode;
     label: string;
     layer: Layer;

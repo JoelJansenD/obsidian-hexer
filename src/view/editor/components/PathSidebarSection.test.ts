@@ -20,9 +20,10 @@ const createPathSection = (paths: Path[]) => {
     const parent = document.createElement('div');
     const section = new PathSidebarSection(parent, componentOptions, {
         icon: Droplets,
-        type: 'river',
+        layer: 'river',
         label: 'Rivers',
-        newPathLabel: 'New river',
+        addLabel: 'New river',
+        addRole: 'add-river',
         getPaths: data => data.rivers,
     });
     return { parent, componentOptions, openPathSettings, section };
