@@ -61,6 +61,15 @@ export default class EditorCanvas {
         this._listeners.clear();
     }
 
+    /**
+     * Releases everything attached outside the canvas element, so the canvas can
+     * be discarded when the view is closed or reloaded.
+     */
+    public destroy() {
+        this.unregisterEvents();
+        this._resizeObserver.disconnect();
+    }
+
     public requestRender() {
         if(this._renderRequested) {
             return;

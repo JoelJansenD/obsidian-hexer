@@ -80,7 +80,7 @@ describe('onLeftDrag', () => {
         expect(hexMap.get('2,0')!.icon).toEqual(expectedIcon);
     });
 
-    it.todo('creates new hexagons with icons when dragging over empty hexagons', () => {
+    it('creates new hexagons with icons when dragging over empty hexagons', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         const data = createHexerData({ hexes: hexMap });
