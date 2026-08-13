@@ -1,6 +1,6 @@
 import { Check, createElement, File, PencilLine, Settings } from "lucide";
-import { Path } from "../../../logic/path";
-import { ObsidianInterop } from "../../ObsidianInterop";
+import { ObsidianInterop } from "../../../ObsidianInterop";
+import { Path } from "../../../../logic/path";
 
 interface PathRowOptions {
     disableEdit: boolean;

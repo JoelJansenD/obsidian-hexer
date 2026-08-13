@@ -1,7 +1,7 @@
 import { createElement, Plus } from "lucide";
 import EditorSidebarSection, { EditorSidebarSectionOptions } from "./EditorSidebarSection";
-import { HexerData } from "../../../logic/HexerData";
-import { ComponentOptions } from "../Editor";
+import { HexerData } from "../../../../logic/HexerData";
+import { ComponentOptions } from "../../Editor";
 
 export interface EditorListSidebarSectionOptions extends EditorSidebarSectionOptions {
     /** Text shown on the add button. */

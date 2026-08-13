@@ -3,7 +3,7 @@ import { HexerData } from "../../logic/HexerData";
 import { resolveToolStrategy } from "../../logic/toolStrategies/ToolStrategy";
 import { ObsidianInterop } from "../ObsidianInterop";
 import EditorCanvas from "./components/EditorCanvas";
-import EditorSidebar from "./components/EditorSidebar";
+import EditorSidebar from "./components/sidebar/EditorSidebar";
 
 export interface DataOptions {
     getDataClone: () => HexerData,

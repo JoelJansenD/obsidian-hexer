@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { Droplets } from "lucide";
-import createHexerData from "../../../__test/createHexerData";
-import { createComponentOptions } from "../../../__test/defaultEditorState";
-import { Path } from "../../../logic/path";
-import { ObsidianInterop, PathSettingsOptions } from "../../ObsidianInterop";
-import { ComponentOptions } from "../Editor";
+import createHexerData from "../../../../__test/createHexerData";
+import { createComponentOptions } from "../../../../__test/defaultEditorState";
+import { Path } from "../../../../logic/path";
+import { ObsidianInterop, PathSettingsOptions } from "../../../ObsidianInterop";
+import { ComponentOptions } from "../../Editor";
 import PathSidebarSection from "./PathSidebarSection";
 
 const createPath = (name: string, color: string) => {

@@ -2,7 +2,7 @@
 import { createComponentOptions } from "../../../__test/defaultEditorState";
 import { HexerData } from "../../../logic/HexerData";
 import { ComponentOptions } from "../Editor";
-import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
+import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./sidebar/EditorListSidebarSection";
 
 interface FakeItem {
     id: string;

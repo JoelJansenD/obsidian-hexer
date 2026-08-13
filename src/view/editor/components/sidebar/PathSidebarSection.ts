@@ -1,8 +1,8 @@
 import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 import PathRow from "./PathRow";
-import { HexerData } from "../../../logic/HexerData";
-import { ComponentOptions } from "../Editor";
-import { Path } from "../../../logic/path";
+import { HexerData } from "../../../../logic/HexerData";
+import { ComponentOptions } from "../../Editor";
+import { Path } from "../../../../logic/path";
 
 interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
     /** Selects the paths array (rivers or roads) this section manages. */

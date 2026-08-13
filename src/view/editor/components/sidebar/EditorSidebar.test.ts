@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { createComponentOptions } from "../../../__test/defaultEditorState";
-import { Layer } from "../../../logic/EditorState";
+import { createComponentOptions } from "../../../../__test/defaultEditorState";
+import { Layer } from "../../../../logic/EditorState";
 import EditorSidebar from "./EditorSidebar";
 
 const createSidebar = () => {

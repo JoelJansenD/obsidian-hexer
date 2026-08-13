@@ -1,9 +1,9 @@
 import { Mountain, Droplets, Shapes, Route } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
-import ColourPalette from "../../components/ColourPalette";
-import { Layer } from "../../../logic/EditorState";
-import { ComponentOptions } from "../Editor";
-import { HEXER_ICONS } from "../../../logic/icon";
+import ColourPalette from "../../../components/ColourPalette";
+import { Layer } from "../../../../logic/EditorState";
+import { ComponentOptions } from "../../Editor";
+import { HEXER_ICONS } from "../../../../logic/icon";
 import PathSidebarSection from "./PathSidebarSection";
 
 export default class EditorSidebar {
