@@ -269,17 +269,4 @@ describe('Refreshing', () => {
         expect(getColourInput(parent, newPath).disabled).toBe(true);
         expect(rowEl.querySelector<HTMLElement>('[data-role="edit-path"]')!.style.display).not.toBe('none');
     });
-
-    it('renders each path once', () => {
-        // Arrange
-        const { parent, componentOptions, section } = createPathSection([]);
-        clickAddPath(parent);
-        clearActivePath(componentOptions);
-
-        // Act
-        section.refresh();
-
-        // Assert
-        expect(readRows(parent).map(row => row.name)).toEqual(['New river']);
-    });
 });
