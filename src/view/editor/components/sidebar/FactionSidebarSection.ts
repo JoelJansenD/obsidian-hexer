@@ -1,6 +1,7 @@
 import { Faction } from "../../../../logic/faction";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
+import { ItemSettings } from "../../../ObsidianInterop";
 import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 import SidebarListRow from "./SidebarListRow";
 
@@ -46,6 +47,10 @@ export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
             onEdit: this.editFaction.bind(this),
             onFinish: this.closeFaction.bind(this),
             onColourPicked: colour => this.saveColour(item.id, colour),
+            onSettings: faction => this._componentOptions.obsidian.openItemSettings({
+                settings: { name: faction.name, filePath: faction.filePath },
+                onSave: settings => this.saveFactionSettings(faction.id, settings),
+            }),
         });
     }
 
@@ -74,5 +79,19 @@ export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
 
         target.color = colour;
         this._componentOptions.setData(data);
+    }
+
+    private saveFactionSettings(factionId: string, settings: ItemSettings) {
+        const data = this._componentOptions.getDataClone();
+        const target = data.factions.find(faction => faction.id === factionId);
+        if(!target) {
+            return;
+        }
+
+        target.name = settings.name;
+        target.filePath = settings.filePath;
+
+        this._componentOptions.setData(data);
+        this.renderItems();
     }
 }

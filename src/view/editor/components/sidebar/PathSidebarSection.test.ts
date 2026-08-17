@@ -3,7 +3,7 @@ import { Droplets } from "lucide";
 import createHexerData from "../../../../__test/createHexerData";
 import { createComponentOptions } from "../../../../__test/defaultEditorState";
 import { Path } from "../../../../logic/path";
-import { ObsidianInterop, PathSettingsOptions } from "../../../ObsidianInterop";
+import { ItemSettingsOptions, ObsidianInterop } from "../../../ObsidianInterop";
 import { ComponentOptions } from "../../Editor";
 import PathSidebarSection from "./PathSidebarSection";
 
@@ -15,8 +15,8 @@ const createPath = (name: string, color: string) => {
 
 const createPathSection = (paths: Path[]) => {
     const componentOptions = createComponentOptions({}, createHexerData({ rivers: paths }));
-    const openPathSettings = vi.fn<(options: PathSettingsOptions) => void>();
-    componentOptions.obsidian = { openPathSettings } as unknown as ObsidianInterop;
+    const openItemSettings = vi.fn<(options: ItemSettingsOptions) => void>();
+    componentOptions.obsidian = { openItemSettings } as unknown as ObsidianInterop;
     const parent = document.createElement('div');
     const section = new PathSidebarSection(parent, componentOptions, {
         icon: Droplets,
@@ -26,7 +26,7 @@ const createPathSection = (paths: Path[]) => {
         addRole: 'add-river',
         getPaths: data => data.rivers,
     });
-    return { parent, componentOptions, openPathSettings, section };
+    return { parent, componentOptions, openItemSettings, section };
 };
 
 const readRows = (parent: HTMLElement) =>
@@ -205,23 +205,23 @@ describe('Configuration modal', () => {
         const paths = [createPath('Silverflow', '#1122ff'), createPath('Mudbrook', '#8b4513')];
 
         // Act
-        const { openPathSettings } = openModal(paths);
+        const { openItemSettings } = openModal(paths);
 
         // Assert
-        expect(openPathSettings).toHaveBeenCalledTimes(1);
-        expect(openPathSettings.mock.calls[0][0].path.id).toBe(paths[0].id);
+        expect(openItemSettings).toHaveBeenCalledTimes(1);
+        expect(openItemSettings.mock.calls[0][0].settings.name).toBe(paths[0].name);
     });
 
     it('applies the name and note chosen in the modal', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
-        const { parent, componentOptions, openPathSettings } = openModal(paths);
-        const edited = openPathSettings.mock.calls[0][0].path.clone();
+        const { parent, componentOptions, openItemSettings } = openModal(paths);
+        const edited = { ...openItemSettings.mock.calls[0][0].settings };
         edited.name = 'Quicksilver';
         edited.filePath = 'Rivers/Quicksilver.md';
 
         // Act
-        openPathSettings.mock.calls[0][0].onSave!(edited);
+        openItemSettings.mock.calls[0][0].onSave!(edited);
 
         // Assert
         expect(getRow(parent, paths[0]).querySelector('.hexer-sidebar-list-row-name')!.textContent).toBe('Quicksilver');
@@ -232,10 +232,10 @@ describe('Configuration modal', () => {
     it('links the note on the row once the edit is finished', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
-        const { parent, openPathSettings } = openModal(paths);
-        const edited = openPathSettings.mock.calls[0][0].path.clone();
+        const { parent, openItemSettings } = openModal(paths);
+        const edited = { ...openItemSettings.mock.calls[0][0].settings };
         edited.filePath = 'Rivers/Quicksilver.md';
-        openPathSettings.mock.calls[0][0].onSave!(edited);
+        openItemSettings.mock.calls[0][0].onSave!(edited);
 
         // Act
         clickButton(parent, paths[0], 'save-item');

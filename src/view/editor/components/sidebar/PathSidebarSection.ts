@@ -3,6 +3,7 @@ import SidebarListRow from "./SidebarListRow";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
 import { Path } from "../../../../logic/path";
+import { ItemSettings } from "../../../ObsidianInterop";
 
 interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
     /** Selects the paths array (rivers or roads) this section manages. */
@@ -51,9 +52,9 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
             onEdit: this.editPath.bind(this),
             onFinish: this.closePath.bind(this),
             onColourPicked: colour => this.savePath(path, colour),
-            onSettings: item => this._componentOptions.obsidian.openPathSettings({
-                path: item,
-                onSave: edited => this.savePathSettings(edited),
+            onSettings: item => this._componentOptions.obsidian.openItemSettings({
+                settings: { name: item.name, filePath: item.filePath },
+                onSave: settings => this.savePathSettings(item.id, settings),
             }),
         });
     }
@@ -92,15 +93,15 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
         this._componentOptions.setData(data);
     }
 
-    private savePathSettings(edited: Path) {
+    private savePathSettings(pathId: string, settings: ItemSettings) {
         const data = this._componentOptions.getDataClone();
-        const target = [...data.rivers, ...data.roads].find(p => p.id === edited.id);
+        const target = [...data.rivers, ...data.roads].find(p => p.id === pathId);
         if(!target) {
             return;
         }
 
-        target.name = edited.name;
-        target.filePath = edited.filePath;
+        target.name = settings.name;
+        target.filePath = settings.filePath;
 
         this._componentOptions.setData(data);
         this.renderItems();
