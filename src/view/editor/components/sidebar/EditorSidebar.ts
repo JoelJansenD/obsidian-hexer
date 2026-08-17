@@ -1,10 +1,12 @@
-import { Mountain, Droplets, Shapes, Route } from "lucide";
+import { Mountain, Droplets, Shapes, Route, Shield } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
-import ColourPalette from "../../components/ColourPalette";
-import { Layer } from "../../../logic/EditorState";
-import { ComponentOptions } from "../Editor";
-import { HEXER_ICONS } from "../../../logic/icon";
+import ColourPalette from "../../../components/ColourPalette";
+import { Layer } from "../../../../logic/EditorState";
+import { ComponentOptions } from "../../Editor";
+import { HEXER_ICONS } from "../../../../logic/icon";
 import PathSidebarSection from "./PathSidebarSection";
+import { FactionSidebarSection } from "./FactionSidebarSection";
+import EditorListSidebarSection from "./EditorListSidebarSection";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
@@ -30,53 +32,23 @@ export default class EditorSidebar {
         const roadSection = this.buildRoads(this._sidebarEl);
         this._sections.set('road', roadSection);
 
+        const factionSection = this.buildFactions(this._sidebarEl);
+        this._sections.set('faction', factionSection);
+
         this.updateIconElements();
     }
 
-    private buildRivers(sidebarEl: HTMLElement) {
-        return new PathSidebarSection(sidebarEl, this._componentOptions, {
-            icon: Droplets,
-            type: 'river',
-            label: 'Rivers',
-            newPathLabel: 'New river',
-            getPaths: data => data.rivers,
-            onSelect: () => this.select('river'),
+    private buildFactions(sidebarEl: HTMLElement) {
+        const factionSection = new FactionSidebarSection(sidebarEl, this._componentOptions, {
+            addLabel: 'New faction',
+            addRole: 'add-faction',
+            newItemName: 'New faction',
+            label: 'Factions',
+            layer: 'faction',
+            icon: Shield,
+            onSelect: () => this.select('faction'),
         });
-    }
-
-    private buildRoads(sidebarEl: HTMLElement) {
-        return new PathSidebarSection(sidebarEl, this._componentOptions, {
-            icon: Route,
-            type: 'road',
-            label: 'Roads',
-            newPathLabel: 'New road',
-            getPaths: data => data.roads,
-            onSelect: () => this.select('road'),
-        });
-    }
-
-    private buildTerrain(sidebarEl: HTMLElement) {
-        const terrainSection = new EditorSidebarSection(sidebarEl, {
-            icon: Mountain,
-            layer: 'terrain',
-            label: 'Terrain',
-            onSelect: () => this.select('terrain'),
-        });
-        
-        const editorState = this._componentOptions.getEditorState();
-        const paletteEl = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        new ColourPalette(
-            paletteEl,
-            {
-                dataField: 'terrain',
-                value: editorState.activeColour,
-                onUpdate: (newColour: string) => {
-                    const state = this._componentOptions.getEditorState();
-                    state.activeColour = newColour;
-                    this._componentOptions.setEditorState(state);
-                }
-            });
-        return terrainSection;
+        return factionSection;
     }
 
     private buildIcon(sidebarEl: HTMLElement) {
@@ -123,6 +95,56 @@ export default class EditorSidebar {
         return iconSection;
     }
 
+    private buildRivers(sidebarEl: HTMLElement) {
+        return new PathSidebarSection(sidebarEl, this._componentOptions, {
+            icon: Droplets,
+            layer: 'river',
+            label: 'Rivers',
+            addLabel: 'New river',
+            addRole: 'add-river',
+            newItemName: 'New river',
+            getPaths: data => data.rivers,
+            onSelect: () => this.select('river'),
+        });
+    }
+
+    private buildRoads(sidebarEl: HTMLElement) {
+        return new PathSidebarSection(sidebarEl, this._componentOptions, {
+            icon: Route,
+            layer: 'road',
+            label: 'Roads',
+            addLabel: 'New road',
+            addRole: 'add-road',
+            newItemName: 'New road',
+            getPaths: data => data.roads,
+            onSelect: () => this.select('road'),
+        });
+    }
+
+    private buildTerrain(sidebarEl: HTMLElement) {
+        const terrainSection = new EditorSidebarSection(sidebarEl, {
+            icon: Mountain,
+            layer: 'terrain',
+            label: 'Terrain',
+            onSelect: () => this.select('terrain'),
+        });
+        
+        const editorState = this._componentOptions.getEditorState();
+        const paletteEl = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        new ColourPalette(
+            paletteEl,
+            {
+                dataField: 'terrain',
+                value: editorState.activeColour,
+                onUpdate: (newColour: string) => {
+                    const state = this._componentOptions.getEditorState();
+                    state.activeColour = newColour;
+                    this._componentOptions.setEditorState(state);
+                }
+            });
+        return terrainSection;
+    }
+
     private updateIconElements() {
         const state = this._componentOptions.getEditorState();
         const colour = state.activeIcon.color;
@@ -147,10 +169,11 @@ export default class EditorSidebar {
         const state = this._componentOptions.getEditorState();
         state.activeLayer = layer;
         state.activePath = null;
+        state.activeFactionId = null;
         this._componentOptions.setEditorState(state);
 
         for (const section of this._sections.values()) {
-            if (section instanceof PathSidebarSection) {
+            if (section instanceof EditorListSidebarSection) {
                 section.refresh();
             }
         }

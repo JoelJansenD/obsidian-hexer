@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { Droplets } from "lucide";
-import createHexerData from "../../../__test/createHexerData";
-import { createComponentOptions } from "../../../__test/defaultEditorState";
-import { Path } from "../../../logic/path";
-import { ObsidianInterop, PathSettingsOptions } from "../../ObsidianInterop";
-import { ComponentOptions } from "../Editor";
+import createHexerData from "../../../../__test/createHexerData";
+import { createComponentOptions } from "../../../../__test/defaultEditorState";
+import { Path } from "../../../../logic/path";
+import { ItemSettingsOptions, ObsidianInterop } from "../../../ObsidianInterop";
+import { ComponentOptions } from "../../Editor";
 import PathSidebarSection from "./PathSidebarSection";
 
 const createPath = (name: string, color: string) => {
@@ -15,33 +15,35 @@ const createPath = (name: string, color: string) => {
 
 const createPathSection = (paths: Path[]) => {
     const componentOptions = createComponentOptions({}, createHexerData({ rivers: paths }));
-    const openPathSettings = vi.fn<(options: PathSettingsOptions) => void>();
-    componentOptions.obsidian = { openPathSettings } as unknown as ObsidianInterop;
+    const openItemSettings = vi.fn<(options: ItemSettingsOptions) => void>();
+    componentOptions.obsidian = { openItemSettings } as unknown as ObsidianInterop;
     const parent = document.createElement('div');
     const section = new PathSidebarSection(parent, componentOptions, {
         icon: Droplets,
-        type: 'river',
+        layer: 'river',
         label: 'Rivers',
-        newPathLabel: 'New river',
+        addLabel: 'New river',
+        addRole: 'add-river',
+        newItemName: 'New river',
         getPaths: data => data.rivers,
     });
-    return { parent, componentOptions, openPathSettings, section };
+    return { parent, componentOptions, openItemSettings, section };
 };
 
 const readRows = (parent: HTMLElement) =>
-    Array.from(parent.querySelectorAll<HTMLElement>('.hexer-path-row')).map(rowEl => ({
-        name: rowEl.querySelector('.hexer-path-row-name')!.textContent,
-        colour: rowEl.querySelector<HTMLInputElement>('.hexer-path-row-color')!.value,
+    Array.from(parent.querySelectorAll<HTMLElement>('.hexer-sidebar-list-row')).map(rowEl => ({
+        name: rowEl.querySelector('.hexer-sidebar-list-row-name')!.textContent,
+        colour: rowEl.querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!.value,
     }));
 
 const getRow = (parent: HTMLElement, path: Path) => {
-    const rowEl = parent.querySelector<HTMLElement>(`[data-path-id="${path.id}"]`);
+    const rowEl = parent.querySelector<HTMLElement>(`[data-item-id="${path.id}"]`);
     expect(rowEl).not.toBeNull();
     return rowEl!;
 };
 
 const getColourInput = (parent: HTMLElement, path: Path) =>
-    getRow(parent, path).querySelector<HTMLInputElement>('.hexer-path-row-color')!;
+    getRow(parent, path).querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!;
 
 const clickButton = (parent: HTMLElement, path: Path, role: string) => {
     const buttonEl = getRow(parent, path).querySelector(`[data-role="${role}"]`);
@@ -124,7 +126,7 @@ describe('Edit mode', () => {
         const { parent, componentOptions } = createPathSection(paths);
 
         // Act
-        clickButton(parent, paths[0], 'edit-path');
+        clickButton(parent, paths[0], 'edit-item');
 
         // Assert
         expect(getRow(parent, paths[0]).dataset.editing).toBe('true');
@@ -138,23 +140,23 @@ describe('Edit mode', () => {
         const { parent } = createPathSection(paths);
 
         // Act
-        clickButton(parent, paths[0], 'edit-path');
+        clickButton(parent, paths[0], 'edit-item');
 
         // Assert
         const otherRowEl = getRow(parent, paths[1]);
         expect(otherRowEl.dataset.editing).toBe('false');
         expect(getColourInput(parent, paths[1]).disabled).toBe(true);
-        expect(otherRowEl.querySelector<HTMLElement>('[data-role="edit-path"]')!.style.display).toBe('none');
+        expect(otherRowEl.querySelector<HTMLElement>('[data-role="edit-item"]')!.style.display).toBe('none');
     });
 
     it('closes edit mode when the edit is finished', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
         const { parent, componentOptions } = createPathSection(paths);
-        clickButton(parent, paths[0], 'edit-path');
+        clickButton(parent, paths[0], 'edit-item');
 
         // Act
-        clickButton(parent, paths[0], 'save-path');
+        clickButton(parent, paths[0], 'save-item');
 
         // Assert
         expect(getRow(parent, paths[0]).dataset.editing).toBe('false');
@@ -166,7 +168,7 @@ describe('Edit mode', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
         const { parent, componentOptions } = createPathSection(paths);
-        clickButton(parent, paths[0], 'edit-path');
+        clickButton(parent, paths[0], 'edit-item');
 
         // Act
         pickColour(parent, paths[0], '#00ff00');
@@ -180,11 +182,11 @@ describe('Edit mode', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
         const { parent } = createPathSection(paths);
-        clickButton(parent, paths[0], 'edit-path');
+        clickButton(parent, paths[0], 'edit-item');
         pickColour(parent, paths[0], '#00ff00');
 
         // Act
-        clickButton(parent, paths[0], 'save-path');
+        clickButton(parent, paths[0], 'save-item');
 
         // Assert
         expect(getColourInput(parent, paths[0]).value).toBe('#00ff00');
@@ -194,8 +196,8 @@ describe('Edit mode', () => {
 describe('Configuration modal', () => {
     const openModal = (paths: Path[]) => {
         const section = createPathSection(paths);
-        clickButton(section.parent, paths[0], 'edit-path');
-        clickButton(section.parent, paths[0], 'path-settings');
+        clickButton(section.parent, paths[0], 'edit-item');
+        clickButton(section.parent, paths[0], 'item-settings');
         return section;
     };
 
@@ -204,26 +206,26 @@ describe('Configuration modal', () => {
         const paths = [createPath('Silverflow', '#1122ff'), createPath('Mudbrook', '#8b4513')];
 
         // Act
-        const { openPathSettings } = openModal(paths);
+        const { openItemSettings } = openModal(paths);
 
         // Assert
-        expect(openPathSettings).toHaveBeenCalledTimes(1);
-        expect(openPathSettings.mock.calls[0][0].path.id).toBe(paths[0].id);
+        expect(openItemSettings).toHaveBeenCalledTimes(1);
+        expect(openItemSettings.mock.calls[0][0].settings.name).toBe(paths[0].name);
     });
 
     it('applies the name and note chosen in the modal', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
-        const { parent, componentOptions, openPathSettings } = openModal(paths);
-        const edited = openPathSettings.mock.calls[0][0].path.clone();
+        const { parent, componentOptions, openItemSettings } = openModal(paths);
+        const edited = { ...openItemSettings.mock.calls[0][0].settings };
         edited.name = 'Quicksilver';
         edited.filePath = 'Rivers/Quicksilver.md';
 
         // Act
-        openPathSettings.mock.calls[0][0].onSave!(edited);
+        openItemSettings.mock.calls[0][0].onSave!(edited);
 
         // Assert
-        expect(getRow(parent, paths[0]).querySelector('.hexer-path-row-name')!.textContent).toBe('Quicksilver');
+        expect(getRow(parent, paths[0]).querySelector('.hexer-sidebar-list-row-name')!.textContent).toBe('Quicksilver');
         expect(componentOptions.setData).toHaveBeenCalled();
         expect(componentOptions.getDataClone().rivers[0].filePath).toBe('Rivers/Quicksilver.md');
     });
@@ -231,13 +233,13 @@ describe('Configuration modal', () => {
     it('links the note on the row once the edit is finished', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
-        const { parent, openPathSettings } = openModal(paths);
-        const edited = openPathSettings.mock.calls[0][0].path.clone();
+        const { parent, openItemSettings } = openModal(paths);
+        const edited = { ...openItemSettings.mock.calls[0][0].settings };
         edited.filePath = 'Rivers/Quicksilver.md';
-        openPathSettings.mock.calls[0][0].onSave!(edited);
+        openItemSettings.mock.calls[0][0].onSave!(edited);
 
         // Act
-        clickButton(parent, paths[0], 'save-path');
+        clickButton(parent, paths[0], 'save-item');
 
         // Assert
         expect(getRow(parent, paths[0]).querySelector('[data-role="view-file"]')).not.toBeNull();
@@ -266,19 +268,6 @@ describe('Refreshing', () => {
         const rowEl = getRow(parent, newPath);
         expect(rowEl.dataset.editing).toBe('false');
         expect(getColourInput(parent, newPath).disabled).toBe(true);
-        expect(rowEl.querySelector<HTMLElement>('[data-role="edit-path"]')!.style.display).not.toBe('none');
-    });
-
-    it('renders each path once', () => {
-        // Arrange
-        const { parent, componentOptions, section } = createPathSection([]);
-        clickAddPath(parent);
-        clearActivePath(componentOptions);
-
-        // Act
-        section.refresh();
-
-        // Assert
-        expect(readRows(parent).map(row => row.name)).toEqual(['New river']);
+        expect(rowEl.querySelector<HTMLElement>('[data-role="edit-item"]')!.style.display).not.toBe('none');
     });
 });

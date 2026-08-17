@@ -1,23 +1,22 @@
 import { AbstractInputSuggest, App, Modal, Setting, TFile } from "obsidian";
-import { PathSettingsOptions } from "../../view/ObsidianInterop";
-import { Path } from "../../logic/path";
+import { ItemSettings, ItemSettingsOptions } from "../../view/ObsidianInterop";
 
-export default class PathSettingsModal extends Modal {
+export default class ItemSettingsModal extends Modal {
 
-    private readonly path: Path;
+    private readonly settings: ItemSettings;
 
-    constructor(app: App, private _options: PathSettingsOptions) {
+    constructor(app: App, private _options: ItemSettingsOptions) {
         super(app);
 
-        this.path = new Path({... _options.path});
+        this.settings = { ..._options.settings };
 
         new Setting(this.contentEl)
             .setName('Name')
             .addText(text => {
                 text
-                    .setValue(this.path.name)
-                    .onChange(value => this.path.name = value);
-                text.inputEl.dataset.hexerSetting = 'path-name';
+                    .setValue(this.settings.name)
+                    .onChange(value => this.settings.name = value);
+                text.inputEl.dataset.hexerSetting = 'item-name';
             });
 
         new Setting(this.contentEl)
@@ -25,17 +24,17 @@ export default class PathSettingsModal extends Modal {
             .addSearch(search => {
                 search
                     .setPlaceholder('Select a file to link')
-                    .setValue(this.path.filePath || '')
+                    .setValue(this.settings.filePath || '')
                     .clearButtonEl.addEventListener('click', () => {
-                        this.path.filePath = null;
+                        this.settings.filePath = null;
                         search.setValue('');
                     });
-                search.inputEl.dataset.hexerSetting = 'path-file';
+                search.inputEl.dataset.hexerSetting = 'item-file';
 
                 const suggest = new FileSuggest(this.app, search.inputEl);
                 suggest.onSelect(file => {
                     if(file instanceof TFile) {
-                        this.path.filePath = file.path;
+                        this.settings.filePath = file.path;
                         search.setValue(file.path);
                     }
                     suggest.close();
@@ -48,10 +47,10 @@ export default class PathSettingsModal extends Modal {
                     .setButtonText('Save')
                     .setCta()
                     .onClick(() => {
-                        this._options.onSave?.(this.path);
+                        this._options.onSave?.(this.settings);
                         this.close();
                     });
-                button.buttonEl.dataset.role = 'save-path-settings';
+                button.buttonEl.dataset.role = 'save-item-settings';
             });
     }
 }
@@ -61,11 +60,11 @@ class FileSuggest extends AbstractInputSuggest<TFile> {
     constructor(private _app: App, inputEl: HTMLInputElement) {
         super(_app, inputEl);
     }
-    
+
     protected getSuggestions(query: string): TFile[] | Promise<TFile[]> {
         return this._app.vault.getFiles().filter(file => file.name.toLowerCase().includes(query.toLowerCase()));
     }
-    
+
     renderSuggestion(value: TFile, el: HTMLElement): void {
         el.createEl('div', { text: value.name });
     }

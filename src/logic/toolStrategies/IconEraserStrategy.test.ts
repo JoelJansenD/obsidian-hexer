@@ -14,7 +14,7 @@ describe('onLeftClick', () => {
     it('removes the hexagon from the map if it is empty after erasing', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' }, factionId: null });
         const data = createHexerData({ hexes: hexMap });
 
         // Act
@@ -27,7 +27,7 @@ describe('onLeftClick', () => {
     it('clears only the icon if a terrain colour is also present', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: { name: 'castle', color: '#ff0000' } });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: { name: 'castle', color: '#ff0000' }, factionId: null });
         const data = createHexerData({ hexes: hexMap });
 
         // Act
@@ -51,9 +51,9 @@ describe('onLeftDrag', () => {
     it('erases existing icons as the mouse moves across them', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' } });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' }, factionId: null });
+        hexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' }, factionId: null });
+        hexMap.set('2,0', { q: 2, r: 0, terrainColor: null, icon: { name: 'castle', color: '#ff0000' }, factionId: null });
         const data = createHexerData({ hexes: hexMap });
 
         // Act
@@ -70,9 +70,9 @@ describe('onLeftDrag', () => {
     it('clears only the icon as the mouse moves across hexagons that also have a terrain colour', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' } });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' } });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' } });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' }, factionId: null });
+        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' }, factionId: null });
+        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' }, factionId: null });
         const data = createHexerData({ hexes: hexMap });
 
         // Act

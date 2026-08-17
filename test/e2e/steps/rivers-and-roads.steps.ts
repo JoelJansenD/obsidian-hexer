@@ -2,7 +2,7 @@ import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import editorPage from '../support/editor.page';
 import pathPage from '../support/path.page';
-import pathSettingsPage from '../support/pathSettings.page';
+import itemSettingsPage from '../support/itemSettings.page';
 import { createNote } from '../support/obsidian.page';
 import { RiversAndRoadsContext } from '../support/contexts/rivers-and-roads.context';
 import { RadialCoordinates } from '../../../src/logic/hexagon';
@@ -61,8 +61,8 @@ When('I edit the river\'s information', async function (this: RiversAndRoadsCont
     await pathPage.editRiverInformation(this.selectedRiver!.id);
 });
 
-When('I change the name to {string}', async function (this: RiversAndRoadsContext, name: string) {
-    await pathSettingsPage.setName(name);
+When('I change the river\'s name to {string}', async function (this: RiversAndRoadsContext, name: string) {
+    await itemSettingsPage.setName(name);
     this.expectedName = name;
 });
 
@@ -71,8 +71,8 @@ When('I attach a note to the river', async function (this: RiversAndRoadsContext
     // the note, then save, leaving the assertions to read the persisted path.
     const notePath = 'Silverflow River.md';
     await createNote(notePath, '# Silverflow River\n');
-    await pathSettingsPage.attachNote('Silverflow River');
-    await pathSettingsPage.save();
+    await itemSettingsPage.attachNote('Silverflow River');
+    await itemSettingsPage.save();
     this.attachedNotePath = notePath;
 });
 

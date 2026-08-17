@@ -1,15 +1,22 @@
-import { Path } from "../logic/path";
+/**
+ * The part of a sidebar item the settings dialog edits, shared by every item
+ * type that can be listed in the sidebar (paths, factions, ...).
+ */
+export interface ItemSettings {
+    name: string;
+    filePath: string | null;
+}
 
 /**
- * Options supplied by the calling UI when opening the path settings dialog.
- * The path being edited is required; the listeners are optional and let the
- * caller decide what happens when the dialog is committed or dismissed.
+ * Options supplied by the calling UI when opening the item settings dialog.
+ * The settings being edited are required; the listeners are optional and let
+ * the caller decide what happens when the dialog is committed or dismissed.
  */
-export interface PathSettingsOptions {
-    /** The path the dialog edits. */
-    path: Path;
-    /** Called with the edited path when the user commits the dialog. */
-    onSave?: (path: Path) => void;
+export interface ItemSettingsOptions {
+    /** The settings the dialog starts from. */
+    settings: ItemSettings;
+    /** Called with the edited settings when the user commits the dialog. */
+    onSave?: (settings: ItemSettings) => void;
     /** Called when the user dismisses the dialog without saving. */
     onCancel?: () => void;
 }
@@ -35,8 +42,8 @@ export interface FilePreviewOptions {
  * plain function types without knowing anything about Obsidian itself.
  */
 export interface ObsidianInterop {
-    /** Opens the settings dialog for a path, driven by the caller's options. */
-    openPathSettings: (options: PathSettingsOptions) => void;
+    /** Opens the settings dialog for a sidebar item, driven by the caller's options. */
+    openItemSettings: (options: ItemSettingsOptions) => void;
     /** Shows Obsidian's native reading-view preview of the linked note on hover. */
     showFilePreview: (options: FilePreviewOptions) => void;
     /** Opens the linked note; a mod-click opens it in a new tab. */

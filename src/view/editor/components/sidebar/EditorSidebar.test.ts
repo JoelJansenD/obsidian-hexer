@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { createComponentOptions } from "../../../__test/defaultEditorState";
-import { Layer } from "../../../logic/EditorState";
+import { createComponentOptions } from "../../../../__test/defaultEditorState";
+import { Layer } from "../../../../logic/EditorState";
 import EditorSidebar from "./EditorSidebar";
 
 const createSidebar = () => {
@@ -45,6 +45,7 @@ describe('Layers', () => {
             icon: null,
             river: null,
             road: null,
+            faction: null,
             // Terrain cannot be first because it is open by default, so test it later
             terrain: null,
         };

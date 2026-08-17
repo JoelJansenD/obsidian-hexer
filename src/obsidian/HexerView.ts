@@ -2,7 +2,7 @@ import { Keymap, parseYaml, stringifyYaml, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
 import { FRONTMATTER_REGEX, fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
-import PathSettingsModal from './modals/PathSettingsModal';
+import ItemSettingsModal from './modals/ItemSettingsModal';
 import { FilePreviewOptions } from '../view/ObsidianInterop';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
@@ -54,7 +54,7 @@ export class HexerView extends TextFileView {
                     setData: (data: HexerData) => this.setHexerData(data)
                 },
                 {
-                    openPathSettings: options => new PathSettingsModal(this.app, options).open(),
+                    openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
                     showFilePreview: options => this.showFilePreview(options),
                     openFile: (filePath, event) => this.openFile(filePath, event),
                 });

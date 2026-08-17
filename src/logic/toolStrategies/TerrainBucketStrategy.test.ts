@@ -15,17 +15,17 @@ describe('onLeftClick', () => {
         // A connected chain and branch of same-colour hexes that requires the
         // fill to recurse across several hops from the clicked hex.
         hexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: null });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#ff0000', icon: null });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#ff0000', icon: null });
-        hexMap.set('3,0', { q: 3, r: 0, terrainColor: '#ff0000', icon: null });
-        hexMap.set('1,-1', { q: 1, r: -1, terrainColor: '#ff0000', icon: null });
+        hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        hexMap.set('1,0', { q: 1, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        hexMap.set('2,0', { q: 2, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        hexMap.set('3,0', { q: 3, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        hexMap.set('1,-1', { q: 1, r: -1, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // A connected hex of a different colour that must not be filled.
-        hexMap.set('2,-1', { q: 2, r: -1, terrainColor: '#0000ff', icon: null });
+        hexMap.set('2,-1', { q: 2, r: -1, terrainColor: '#0000ff', icon: null, factionId: null });
 
         // A same-colour hex that is disconnected and must not be filled.
-        hexMap.set('10,10', { q: 10, r: 10, terrainColor: '#ff0000', icon: null });
+        hexMap.set('10,10', { q: 10, r: 10, terrainColor: '#ff0000', icon: null, factionId: null });
 
         data = createHexerData({ hexes: hexMap });
     });
@@ -51,8 +51,8 @@ describe('onLeftClick', () => {
     it('fills connected hexes sharing an empty terrain colour', () => {
         // Arrange
         const emptyHexMap = new Map<string, Hexagon>();
-        emptyHexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: null });
-        emptyHexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: null });
+        emptyHexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: null, factionId: null });
+        emptyHexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: null, factionId: null });
         const emptyData = createHexerData({ hexes: emptyHexMap });
 
         const fillColour = '#00ff00';

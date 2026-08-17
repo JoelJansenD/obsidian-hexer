@@ -48,7 +48,7 @@ class PathPage {
     }
 
     async editRiver(id: string) {
-        await this.selectAndClick(`[data-path-id="${id}"] [data-role="edit-path"]`);
+        await this.selectAndClick(`[data-item-id="${id}"] [data-role="edit-item"]`);
     }
 
     /**
@@ -57,11 +57,11 @@ class PathPage {
      */
     async editRiverInformation(id: string) {
         await this.editRiver(id);
-        await this.selectAndClick(`[data-path-id="${id}"] [data-role="path-settings"]`);
+        await this.selectAndClick(`[data-item-id="${id}"] [data-role="item-settings"]`);
     }
 
     public async getRiverElement(id: string) {
-        return browser.$(`[data-path-id="${id}"]`);
+        return browser.$(`[data-item-id="${id}"]`);
     }
 
     async getRiver(id: string): Promise<Path | undefined> {

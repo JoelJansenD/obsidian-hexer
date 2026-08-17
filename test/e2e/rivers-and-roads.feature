@@ -25,7 +25,7 @@ Feature: Rivers and Roads
             | 1 | 1 |
             | 2 | 1 |
         When I edit the river's information
-        And I change the name to "Silverflow River"
+        And I change the river's name to "Silverflow River"
         And I attach a note to the river
         Then the river is updated with the new name
         And I can view the attached note

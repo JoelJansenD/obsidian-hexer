@@ -1,15 +1,16 @@
+import { Faction } from "../logic/faction";
 import { Hexagon } from "../logic/hexagon";
 import { HexerData, HexerState } from "../logic/HexerData";
 import { Path } from "../logic/path";
 import { fromFrontmatter, toFrontmatter } from "./frontmatter";
 
-const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [] });
+const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [] });
 
 describe('toFrontmatter', () => {
     it('converts HexerData to frontmatter correctly', () => {
         // Arrange
         const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
         const frontmatter = toFrontmatter(data);
@@ -18,9 +19,10 @@ describe('toFrontmatter', () => {
         expect(frontmatter.hexer).toEqual({
             version: '1.0',
             size: 50,
-            hexes: { '0,0': { q: 0, r: 0, terrainColor: '#ff0000', icon: null } },
+            hexes: { '0,0': { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null } },
             rivers: [],
             roads: [],
+            factions: [],
         });
     });
 });
@@ -29,8 +31,8 @@ describe('frontmatter round-trip', () => {
     it('survives structured serialization to a plain object and back', () => {
         // Arrange
         const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
-        data.setHex({ q: 1, r: 2, terrainColor: '#00ff00', icon: null });
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        data.setHex({ q: 1, r: 2, terrainColor: '#00ff00', icon: null, factionId: null });
         
         const river = new Path("River 1");
         river.addNode({ q: 0, r: 0 });
@@ -44,20 +46,25 @@ describe('frontmatter round-trip', () => {
         road.addEdge({ q: 1, r: 2 }, { q: 2, r: 3 });
         data.roads.push(road);
 
+        const faction: Faction = { id: 'faction-1', name: 'Faction 1', color: '#0000ff', filePath: 'Factions/Faction 1.md' };
+        data.factions.push(faction);
+
         // Act - mimic the on-disk write/read cycle. A Map serializes to {},
         // so this fails unless toFrontmatter emits a plain object.
         const serialized = JSON.parse(JSON.stringify(toFrontmatter(data)));
         const restored = fromFrontmatter(serialized);
 
         // Assert
-        expect(restored.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
-        expect(restored.getHex(1, 2)).toEqual({ q: 1, r: 2, terrainColor: '#00ff00', icon: null });
+        expect(restored.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        expect(restored.getHex(1, 2)).toEqual({ q: 1, r: 2, terrainColor: '#00ff00', icon: null, factionId: null });
         expect(restored.size).toBe(50);
         expect(restored.version).toBe('1.0');
         expect(restored.rivers.length).toBe(1);
         expect(restored.rivers[0]).toEqual(river);
         expect(restored.roads.length).toBe(1);
         expect(restored.roads[0]).toEqual(road);
+        expect(restored.factions.length).toBe(1);
+        expect(restored.factions[0]).toEqual(faction);
     });
 });
 
@@ -65,14 +72,14 @@ describe('fromFrontmatter', () => {
     it('converts frontmatter to HexerData correctly', () => {
         // Arrange
         const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
         const frontmatter = toFrontmatter(data);
 
         // Act
         const newData = fromFrontmatter(frontmatter);
 
         // Assert
-        expect(newData.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
+        expect(newData.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
     });
 });
 
@@ -80,7 +87,7 @@ describe('clone', () => {
     it('clones HexerData correctly', () => {
         // Arrange
         const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
         const river = new Path("River 1");
         river.addNode({ q: 0, r: 0 });
         river.addNode({ q: 1, r: 2 });
@@ -98,7 +105,7 @@ describe('clone', () => {
 
         // Assert
         expect(clone).not.toBe(data);
-        expect(clone.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null });
+        expect(clone.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
         expect(clone.rivers).toHaveLength(1);
         expect(clone.rivers[0]).toEqual(river);
         expect(clone.roads).toHaveLength(1);

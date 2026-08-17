@@ -14,6 +14,7 @@ export interface Point {
 export interface Hexagon extends RadialCoordinates {
     terrainColor: string | null;
     icon: Icon | null;
+    factionId: string | null;
 };
 
 export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {
@@ -56,7 +57,8 @@ export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates
 
 export function hexagonIsEmpty(hexagon: Hexagon) {
     return hexagon.terrainColor === null
-        && hexagon.icon === null;
+        && hexagon.icon === null
+        && hexagon.factionId === null;
 }
 
 export function pointToRadialCoordinates(x: number, y: number, size: number) {
