@@ -1,4 +1,4 @@
-import { getArea, getNeighbours, Hexagon, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
+import { getArea, getNeighbours, Hexagon, hexagonIsEmpty, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
 
 describe('getArea', () => {
     const key = (q: number, r: number) => `${q},${r}`;
@@ -83,6 +83,75 @@ describe('getNeighbours', () => {
             { q: 11, r: 21 }, // South-West
             { q: 11, r: 22 }  // North-West
         ]);
+    });
+});
+
+describe('hexagonIsEmpty', () => {
+    it('returns true when no fields have values', () => {
+        // Arrange
+        const hexagon: Hexagon = {
+            q: 0,
+            r: 0,
+            terrainColor: null,
+            icon: null,
+            factionId: null
+        };
+        // Act
+        const result = hexagonIsEmpty(hexagon);
+
+        // Assert
+        expect(result).toBe(true);
+    });
+
+    it('returns false when terrainColor has a value', () => {
+        // Arrange
+        const hexagon: Hexagon = {
+            q: 0,
+            r: 0,
+            terrainColor: '#ff0000',
+            icon: null,
+            factionId: null
+        };
+
+        // Act
+        const result = hexagonIsEmpty(hexagon);
+
+        // Assert
+        expect(result).toBe(false);
+    });
+
+    it('returns false when icon has a value', () => {
+        // Arrange
+        const hexagon: Hexagon = {
+            q: 0,
+            r: 0,
+            terrainColor: null,
+            icon: { name: 'test-icon', color: '#00ff00' },
+            factionId: null
+        };
+
+        // Act
+        const result = hexagonIsEmpty(hexagon);
+
+        // Assert
+        expect(result).toBe(false);
+    });
+
+    it('returns false when factionId has a value', () => {
+        // Arrange
+        const hexagon: Hexagon = {
+            q: 0,
+            r: 0,
+            terrainColor: null,
+            icon: null,
+            factionId: 'faction-1'
+        };
+
+        // Act
+        const result = hexagonIsEmpty(hexagon);
+
+        // Assert
+        expect(result).toBe(false);
     });
 });
 
