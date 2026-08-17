@@ -1,4 +1,4 @@
-.hexer-path-row {
+.hexer-sidebar-list-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -7,11 +7,11 @@
     font-weight: normal;
 }
 
-.hexer-path-row-name {
+.hexer-sidebar-list-row-name {
     flex: 1;
 }
 
-.hexer-path-row-button {
+.hexer-sidebar-list-row-button {
     display: flex;
     justify-content: center;
     align-items: center;

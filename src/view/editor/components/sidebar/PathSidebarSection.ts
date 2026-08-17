@@ -1,5 +1,5 @@
 import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
-import PathRow from "./PathRow";
+import SidebarListRow from "./SidebarListRow";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
 import { Path } from "../../../../logic/path";
@@ -39,10 +39,10 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
 
     protected renderRow(listEl: HTMLElement, path: Path) {
         const activePath = this._componentOptions.getEditorState().activePath;
-        new PathRow(listEl, {
+        new SidebarListRow(listEl, {
             disableEdit: activePath !== null && activePath.pathId !== path.id,
             editMode: activePath?.pathId === path.id,
-            path,
+            item: path,
             obsidian: this._componentOptions.obsidian,
             onEdit: this.editPath.bind(this),
             onFinish: this.closePath.bind(this),
