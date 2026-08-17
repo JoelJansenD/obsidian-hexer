@@ -14,14 +14,20 @@ export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
     }
 
     protected getItems(data: HexerData): Faction[] {
-        throw new Error("Method not implemented.");
+        return data.factions;
     }
 
     protected addItem(): void {
-        throw new Error("Method not implemented.");
+        const data = this._componentOptions.getDataClone();
+        data.factions.push({
+            id: crypto.randomUUID(),
+            color: '#ff0000',
+            name: 'New faction'
+        });
+        this._componentOptions.setData(data);
     }
     
     protected renderRow(listEl: HTMLElement, item: Faction): void {
-        throw new Error("Method not implemented.");
+        listEl.createDiv({ text: item.name, cls: 'hexer-faction-row' });
     }
 }

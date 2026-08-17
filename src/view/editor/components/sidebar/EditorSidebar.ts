@@ -1,10 +1,12 @@
-import { Mountain, Droplets, Shapes, Route } from "lucide";
+import { Mountain, Droplets, Shapes, Route, Shield } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../../components/ColourPalette";
 import { Layer } from "../../../../logic/EditorState";
 import { ComponentOptions } from "../../Editor";
 import { HEXER_ICONS } from "../../../../logic/icon";
 import PathSidebarSection from "./PathSidebarSection";
+import { FactionSidebarSection } from "./FactionSidebarSection";
+import EditorListSidebarSection from "./EditorListSidebarSection";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
@@ -30,7 +32,66 @@ export default class EditorSidebar {
         const roadSection = this.buildRoads(this._sidebarEl);
         this._sections.set('road', roadSection);
 
+        const factionSection = this.buildFactions(this._sidebarEl);
+        this._sections.set('faction', factionSection);
+
         this.updateIconElements();
+    }
+
+    private buildFactions(sidebarEl: HTMLElement) {
+        const factionSection = new FactionSidebarSection(sidebarEl, this._componentOptions, {
+            addLabel: 'New faction',
+            addRole: 'add-faction',
+            label: 'Factions',
+            layer: 'faction',
+            icon: Shield,
+            onSelect: () => this.select('faction'),
+        });
+        return factionSection;
+    }
+
+    private buildIcon(sidebarEl: HTMLElement) {
+        const iconSection = new EditorSidebarSection(sidebarEl, {
+            icon: Shapes,
+            layer: 'icon',
+            label: 'Icons',
+            onSelect: () => this.select('icon'),
+        });
+
+        const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon hexer-sidebar-section-padded' });
+        
+        const editorState = this._componentOptions.getEditorState();        
+        new ColourPalette(
+            iconSectionContent,
+            {
+                dataField: 'icon',
+                value: editorState.activeIcon.color,
+                onUpdate: (newColour: string) => {
+                    const state = this._componentOptions.getEditorState();
+                    state.activeIcon.color = newColour;
+                    this._componentOptions.setEditorState(state);
+                    this.updateIconElements();
+                }
+            });
+
+        const iconsContainer = iconSectionContent.createEl('div', { cls: 'hexer-sidebar-icon-container' });
+        const parser = new DOMParser();
+        for(let [iconName, iconPath] of HEXER_ICONS) {
+            const iconEl = parser.parseFromString(iconPath, 'image/svg+xml').documentElement;
+            iconEl.removeAttribute('style');
+
+            const iconWrapper = iconsContainer.createEl('div', { cls: 'hexer-sidebar-icon-item' });
+            iconWrapper.appendChild(iconEl);
+            iconWrapper.addEventListener('click', () => {
+                const editorState = this._componentOptions.getEditorState();
+                editorState.activeIcon = {...editorState.activeIcon, name: iconName};
+                this._componentOptions.setEditorState(editorState);
+                this.updateIconElements();
+            });
+            iconWrapper.dataset.hexerIcon = iconName;
+        }
+
+        return iconSection;
     }
 
     private buildRivers(sidebarEl: HTMLElement) {
@@ -81,50 +142,6 @@ export default class EditorSidebar {
         return terrainSection;
     }
 
-    private buildIcon(sidebarEl: HTMLElement) {
-        const iconSection = new EditorSidebarSection(sidebarEl, {
-            icon: Shapes,
-            layer: 'icon',
-            label: 'Icons',
-            onSelect: () => this.select('icon'),
-        });
-
-        const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon hexer-sidebar-section-padded' });
-        
-        const editorState = this._componentOptions.getEditorState();        
-        new ColourPalette(
-            iconSectionContent,
-            {
-                dataField: 'icon',
-                value: editorState.activeIcon.color,
-                onUpdate: (newColour: string) => {
-                    const state = this._componentOptions.getEditorState();
-                    state.activeIcon.color = newColour;
-                    this._componentOptions.setEditorState(state);
-                    this.updateIconElements();
-                }
-            });
-
-        const iconsContainer = iconSectionContent.createEl('div', { cls: 'hexer-sidebar-icon-container' });
-        const parser = new DOMParser();
-        for(let [iconName, iconPath] of HEXER_ICONS) {
-            const iconEl = parser.parseFromString(iconPath, 'image/svg+xml').documentElement;
-            iconEl.removeAttribute('style');
-
-            const iconWrapper = iconsContainer.createEl('div', { cls: 'hexer-sidebar-icon-item' });
-            iconWrapper.appendChild(iconEl);
-            iconWrapper.addEventListener('click', () => {
-                const editorState = this._componentOptions.getEditorState();
-                editorState.activeIcon = {...editorState.activeIcon, name: iconName};
-                this._componentOptions.setEditorState(editorState);
-                this.updateIconElements();
-            });
-            iconWrapper.dataset.hexerIcon = iconName;
-        }
-
-        return iconSection;
-    }
-
     private updateIconElements() {
         const state = this._componentOptions.getEditorState();
         const colour = state.activeIcon.color;
@@ -152,7 +169,7 @@ export default class EditorSidebar {
         this._componentOptions.setEditorState(state);
 
         for (const section of this._sections.values()) {
-            if (section instanceof PathSidebarSection) {
+            if (section instanceof EditorListSidebarSection) {
                 section.refresh();
             }
         }

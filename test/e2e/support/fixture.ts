@@ -82,6 +82,6 @@ export function buildHexerFileContent(rivers: SeedRiver[] = []): string {
         }
     }
 
-    lines.push('  roads: []', '---', '');
+    lines.push('  roads: []', '  factions: []', '---', '');
     return lines.join('\n');
 }

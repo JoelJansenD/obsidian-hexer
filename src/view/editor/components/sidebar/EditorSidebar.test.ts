@@ -45,7 +45,7 @@ describe('Layers', () => {
             icon: null,
             river: null,
             road: null,
-            factions: null,
+            faction: null,
             // Terrain cannot be first because it is open by default, so test it later
             terrain: null,
         };

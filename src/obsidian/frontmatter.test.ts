@@ -1,9 +1,10 @@
+import { Faction } from "../logic/faction";
 import { Hexagon } from "../logic/hexagon";
 import { HexerData, HexerState } from "../logic/HexerData";
 import { Path } from "../logic/path";
 import { fromFrontmatter, toFrontmatter } from "./frontmatter";
 
-const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [] });
+const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [] });
 
 describe('toFrontmatter', () => {
     it('converts HexerData to frontmatter correctly', () => {
@@ -21,6 +22,7 @@ describe('toFrontmatter', () => {
             hexes: { '0,0': { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null } },
             rivers: [],
             roads: [],
+            factions: [],
         });
     });
 });
@@ -44,6 +46,9 @@ describe('frontmatter round-trip', () => {
         road.addEdge({ q: 1, r: 2 }, { q: 2, r: 3 });
         data.roads.push(road);
 
+        const faction: Faction = { id: 'faction-1', name: 'Faction 1', color: '#0000ff' };
+        data.factions.push(faction);
+
         // Act - mimic the on-disk write/read cycle. A Map serializes to {},
         // so this fails unless toFrontmatter emits a plain object.
         const serialized = JSON.parse(JSON.stringify(toFrontmatter(data)));
@@ -58,6 +63,8 @@ describe('frontmatter round-trip', () => {
         expect(restored.rivers[0]).toEqual(river);
         expect(restored.roads.length).toBe(1);
         expect(restored.roads[0]).toEqual(road);
+        expect(restored.factions.length).toBe(1);
+        expect(restored.factions[0]).toEqual(faction);
     });
 });
 

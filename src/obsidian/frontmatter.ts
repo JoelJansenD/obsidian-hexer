@@ -31,7 +31,8 @@ export function toFrontmatter(data: HexerData): HexerFrontmatter {
             size: data.size,
             hexes: Object.fromEntries(data.hexes),
             rivers: data.rivers.map(serializePath),
-            roads: data.roads.map(serializePath)
+            roads: data.roads.map(serializePath),
+            factions: data.factions
         },
     };
 }
@@ -43,7 +44,8 @@ export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
         size,
         hexes: new Map(Object.entries(hexes ?? {})),
         rivers: (frontmatter.hexer.rivers ?? []).map(deserializePath),
-        roads: (frontmatter.hexer.roads ?? []).map(deserializePath)
+        roads: (frontmatter.hexer.roads ?? []).map(deserializePath),
+        factions: frontmatter.hexer.factions ?? []
     });
 }
 

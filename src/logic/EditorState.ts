@@ -1,7 +1,7 @@
 import { Icon } from "./icon";
 import { PathNode } from "./path";
 
-export type Layer = 'terrain' | 'icon' | 'river' | 'road' | 'factions';
+export type Layer = 'terrain' | 'icon' | 'river' | 'road' | 'faction';
 export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser' | 'polygon';
 
 export interface EditorState {
