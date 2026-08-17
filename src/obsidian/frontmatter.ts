@@ -32,7 +32,7 @@ export function toFrontmatter(data: HexerData): HexerFrontmatter {
             hexes: Object.fromEntries(data.hexes),
             rivers: data.rivers.map(serializePath),
             roads: data.roads.map(serializePath),
-            factions: data.factions
+            factions: data.factions.map(faction => ({ ...faction })),
         },
     };
 }
