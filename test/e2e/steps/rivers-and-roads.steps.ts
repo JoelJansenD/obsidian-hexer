@@ -61,7 +61,7 @@ When('I edit the river\'s information', async function (this: RiversAndRoadsCont
     await pathPage.editRiverInformation(this.selectedRiver!.id);
 });
 
-When('I change the name to {string}', async function (this: RiversAndRoadsContext, name: string) {
+When('I change the river\'s name to {string}', async function (this: RiversAndRoadsContext, name: string) {
     await itemSettingsPage.setName(name);
     this.expectedName = name;
 });
