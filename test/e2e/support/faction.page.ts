@@ -10,11 +10,10 @@ class FactionPage {
     }
 
     /**
-     * Opens the settings dialog for a faction: the settings gear only exists
-     * while the row is in edit mode, so enter edit mode first, then click it.
+     * Opens the settings dialog for a faction. The gear only exists while the row
+     * is in edit mode, so the row must already be active when this is called.
      */
-    async editFactionInformation(id: string) {
-        await this.editFaction(id);
+    async openFactionSettings(id: string) {
         await this.selectAndClick(`[data-item-id="${id}"] [data-role="item-settings"]`);
     }
 

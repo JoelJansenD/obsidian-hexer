@@ -1,6 +1,8 @@
 import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import factionPage from '../support/faction.page';
+import itemSettingsPage from '../support/itemSettings.page';
+import { createNote } from '../support/obsidian.page';
 import { FactionsContext } from '../support/contexts/factions.context';
 
 When('I create a new faction', async function (this: FactionsContext) {
@@ -20,30 +22,48 @@ Then('the faction is active', async function (this: FactionsContext) {
     await expect(factionEl).toHaveAttribute('data-editing', 'true');
 });
 
-Given('I have an active faction', async function () {
-    return 'pending';
+// Creating a faction opens it in edit mode, which is what makes it the active
+// one, so a freshly created faction is all this needs.
+Given('I have an active faction', async function (this: FactionsContext) {
+    await factionPage.createFaction();
+    const factions = await factionPage.getFactions();
+    expect(factions.length).toBe(1);
+    this.selectedFaction = factions[0];
 });
 
-When('I edit the faction\'s information', async function () {
-    return 'pending';
+When('I edit the faction\'s information', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    await factionPage.openFactionSettings(this.selectedFaction!.id);
 });
 
-When('I change the faction\'s name to {string}', async function (name: string) {
-    return 'pending';
+When('I change the faction\'s name to {string}', async function (this: FactionsContext, name: string) {
+    await itemSettingsPage.setName(name);
+    this.expectedName = name;
 });
 
-When('I attach a note to the faction', async function () {
-    return 'pending';
+When('I attach a note to the faction', async function (this: FactionsContext) {
+    const notePath = 'The Iron Concord.md';
+    await createNote(notePath, '# The Iron Concord\n');
+    await itemSettingsPage.attachNote('The Iron Concord');
+    this.attachedNotePath = notePath;
 });
 
 When('I save the faction settings', async function () {
-    return 'pending';
+    await itemSettingsPage.save();
 });
 
-Then('the faction is updated with the new name', async function () {
-    return 'pending';
+Then('the faction is updated with the new name', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.expectedName).toBeDefined();
+    const faction = await factionPage.getFaction(this.selectedFaction!.id);
+    expect(faction).toBeDefined();
+    expect(faction!.name).toBe(this.expectedName);
 });
 
-Then('I can view the faction\'s attached note', async function () {
-    return 'pending';
+Then('I can view the faction\'s attached note', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.attachedNotePath).toBeDefined();
+    const faction = await factionPage.getFaction(this.selectedFaction!.id);
+    expect(faction).toBeDefined();
+    expect(faction!.filePath).toBe(this.attachedNotePath);
 });
