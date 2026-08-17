@@ -31,7 +31,7 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
 
     protected addItem() {
         const data = this._componentOptions.getDataClone();
-        const newPath = new Path(this._pathOptions.addLabel);
+        const newPath = new Path(this._pathOptions.newItemName);
         this._pathOptions.getPaths(data).push(newPath);
         this._componentOptions.setData(data);
         this.setActivePath(newPath);

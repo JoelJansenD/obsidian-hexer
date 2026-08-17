@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
-import { createComponentOptions } from "../../../__test/defaultEditorState";
-import { HexerData } from "../../../logic/HexerData";
-import { ComponentOptions } from "../Editor";
-import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./sidebar/EditorListSidebarSection";
+import { createComponentOptions } from "../../../../__test/defaultEditorState";
+import { HexerData } from "../../../../logic/HexerData";
+import { ComponentOptions } from "../../Editor";
+import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 
 interface FakeItem {
     id: string;
@@ -14,6 +14,7 @@ const listOptions = (overrides: Partial<EditorListSidebarSectionOptions> = {}): 
     layer: 'terrain',
     addLabel: 'New fake',
     addRole: 'add-fake',
+    newItemName: 'New fake',
     ...overrides,
 });
 

@@ -5,10 +5,6 @@ class FactionPage {
         await this.selectAndClick('[data-role="add-faction"]');
     }
 
-    async editFaction(id: string) {
-        await this.selectAndClick(`[data-item-id="${id}"] [data-role="edit-item"]`);
-    }
-
     /**
      * Opens the settings dialog for a faction. The gear only exists while the row
      * is in edit mode, so the row must already be active when this is called.
@@ -42,7 +38,7 @@ class FactionPage {
             return (view?.hexerData?.factions ?? []).map((faction) => ({
                 id: faction.id,
                 name: faction.name,
-                color: faction.color || '#ff0000',
+                color: faction.color!,
                 filePath: faction.filePath ?? null,
             }));
         });

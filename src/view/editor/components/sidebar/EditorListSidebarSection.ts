@@ -8,6 +8,8 @@ export interface EditorListSidebarSectionOptions extends EditorSidebarSectionOpt
     addLabel: string;
     /** dataset.role for the add button, e.g. 'add-river'. */
     addRole: string;
+    /** Name given to a newly created item, e.g. 'New river'. */
+    newItemName: string;
 }
 
 /**
@@ -22,14 +24,14 @@ export default abstract class EditorListSidebarSection<TItem> extends EditorSide
     constructor(
         parentEl: HTMLElement,
         protected _componentOptions: ComponentOptions,
-        listOptions: EditorListSidebarSectionOptions,
+        protected _listOptions: EditorListSidebarSectionOptions,
     ) {
-        super(parentEl, listOptions);
+        super(parentEl, _listOptions);
 
-        const addButton = this.contentEl.createDiv({ cls: 'hexer-sidebar-add-path' });
-        addButton.dataset.role = listOptions.addRole;
+        const addButton = this.contentEl.createDiv({ cls: 'hexer-sidebar-add-item' });
+        addButton.dataset.role = _listOptions.addRole;
         addButton.appendChild(createElement(Plus, { height: 14, width: 14 }));
-        addButton.createEl('span', { text: listOptions.addLabel });
+        addButton.createEl('span', { text: _listOptions.addLabel });
         addButton.addEventListener('click', this.addItem.bind(this));
 
         this._listEl = this.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });

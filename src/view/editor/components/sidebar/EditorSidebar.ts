@@ -42,6 +42,7 @@ export default class EditorSidebar {
         const factionSection = new FactionSidebarSection(sidebarEl, this._componentOptions, {
             addLabel: 'New faction',
             addRole: 'add-faction',
+            newItemName: 'New faction',
             label: 'Factions',
             layer: 'faction',
             icon: Shield,
@@ -101,6 +102,7 @@ export default class EditorSidebar {
             label: 'Rivers',
             addLabel: 'New river',
             addRole: 'add-river',
+            newItemName: 'New river',
             getPaths: data => data.rivers,
             onSelect: () => this.select('river'),
         });
@@ -113,6 +115,7 @@ export default class EditorSidebar {
             label: 'Roads',
             addLabel: 'New road',
             addRole: 'add-road',
+            newItemName: 'New road',
             getPaths: data => data.roads,
             onSelect: () => this.select('road'),
         });

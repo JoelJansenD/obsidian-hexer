@@ -24,6 +24,7 @@ const createPathSection = (paths: Path[]) => {
         label: 'Rivers',
         addLabel: 'New river',
         addRole: 'add-river',
+        newItemName: 'New river',
         getPaths: data => data.rivers,
     });
     return { parent, componentOptions, openItemSettings, section };

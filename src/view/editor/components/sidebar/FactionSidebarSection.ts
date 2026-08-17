@@ -24,7 +24,7 @@ export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
         const newFaction: Faction = {
             id: crypto.randomUUID(),
             color: '#ff0000',
-            name: 'New faction',
+            name: this._listOptions.newItemName,
             filePath: null
         };
         data.factions.push(newFaction);
