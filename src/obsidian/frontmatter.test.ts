@@ -46,7 +46,7 @@ describe('frontmatter round-trip', () => {
         road.addEdge({ q: 1, r: 2 }, { q: 2, r: 3 });
         data.roads.push(road);
 
-        const faction: Faction = { id: 'faction-1', name: 'Faction 1', color: '#0000ff' };
+        const faction: Faction = { id: 'faction-1', name: 'Faction 1', color: '#0000ff', filePath: 'Factions/Faction 1.md' };
         data.factions.push(faction);
 
         // Act - mimic the on-disk write/read cycle. A Map serializes to {},

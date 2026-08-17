@@ -11,7 +11,8 @@ const defaultEditorState: EditorState = {
     },
     activeLayer: 'terrain',
     activePaintTool: 'brush',
-    activePath: null
+    activePath: null,
+    activeFactionId: null
 };
 export default defaultEditorState;
 

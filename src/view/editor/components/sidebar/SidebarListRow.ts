@@ -1,46 +1,47 @@
 import { Check, createElement, File, PencilLine, Settings } from "lucide";
 import { ObsidianInterop } from "../../../ObsidianInterop";
-import { Path } from "../../../../logic/path";
 
-interface SidebarListRowOptions {
+export interface SidebarListRowOptions<TItem> {
     disableEdit: boolean;
     editMode: boolean;
-    item: Path;
+    item: TItem;
     obsidian: ObsidianInterop;
+    getId: (item: TItem) => string;
+    getName: (item: TItem) => string;
+    getColour: (item: TItem) => string;
+    getFilePath: (item: TItem) => string | null;
     onEdit?: (itemId: string) => void;
     onFinish?: () => void;
-    onSave?: () => void;
-    /** Persists the item after it has been edited in the settings dialog. */
-    onSettingsSave?: (item: Path) => void;
+    onColourPicked?: (colour: string) => void;
+    onSettings?: (item: TItem) => void;
 }
 
-export default class SidebarListRow {
+export default class SidebarListRow<TItem> {
     editButton!: HTMLDivElement;
-    settingsOrViewButton!: HTMLDivElement;
+    settingsOrViewButton?: HTMLDivElement;
 
     constructor(
         private _parentEl: HTMLElement,
-        private _options: SidebarListRowOptions) {
+        private _options: SidebarListRowOptions<TItem>) {
         this.render();
     }
 
     private render() {
         const rowEl = this._parentEl.createDiv({ cls: "hexer-sidebar-list-row" });
-        rowEl.dataset.itemId = this._options.item.id;
+        rowEl.dataset.itemId = this._options.getId(this._options.item);
         rowEl.dataset.editing = String(this._options.editMode);
 
         const colourPicker = rowEl.createEl('input', {
             type: 'color',
             cls: 'hexer-sidebar-list-row-color',
         });
-        colourPicker.value = this._options.item.color;
+        colourPicker.value = this._options.getColour(this._options.item);
         colourPicker.disabled = !this._options.editMode;
         colourPicker.addEventListener('input', () => {
-            this._options.item.color = colourPicker.value;
-            this._options.onSave?.();
+            this._options.onColourPicked?.(colourPicker.value);
         });
 
-        rowEl.createSpan({ text: this._options.item.name, cls: "hexer-sidebar-list-row-name" });
+        rowEl.createSpan({ text: this._options.getName(this._options.item), cls: "hexer-sidebar-list-row-name" });
 
         if(this._options.editMode) {
             this.renderEditModeButtons(rowEl);
@@ -55,17 +56,15 @@ export default class SidebarListRow {
     }
 
     private renderEditModeButtons(rowEl: HTMLDivElement) {
-        this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-sidebar-list-row-button' });
-        this.settingsOrViewButton.dataset.role = 'item-settings';
-        this.settingsOrViewButton.appendChild(createElement(Settings, { width: 16, height: 16 }));
-        this.settingsOrViewButton.addEventListener('click', () => {
-            this._options.obsidian.openPathSettings({
-                path: this._options.item,
-                onSave: edited => {
-                    this._options.onSettingsSave?.(edited)
-                },
+        const onSettings = this._options.onSettings;
+        if(onSettings) {
+            this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-sidebar-list-row-button' });
+            this.settingsOrViewButton.dataset.role = 'item-settings';
+            this.settingsOrViewButton.appendChild(createElement(Settings, { width: 16, height: 16 }));
+            this.settingsOrViewButton.addEventListener('click', () => {
+                onSettings(this._options.item);
             });
-        });
+        }
 
         this.editButton = rowEl.createDiv({  cls: 'hexer-sidebar-list-row-button' });
         this.editButton.dataset.role = 'save-item';
@@ -76,20 +75,21 @@ export default class SidebarListRow {
     }
 
     private renderViewModeButtons(rowEl: HTMLDivElement) {
-        const filePath = this._options.item.filePath;
+        const filePath = this._options.getFilePath(this._options.item);
         if(filePath) {
-            this.settingsOrViewButton = rowEl.createDiv({ cls: 'hexer-sidebar-list-row-button' });
-            this.settingsOrViewButton.dataset.role = 'view-file';
-            this.settingsOrViewButton.appendChild(createElement(File, { width: 16, height: 16 }));
-            this.settingsOrViewButton.addEventListener('mouseover', event => {
+            const viewButton = rowEl.createDiv({ cls: 'hexer-sidebar-list-row-button' });
+            this.settingsOrViewButton = viewButton;
+            viewButton.dataset.role = 'view-file';
+            viewButton.appendChild(createElement(File, { width: 16, height: 16 }));
+            viewButton.addEventListener('mouseover', event => {
                 this._options.obsidian.showFilePreview({
                     filePath,
                     event,
-                    targetEl: this.settingsOrViewButton,
+                    targetEl: viewButton,
                 });
             });
 
-            this.settingsOrViewButton.addEventListener('click', event => {
+            viewButton.addEventListener('click', event => {
                 this._options.obsidian.openFile(filePath, event);
             });
         }
@@ -98,7 +98,7 @@ export default class SidebarListRow {
         this.editButton.dataset.role = 'edit-item';
         this.editButton.appendChild(createElement(PencilLine, { width: 16, height: 16 }));
         this.editButton.addEventListener('click', () => {
-            this._options.onEdit?.(this._options.item.id);
+            this._options.onEdit?.(this._options.getId(this._options.item));
         });
     }
 }

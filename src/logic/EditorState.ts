@@ -9,8 +9,8 @@ export interface EditorState {
     activeIcon: Icon;
     activeLayer: Layer;
     activePaintTool: PaintTool;
-    /** The path currently being edited, or null when none is active. */
     activePath: EditorPathState | null;
+    activeFactionId: string | null;
 }
 
 export interface EditorPathState {

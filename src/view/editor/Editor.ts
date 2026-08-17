@@ -29,7 +29,8 @@ export default class Editor {
         },
         activeLayer: 'terrain',
         activePaintTool: 'select',
-        activePath: null
+        activePath: null,
+        activeFactionId: null
     };
 
     constructor(

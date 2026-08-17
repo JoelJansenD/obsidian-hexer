@@ -39,15 +39,22 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
 
     protected renderRow(listEl: HTMLElement, path: Path) {
         const activePath = this._componentOptions.getEditorState().activePath;
-        new SidebarListRow(listEl, {
+        new SidebarListRow<Path>(listEl, {
             disableEdit: activePath !== null && activePath.pathId !== path.id,
             editMode: activePath?.pathId === path.id,
             item: path,
             obsidian: this._componentOptions.obsidian,
+            getId: item => item.id,
+            getName: item => item.name,
+            getColour: item => item.color,
+            getFilePath: item => item.filePath,
             onEdit: this.editPath.bind(this),
             onFinish: this.closePath.bind(this),
-            onSave: (() => this.savePath(path)).bind(this),
-            onSettingsSave: this.savePathSettings.bind(this)
+            onColourPicked: colour => this.savePath(path, colour),
+            onSettings: item => this._componentOptions.obsidian.openPathSettings({
+                path: item,
+                onSave: edited => this.savePathSettings(edited),
+            }),
         });
     }
 
@@ -74,14 +81,14 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
         this.renderItems();
     }
 
-    private savePath(path: Path) {
+    private savePath(path: Path, colour: string) {
         const data = this._componentOptions.getDataClone();
         const target = [...data.rivers, ...data.roads].find(p => p.id === path.id);
         if(!target) {
             return;
         }
 
-        target.color = path.color;
+        target.color = colour;
         this._componentOptions.setData(data);
     }
 
