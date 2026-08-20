@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { Hexagon, RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
@@ -16,8 +16,10 @@ export default class FactionBrushStrategy implements ToolStrategy {
         this.paint(data, editorState, radialCoordinates);
     }
 
-    private paint(_data: HexerData, _editorState: EditorState, _radialCoordinates: RadialCoordinates) {
-        throw new Error('Not implemented');
+    private paint(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        const hexagon: Hexagon = data.getOrCreateHex(radialCoordinates);
+        hexagon.factionId = editorState.activeFactionId;
+        data.setHex(hexagon);
     }
 
     public getEvents(): RegisteredEvents {
