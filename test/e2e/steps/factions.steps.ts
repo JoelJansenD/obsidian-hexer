@@ -75,3 +75,41 @@ Then('the faction is added to the hex', async function (this: FactionsContext) {
     const hex = await editorPage.getHex(this.lastClickedHex!);
     expect(hex?.factionId).toBe(this.selectedFaction!.id);
 });
+
+const REPLACEMENT_HEX = { q: 3, r: 3 };
+
+Given('a hex already belongs to another faction', async function (this: FactionsContext) {
+    await factionPage.createFaction();
+    const factions = await factionPage.getFactions();
+    this.originalFaction = factions[0];
+
+    await editorPage.clickHex(REPLACEMENT_HEX);
+    this.lastClickedHex = REPLACEMENT_HEX;
+
+    const hex = await editorPage.getHex(REPLACEMENT_HEX);
+    expect(hex?.factionId).toBe(this.originalFaction!.id);
+});
+
+// Creating a faction makes it the active one, so this leaves a second, distinct
+// faction selected while the first is the one already painted onto the hex.
+Given('I have selected a different faction', async function (this: FactionsContext) {
+    expect(this.originalFaction).toBeDefined();
+    await factionPage.createFaction();
+    const factions = await factionPage.getFactions();
+    this.selectedFaction = factions.find(faction => faction.id !== this.originalFaction!.id);
+    expect(this.selectedFaction).toBeDefined();
+});
+
+When('I click that hex', async function (this: FactionsContext) {
+    expect(this.lastClickedHex).toBeDefined();
+    await editorPage.clickHex(this.lastClickedHex!);
+});
+
+Then('the original faction is replaced with the new faction', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.originalFaction).toBeDefined();
+    expect(this.lastClickedHex).toBeDefined();
+    const hex = await editorPage.getHex(this.lastClickedHex!);
+    expect(hex?.factionId).toBe(this.selectedFaction!.id);
+    expect(hex?.factionId).not.toBe(this.originalFaction!.id);
+});
