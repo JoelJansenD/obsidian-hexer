@@ -59,6 +59,12 @@ When('I click an empty hex', async function (this: GlobalContext) {
     this.lastClickedHex = EMPTY_HEX;
 });
 
+When('I click a hex at {int},{int}', async function (this: GlobalContext, q: number, r: number) {
+    const hex = { q, r };
+    await editorPage.clickHex(hex);
+    this.lastClickedHex = hex;
+});
+
 When('I click and drag across multiple hexes', async function (this: GlobalContext) {
     const DRAG_HEXES = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 3, r: 1 }];
     await editorPage.dragAcrossHexes(DRAG_HEXES);

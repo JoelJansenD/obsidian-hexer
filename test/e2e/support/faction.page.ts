@@ -1,8 +1,35 @@
 import { Faction } from "../../../src/logic/faction";
+import { buildHexerFileContent, SEEDED_FACTIONS, SeedFaction } from "./fixture";
 
 class FactionPage {
     async createFaction() {
         await this.selectAndClick('[data-role="add-faction"]');
+    }
+
+    /**
+     * Writes the standard factions into the open Hexer view, rebuilding the
+     * editor through the real parse path (the first faction is painted onto the
+     * first few hexes). Returns the seeded factions. The editor is rebuilt with
+     * default state, so callers must re-select the layer and tool afterwards.
+     */
+    async seedFactions(): Promise<SeedFaction[]> {
+        const content = buildHexerFileContent([], SEEDED_FACTIONS);
+        await browser.executeObsidian(({ app }, data) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                setViewData?: (data: string, clear: boolean) => void;
+            } | undefined;
+            view?.setViewData?.(data, true);
+        }, content);
+        return SEEDED_FACTIONS;
+    }
+
+    /**
+     * Puts a faction row into edit mode, which also makes it the active faction.
+     * The edit control only exists while the row is in view mode.
+     */
+    async editFaction(id: string) {
+        await this.selectAndClick(`[data-item-id="${id}"] [data-role="edit-item"]`);
     }
 
     /**

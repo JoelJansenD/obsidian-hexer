@@ -7,4 +7,5 @@ export interface FactionsContext {
     expectedName?: string;
     attachedNotePath?: string;
     lastClickedHex?: RadialCoordinates;
+    lastDraggedHexes?: RadialCoordinates[];
 }
