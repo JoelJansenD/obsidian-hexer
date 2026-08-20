@@ -17,13 +17,7 @@ export default class TerrainBrushStrategy implements ToolStrategy {
     }
 
     private paint(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const hexagon: Hexagon = data.getHex(radialCoordinates) || {
-            q: radialCoordinates.q,
-            r: radialCoordinates.r,
-            terrainColor: null,
-            icon: null,
-            factionId: null
-        };
+        const hexagon: Hexagon = data.getOrCreateHex(radialCoordinates);
         hexagon.terrainColor = editorState.activeColour;
         data.setHex(hexagon);
     }
