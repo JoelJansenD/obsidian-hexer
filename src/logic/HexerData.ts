@@ -46,6 +46,28 @@ export class HexerData implements HexerState {
         return this.hexes.get(key);
     }
 
+    public getOrCreateHex(coordinates: RadialCoordinates): Hexagon;
+    public getOrCreateHex(q: number, r: number): Hexagon;
+    public getOrCreateHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon {
+        const q = typeof arg1 === 'object' ? arg1.q : arg1;
+        const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+        const key = hexKey(q, r);
+        const hex = this.hexes.get(key);
+        if(hex) {
+            return hex;
+        }
+
+        const newHex = {
+            q: q,
+            r: r,
+            terrainColor: null,
+            icon: null,
+            factionId: null
+        };
+        this.hexes.set(key, newHex);
+        return newHex;
+    }
+
     public setHex(hex: Hexagon): void {
         const key = hexKey(hex.q, hex.r);
         this.hexes.set(key, hex);

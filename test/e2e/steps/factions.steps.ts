@@ -1,33 +1,24 @@
 import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
+import editorPage from '../support/editor.page';
 import factionPage from '../support/faction.page';
 import itemSettingsPage from '../support/itemSettings.page';
 import { createNote } from '../support/obsidian.page';
 import { FactionsContext } from '../support/contexts/factions.context';
 
+Given('I am editing the faction {string}', async function (this: FactionsContext, name: string) {
+    await factionPage.seedFactions();
+    await editorPage.selectLayer('faction');
+    const factions = await factionPage.getFactions();
+    const faction = factions.find(candidate => candidate.name === name);
+    expect(faction).toBeDefined();
+    this.selectedFaction = faction;
+    await factionPage.editFaction(faction!.id);
+});
+
 When('I create a new faction', async function (this: FactionsContext) {
     await factionPage.createFaction();
     const factions = await factionPage.getFactions();
-    this.selectedFaction = factions[0];
-});
-
-Then('a new faction is created', async function () {
-    const factions = await factionPage.getFactions();
-    expect(factions.length).toBe(1);
-});
-
-Then('the faction is active', async function (this: FactionsContext) {
-    expect(this.selectedFaction).toBeDefined();
-    const factionEl = await factionPage.getFactionElement(this.selectedFaction!.id);
-    await expect(factionEl).toHaveAttribute('data-editing', 'true');
-});
-
-// Creating a faction opens it in edit mode, which is what makes it the active
-// one, so a freshly created faction is all this needs.
-Given('I have an active faction', async function (this: FactionsContext) {
-    await factionPage.createFaction();
-    const factions = await factionPage.getFactions();
-    expect(factions.length).toBe(1);
     this.selectedFaction = factions[0];
 });
 
@@ -52,6 +43,17 @@ When('I save the faction settings', async function () {
     await itemSettingsPage.save();
 });
 
+Then('a new faction is created', async function () {
+    const factions = await factionPage.getFactions();
+    expect(factions.length).toBe(1);
+});
+
+Then('the faction is active', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    const factionEl = await factionPage.getFactionElement(this.selectedFaction!.id);
+    await expect(factionEl).toHaveAttribute('data-editing', 'true');
+});
+
 Then('the faction is updated with the new name', async function (this: FactionsContext) {
     expect(this.selectedFaction).toBeDefined();
     expect(this.expectedName).toBeDefined();
@@ -66,4 +68,20 @@ Then('I can view the faction\'s attached note', async function (this: FactionsCo
     const faction = await factionPage.getFaction(this.selectedFaction!.id);
     expect(faction).toBeDefined();
     expect(faction!.filePath).toBe(this.attachedNotePath);
+});
+
+Then('the faction is added to the hex', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.lastClickedHex).toBeDefined();
+    const hex = await editorPage.getHex(this.lastClickedHex!);
+    expect(hex?.factionId).toBe(this.selectedFaction!.id);
+});
+
+Then('the faction is added to every hovered hex', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.lastDraggedHexes).toBeDefined();
+    for(const coordinates of this.lastDraggedHexes!) {
+        const hex = await editorPage.getHex(coordinates);
+        expect(hex?.factionId).toBe(this.selectedFaction!.id);
+    }
 });

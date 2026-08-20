@@ -3,9 +3,9 @@ import { Hexagon, RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
-export default class TerrainBrushStrategy implements ToolStrategy {
+export default class FactionBrushStrategy implements ToolStrategy {
     public canBeApplied (layer: Layer, tool: PaintTool) {
-        return layer === 'terrain' && tool === 'brush';
+        return layer === 'faction' && tool === 'brush';
     }
 
     public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
@@ -18,7 +18,7 @@ export default class TerrainBrushStrategy implements ToolStrategy {
 
     private paint(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         const hexagon: Hexagon = data.getOrCreateHex(radialCoordinates);
-        hexagon.terrainColor = editorState.activeColour;
+        hexagon.factionId = editorState.activeFactionId;
         data.setHex(hexagon);
     }
 

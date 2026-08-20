@@ -84,4 +84,30 @@ describe('HexerData', () => {
         // Assert
         expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#00ff00', icon: null, factionId: null });
     });
+
+    it('getOrCreateHex returns the existing hex without altering it', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+        const existing: Hexagon = { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null };
+        data.setHex(existing);
+
+        // Act
+        const hex = data.getOrCreateHex({ q: 0, r: 0 });
+
+        // Assert
+        expect(hex).toBe(existing);
+        expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+    });
+
+    it('getOrCreateHex creates and stores a new empty hex when none exists', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+
+        // Act
+        const hex = data.getOrCreateHex({ q: 1, r: 1 });
+
+        // Assert
+        expect(hex).toEqual({ q: 1, r: 1, terrainColor: null, icon: null, factionId: null });
+        expect(data.getHex(1, 1)).toBe(hex);
+    });
 });
