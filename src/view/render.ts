@@ -1,8 +1,20 @@
 import { EditorPathState, EditorState } from "../logic/EditorState";
-import { Hexagon, radialCoordinatesToPoint } from "../logic/hexagon";
+import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HEXER_ICONS } from "../logic/icon";
 import { Path, PathEdge, PathNode, PathType } from "../logic/path";
+
+// Neighbour of a hex across each of its six edges, indexed by edge: edge `i`
+// runs from corner `i` to corner `i + 1`. Used to decide which edges of a
+// faction hex sit on the region's outer boundary.
+const EDGE_NEIGHBOURS: RadialCoordinates[] = [
+    { q: 1, r: 0 },   // corner 0 -> 1
+    { q: 0, r: 1 },   // corner 1 -> 2
+    { q: -1, r: 1 },  // corner 2 -> 3
+    { q: -1, r: 0 },  // corner 3 -> 4
+    { q: 0, r: -1 },  // corner 4 -> 5
+    { q: 1, r: -1 },  // corner 5 -> 0
+];
 
 export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
@@ -13,6 +25,13 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
 
     for(const hex of data.hexes.values()) {
         drawHex(context, hex, data.size);
+    }
+
+    // Factions sit above the terrain but below the icons, so paint them as a
+    // pass of their own between the two per-hex passes.
+    drawFactions(context, data, data.size);
+
+    for(const hex of data.hexes.values()) {
         drawIcon(context, hex, data.size);
     }
 
@@ -24,24 +43,33 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     }
 }
 
-function drawHex(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
-    const hexCenter = radialCoordinatesToPoint(hex, size);
-
-    context.beginPath();
+function hexCorners(center: Point, size: number): Point[] {
+    const corners: Point[] = [];
     for(let cornerIdx = 0; cornerIdx < 6; cornerIdx++) {
-        const degree = 60 * cornerIdx;
-        const angle = (Math.PI / 180) * degree;
-
-        const cornerX = hexCenter.x + size * Math.cos(angle);
-        const cornerY = hexCenter.y + size * Math.sin(angle);
-
-        if(cornerIdx === 0) {
-            context.moveTo(cornerX, cornerY);
-        } else {
-            context.lineTo(cornerX, cornerY);
-        }
+        const angle = (Math.PI / 180) * (60 * cornerIdx);
+        corners.push({
+            x: center.x + size * Math.cos(angle),
+            y: center.y + size * Math.sin(angle),
+        });
     }
+    return corners;
+}
+
+function traceHex(context: CanvasRenderingContext2D, corners: Point[]) {
+    context.beginPath();
+    corners.forEach((corner, cornerIdx) => {
+        if(cornerIdx === 0) {
+            context.moveTo(corner.x, corner.y);
+        } else {
+            context.lineTo(corner.x, corner.y);
+        }
+    });
     context.closePath();
+}
+
+function drawHex(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
+    const corners = hexCorners(radialCoordinatesToPoint(hex, size), size);
+    traceHex(context, corners);
 
     if(hex.terrainColor) {
         context.fillStyle = hex.terrainColor;
@@ -49,6 +77,69 @@ function drawHex(context: CanvasRenderingContext2D, hex: Hexagon, size: number) 
     }
 
     context.stroke();
+}
+
+function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: number) {
+    if(data.factions.length === 0) {
+        return;
+    }
+
+    const factionsById = new Map(data.factions.map(faction => [faction.id, faction]));
+
+    context.save();
+
+    // Translucent fill so the terrain underneath stays visible. Fill every hex
+    // in a region first, before any borders are drawn.
+    context.globalAlpha = 0.2;
+    for(const hex of data.hexes.values()) {
+        const faction = hex.factionId ? factionsById.get(hex.factionId) : undefined;
+        if(!faction) {
+            continue;
+        }
+
+        traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size), size));
+        context.fillStyle = faction.color;
+        context.fill();
+    }
+
+    // Then stroke only the edges that face a hex of a different (or no) faction,
+    // leaving shared internal edges borderless so a region reads as one shape.
+    // The border is drawn opaque in the faction's own colour.
+    context.globalAlpha = 1;
+    context.lineWidth = size * 0.08;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    for(const hex of data.hexes.values()) {
+        const faction = hex.factionId ? factionsById.get(hex.factionId) : undefined;
+        if(!faction) {
+            continue;
+        }
+
+        const corners = hexCorners(radialCoordinatesToPoint(hex, size), size);
+
+        context.beginPath();
+        let hasBorder = false;
+        for(let edge = 0; edge < 6; edge++) {
+            const modifier = EDGE_NEIGHBOURS[edge];
+            const neighbour = data.getHex(hex.q + modifier.q, hex.r + modifier.r);
+            if(neighbour?.factionId === hex.factionId) {
+                continue;
+            }
+
+            const from = corners[edge];
+            const to = corners[(edge + 1) % 6];
+            context.moveTo(from.x, from.y);
+            context.lineTo(to.x, to.y);
+            hasBorder = true;
+        }
+
+        if(hasBorder) {
+            context.strokeStyle = faction.color;
+            context.stroke();
+        }
+    }
+
+    context.restore();
 }
 
 function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
