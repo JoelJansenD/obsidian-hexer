@@ -106,9 +106,9 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
     // leaving shared internal edges borderless so a region reads as one shape.
     // The border is drawn opaque in the faction's own colour.
     context.globalAlpha = 1;
-    context.lineWidth = size * 0.08;
     context.lineCap = 'round';
     context.lineJoin = 'round';
+    const borderWidth = size * 0.08;
     for(const hex of data.hexes.values()) {
         const faction = hex.factionId ? factionsById.get(hex.factionId) : undefined;
         if(!faction) {
@@ -117,8 +117,7 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
 
         const corners = hexCorners(radialCoordinatesToPoint(hex, size), size);
 
-        context.beginPath();
-        let hasBorder = false;
+        const borderEdges: [Point, Point][] = [];
         for(let edge = 0; edge < 6; edge++) {
             const modifier = EDGE_NEIGHBOURS[edge];
             const neighbour = data.getHex(hex.q + modifier.q, hex.r + modifier.r);
@@ -126,17 +125,29 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
                 continue;
             }
 
-            const from = corners[edge];
-            const to = corners[(edge + 1) % 6];
-            context.moveTo(from.x, from.y);
-            context.lineTo(to.x, to.y);
-            hasBorder = true;
+            borderEdges.push([corners[edge], corners[(edge + 1) % 6]]);
         }
 
-        if(hasBorder) {
-            context.strokeStyle = faction.color;
-            context.stroke();
+        if(borderEdges.length === 0) {
+            continue;
         }
+
+        // The stroke is centred on the edge, so clip to the hex and draw at
+        // double width: only the inner half survives, keeping the whole border
+        // inside the hex.
+        context.save();
+        traceHex(context, corners);
+        context.clip();
+
+        context.beginPath();
+        for(const [from, to] of borderEdges) {
+            context.moveTo(from.x, from.y);
+            context.lineTo(to.x, to.y);
+        }
+        context.lineWidth = borderWidth * 2;
+        context.strokeStyle = faction.color;
+        context.stroke();
+        context.restore();
     }
 
     context.restore();
