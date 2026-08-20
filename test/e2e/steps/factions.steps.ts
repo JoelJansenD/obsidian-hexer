@@ -1,5 +1,6 @@
 import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
+import editorPage from '../support/editor.page';
 import factionPage from '../support/faction.page';
 import itemSettingsPage from '../support/itemSettings.page';
 import { createNote } from '../support/obsidian.page';
@@ -66,4 +67,11 @@ Then('I can view the faction\'s attached note', async function (this: FactionsCo
     const faction = await factionPage.getFaction(this.selectedFaction!.id);
     expect(faction).toBeDefined();
     expect(faction!.filePath).toBe(this.attachedNotePath);
+});
+
+Then('the faction is added to the hex', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.lastClickedHex).toBeDefined();
+    const hex = await editorPage.getHex(this.lastClickedHex!);
+    expect(hex?.factionId).toBe(this.selectedFaction!.id);
 });

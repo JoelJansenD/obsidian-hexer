@@ -18,3 +18,9 @@ Feature: Factions
         And I save the faction settings
         Then the faction is updated with the new name
         And I can view the faction's attached note
+
+    Scenario: Adding a faction to a hex
+        Given I have selected the brush tool
+        And I have an active faction
+        When I click an empty hex
+        Then the faction is added to the hex
