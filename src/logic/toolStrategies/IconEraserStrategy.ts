@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { hexagonIsEmpty, RadialCoordinates } from "../hexagon";
+import { RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
@@ -23,10 +23,7 @@ export default class IconEraserStrategy implements ToolStrategy {
         }
 
         hex.icon = null;
-
-        if(hexagonIsEmpty(hex)) {
-            data.deleteHex(radialCoordinates);
-        }
+        data.eraseIfEmpty(hex);
     }
 
     public getEvents(): RegisteredEvents {
