@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { hexagonIsEmpty, RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
@@ -16,8 +16,19 @@ export default class FactionEraserStrategy implements ToolStrategy {
         this.erase(data, radialCoordinates);
     }
 
-    private erase(_data: HexerData, _radialCoordinates: RadialCoordinates) {
-        throw new Error('FactionEraserStrategy.erase is not implemented');
+    private erase(data: HexerData, radialCoordinates: RadialCoordinates) {
+        const hexagon = data.getHex(radialCoordinates);
+        if(!hexagon) {
+            return;
+        }
+
+        hexagon.factionId = null;
+        if(hexagonIsEmpty(hexagon)) {
+            data.deleteHex(radialCoordinates);
+        }
+        else {
+            data.setHex(hexagon);
+        }
     }
 
     public getEvents(): RegisteredEvents {
