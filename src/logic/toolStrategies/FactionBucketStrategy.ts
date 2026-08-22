@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { getArea, RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
@@ -8,8 +8,24 @@ export default class FactionBucketStrategy implements ToolStrategy {
         return layer === 'faction' && tool === 'bucket';
     }
 
-    public onLeftClick(_data: HexerData, _editorState: EditorState, _radialCoordinates: RadialCoordinates) {
-        throw new Error('Not implemented');
+    public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+        const clickedHex = data.getHex(radialCoordinates);
+        if(!clickedHex) {
+            return;
+        }
+
+        const area = getArea(radialCoordinates, (hex) => {
+            const existing = data.getHex(hex);
+            return existing !== undefined && existing.factionId === clickedHex.factionId;
+        });
+
+        area.forEach((hex) => {
+            const hexagon = data.getHex(hex);
+            if(hexagon) {
+                hexagon.factionId = editorState.activeFactionId;
+                data.setHex(hexagon);
+            }
+        });
     }
 
     public getEvents(): RegisteredEvents {

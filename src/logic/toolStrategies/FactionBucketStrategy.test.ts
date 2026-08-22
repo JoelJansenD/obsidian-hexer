@@ -52,4 +52,23 @@ describe('onLeftClick', () => {
         expect(hexMap.get('10,10')!.factionId).toBe(claimedFactionId);
     });
 
+    it('fills connected hexes sharing an empty faction', () => {
+        // Arrange
+        const emptyHexMap = new Map<string, Hexagon>();
+        emptyHexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: null, factionId: null });
+        emptyHexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: null, factionId: null });
+        const emptyData = createHexerData({ hexes: emptyHexMap });
+
+        const activeFactionId = 'faction-c';
+        const editorState = {...defaultEditorState, activeFactionId};
+
+        // Act
+        strategyToTest.onLeftClick(emptyData, editorState, { q: 0, r: 0 });
+
+        // Assert
+        expect(emptyHexMap.get('0,0')!.factionId).toBe(activeFactionId);
+        expect(emptyHexMap.get('1,0')!.factionId).toBe(activeFactionId);
+
+    });
+
 });
