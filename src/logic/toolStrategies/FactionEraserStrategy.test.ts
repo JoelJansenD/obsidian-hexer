@@ -23,6 +23,18 @@ describe('onLeftClick', () => {
         // Assert
         expect(hexMap.get('0,0')?.factionId).toBeNull();
     });
+
+    it('does nothing when the clicked hex does not exist', () => {
+        // Arrange
+        const hexMap: HexMap = new Map<string, Hexagon>();
+        const data = createHexerData({ hexes: hexMap });
+
+        // Act
+        strategyToTest.onLeftClick(data, defaultEditorState, { q: 0, r: 0 });
+
+        // Assert
+        expect(hexMap.size).toBe(0);
+    });
 });
 
 describe('onLeftDrag', () => {
@@ -49,5 +61,19 @@ describe('onLeftDrag', () => {
         expect(hexMap.get('0,0')?.factionId).toBeNull();
         expect(hexMap.get('1,0')?.factionId).toBeNull();
         expect(hexMap.get('2,0')?.factionId).toBeNull();
+    });
+
+    it('does nothing as the mouse moves across hexes that do not exist', () => {
+        // Arrange
+        const hexMap: HexMap = new Map<string, Hexagon>();
+        const data = createHexerData({ hexes: hexMap });
+
+        // Act
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 0, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 1, r: 0 });
+        strategyToTest.onLeftDrag(data, defaultEditorState, { q: 2, r: 0 });
+
+        // Assert
+        expect(hexMap.size).toBe(0);
     });
 });
