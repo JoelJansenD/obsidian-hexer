@@ -54,3 +54,9 @@ Feature: Factions
         And I have selected the bucket tool
         When I click an existing hex
         Then the connected hexes of the same faction are changed to the selected faction
+
+    Scenario: Filling a non-existent hex with the bucket tool
+        Given I am editing the faction "The Ashen Pact"
+        And I have selected the bucket tool
+        When I click a non-existent hex
+        Then nothing changes
