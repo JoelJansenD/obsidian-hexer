@@ -36,3 +36,9 @@ Feature: Factions
         And I have selected the brush tool
         When I click and drag across multiple hexes
         Then the faction is added to every hovered hex
+
+    Scenario: Removing a faction from a hex
+        Given I am editing the faction "The Verdant Circle"
+        And I have selected the eraser tool
+        When I click a hex with a faction
+        Then the faction is removed from the hex

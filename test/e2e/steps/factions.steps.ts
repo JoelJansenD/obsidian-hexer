@@ -70,11 +70,24 @@ Then('I can view the faction\'s attached note', async function (this: FactionsCo
     expect(faction!.filePath).toBe(this.attachedNotePath);
 });
 
+When('I click a hex with a faction', async function (this: FactionsContext) {
+    const hex = { q: 1, r: 1 };
+    await editorPage.clickHex(hex);
+    this.lastClickedHex = hex;
+});
+
 Then('the faction is added to the hex', async function (this: FactionsContext) {
     expect(this.selectedFaction).toBeDefined();
     expect(this.lastClickedHex).toBeDefined();
     const hex = await editorPage.getHex(this.lastClickedHex!);
     expect(hex?.factionId).toBe(this.selectedFaction!.id);
+});
+
+Then('the faction is removed from the hex', async function (this: FactionsContext) {
+    expect(this.lastClickedHex).toBeDefined();
+    const hex = await editorPage.getHex(this.lastClickedHex!);
+    expect(hex).toBeDefined();
+    expect(hex!.factionId).toBeNull();
 });
 
 Then('the faction is added to every hovered hex', async function (this: FactionsContext) {
