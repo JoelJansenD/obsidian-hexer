@@ -1,5 +1,5 @@
 import { Faction } from "./faction";
-import { Hexagon, RadialCoordinates } from "./hexagon";
+import { Hexagon, hexagonIsEmpty, RadialCoordinates } from "./hexagon";
 import { Path } from "./path";
 
 
@@ -79,6 +79,19 @@ export class HexerData implements HexerState {
         const q = typeof arg1 === 'object' ? arg1.q : arg1;
         const r = typeof arg1 === 'object' ? arg1.r : arg2!;
         this.hexes.delete(hexKey(q, r));
+    }
+
+    /**
+     * Persists a hexagon after an erase: an empty hexagon is removed from the map
+     * entirely, otherwise it is written back with its remaining properties.
+     */
+    public eraseIfEmpty(hex: Hexagon): void {
+        if(hexagonIsEmpty(hex)) {
+            this.deleteHex(hex.q, hex.r);
+        }
+        else {
+            this.setHex(hex);
+        }
     }
 
     public clone(): HexerData {

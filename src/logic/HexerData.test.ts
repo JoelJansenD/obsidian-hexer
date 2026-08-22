@@ -110,4 +110,29 @@ describe('HexerData', () => {
         expect(hex).toEqual({ q: 1, r: 1, terrainColor: null, icon: null, factionId: null });
         expect(data.getHex(1, 1)).toBe(hex);
     });
+
+    it('eraseIfEmpty removes the hex from the map when it is empty', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+        const hex: Hexagon = { q: 0, r: 0, terrainColor: null, icon: null, factionId: null };
+        data.setHex(hex);
+
+        // Act
+        data.eraseIfEmpty(hex);
+
+        // Assert
+        expect(data.getHex(0, 0)).toBeUndefined();
+    });
+
+    it('eraseIfEmpty persists the hex when it still has content', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+        const hex: Hexagon = { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null };
+
+        // Act
+        data.eraseIfEmpty(hex);
+
+        // Assert
+        expect(data.getHex(0, 0)).toBe(hex);
+    });
 });
