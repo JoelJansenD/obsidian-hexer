@@ -2,6 +2,7 @@ import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import FactionBrushStrategy from "./FactionBrushStrategy";
+import FactionBucketStrategy from "./FactionBucketStrategy";
 import FactionEraserStrategy from "./FactionEraserStrategy";
 import IconBrushStrategy from "./IconBrushStrategy";
 import IconBucketStrategy from "./IconBucketStrategy";
@@ -28,6 +29,7 @@ export interface ToolStrategy {
 export type ToolStrategyFactory = () => ToolStrategy;
 const toolStrategyFactories: ToolStrategyFactory[] = [
     () => new FactionBrushStrategy(),
+    () => new FactionBucketStrategy(),
     () => new FactionEraserStrategy(),
     () => new IconBrushStrategy(),
     () => new IconBucketStrategy(),

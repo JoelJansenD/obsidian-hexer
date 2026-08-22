@@ -8,4 +8,5 @@ export interface FactionsContext {
     attachedNotePath?: string;
     lastClickedHex?: RadialCoordinates;
     lastDraggedHexes?: RadialCoordinates[];
+    regionHexes?: RadialCoordinates[];
 }

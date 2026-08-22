@@ -107,6 +107,66 @@ Then('the faction is removed from every dragged hex', async function (this: Fact
     }
 });
 
+When('I click an existing hex', async function (this: FactionsContext) {
+    // The first seeded faction (The Verdant Circle) claims the connected region
+    // 1,1 / 2,1 / 2,2 (see the fixture), so clicking any of them floods the whole
+    // region. 3,1 is a neighbouring hex with no faction, left as the control.
+    const hex = { q: 1, r: 1 };
+    const before = await editorPage.getHex(hex);
+    expect(before?.factionId).toBeTruthy();
+    this.originalFaction = await factionPage.getFaction(before!.factionId!);
+    expect(this.originalFaction).toBeDefined();
+    this.lastClickedHex = hex;
+    this.regionHexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }];
+    await editorPage.clickHex(hex);
+});
+
+When('I click a non-existent hex', async function (this: FactionsContext) {
+    // The fixture only seeds hexes 1,1 / 2,1 / 2,2 / 3,1, so nothing exists here.
+    const hex = { q: 5, r: 5 };
+    // Snapshot the seeded region so the assertion can prove it stays untouched
+    // even though a different faction is active.
+    this.regionHexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }];
+    const before = await editorPage.getHex(this.regionHexes[0]);
+    this.originalFaction = await factionPage.getFaction(before!.factionId!);
+    expect(this.originalFaction).toBeDefined();
+    this.lastClickedHex = hex;
+    await editorPage.clickHex(hex);
+});
+
+Then('nothing changes', async function (this: FactionsContext) {
+    expect(this.lastClickedHex).toBeDefined();
+    expect(this.originalFaction).toBeDefined();
+    expect(this.regionHexes).toBeDefined();
+
+    // The clicked hex was never created, so it still does not exist.
+    const clicked = await editorPage.getHex(this.lastClickedHex!);
+    expect(clicked).toBeNull();
+
+    // The seeded region keeps its original faction — the fill did nothing.
+    for(const coordinates of this.regionHexes!) {
+        const hex = await editorPage.getHex(coordinates);
+        expect(hex?.factionId).toBe(this.originalFaction!.id);
+    }
+});
+
+Then('the connected hexes of the same faction are changed to the selected faction', async function (this: FactionsContext) {
+    expect(this.selectedFaction).toBeDefined();
+    expect(this.originalFaction).toBeDefined();
+    expect(this.regionHexes).toBeDefined();
+    // The bucket fill only makes sense when it actually swaps one faction for another.
+    expect(this.selectedFaction!.id).not.toBe(this.originalFaction!.id);
+
+    for(const coordinates of this.regionHexes!) {
+        const hex = await editorPage.getHex(coordinates);
+        expect(hex?.factionId).toBe(this.selectedFaction!.id);
+    }
+
+    // A neighbouring hex outside the region keeps its (absent) faction.
+    const outside = await editorPage.getHex({ q: 3, r: 1 });
+    expect(outside?.factionId ?? null).toBeNull();
+});
+
 Then('the faction is added to every hovered hex', async function (this: FactionsContext) {
     expect(this.selectedFaction).toBeDefined();
     expect(this.lastDraggedHexes).toBeDefined();
