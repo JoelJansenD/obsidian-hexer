@@ -76,6 +76,14 @@ When('I click a hex with a faction', async function (this: FactionsContext) {
     this.lastClickedHex = hex;
 });
 
+When('I click and drag across multiple hexes with a faction', async function (this: FactionsContext) {
+    // The first seeded faction claims hexes 1,1 / 2,1 / 2,2 (see the fixture),
+    // so dragging across them erases a faction from every hovered hex.
+    const hexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }];
+    await editorPage.dragAcrossHexes(hexes);
+    this.lastDraggedHexes = hexes;
+});
+
 Then('the faction is added to the hex', async function (this: FactionsContext) {
     expect(this.selectedFaction).toBeDefined();
     expect(this.lastClickedHex).toBeDefined();
@@ -88,6 +96,15 @@ Then('the faction is removed from the hex', async function (this: FactionsContex
     const hex = await editorPage.getHex(this.lastClickedHex!);
     expect(hex).toBeDefined();
     expect(hex!.factionId).toBeNull();
+});
+
+Then('the faction is removed from every dragged hex', async function (this: FactionsContext) {
+    expect(this.lastDraggedHexes).toBeDefined();
+    for(const coordinates of this.lastDraggedHexes!) {
+        const hex = await editorPage.getHex(coordinates);
+        expect(hex).toBeDefined();
+        expect(hex!.factionId).toBeNull();
+    }
 });
 
 Then('the faction is added to every hovered hex', async function (this: FactionsContext) {
