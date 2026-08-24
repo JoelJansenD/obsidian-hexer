@@ -1,3 +1,4 @@
+import { cameraViewOffset } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
@@ -23,10 +24,10 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     context.restore();
 
-    // Pan the whole scene by the camera offset so hex 0,0 (which sits at point
-    // 0,0) lands where the camera points. The translate stacks on top of the DPR
-    // transform set on resize.
-    const offset = data.camera.offset;
+    // Pan the whole scene so hex 0,0 (which sits at point 0,0) lands where the
+    // camera points: the viewport centre shifted by the camera's pan. The
+    // translate stacks on top of the DPR transform set on resize.
+    const offset = cameraViewOffset(data.camera, context.canvas.clientWidth, context.canvas.clientHeight);
     context.save();
     context.translate(offset.x, offset.y);
 
