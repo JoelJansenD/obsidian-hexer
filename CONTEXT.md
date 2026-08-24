@@ -5,7 +5,14 @@ Hexer is an Obsidian plugin for drawing hex-grid maps — terrain, icons, factio
 ## Language
 
 **Hex** (Hexagon):
-A single cell of the map grid, addressed by radial coordinates `(q, r)`.
+A single cell of the map grid, addressed by axial coordinates `(q, r)`.
+
+**Axial coordinates**:
+The `(q, r)` address of a hex on the grid.
+_Avoid_: radial coordinates, cube coordinates.
+
+**Hex orientation**:
+Whether hexes are drawn flat-top or pointy-top.
 
 **Layer**:
 A paintable dimension of the map. Every layer is either a hex-field layer or a path layer.
@@ -47,3 +54,6 @@ The viewport's pan offset over the map.
 
 **Crosshair**:
 The origin guide drawn at hex `(0, 0)`.
+
+**Map settings**:
+The map-wide options: its name, hex orientation, and whether hex borders and the crosshair are shown.

@@ -1,6 +1,6 @@
 import { cameraViewOffset } from "../logic/camera";
 import { EditorPathState, EditorState, PathLayer } from "../logic/EditorState";
-import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../logic/hexagon";
+import { Hexagon, Point, AxialCoordinates, axialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
@@ -9,7 +9,7 @@ import { Path, PathEdge, PathNode } from "../logic/path";
 // Neighbour of a hex across each of its six edges, indexed by edge: edge `i`
 // runs from corner `i` to corner `i + 1`. Used to decide which edges of a
 // faction hex sit on the region's outer boundary.
-const EDGE_NEIGHBOURS: RadialCoordinates[] = [
+const EDGE_NEIGHBOURS: AxialCoordinates[] = [
     { q: 1, r: 0 },   // corner 0 -> 1
     { q: 0, r: 1 },   // corner 1 -> 2
     { q: -1, r: 1 },  // corner 2 -> 3
@@ -17,6 +17,13 @@ const EDGE_NEIGHBOURS: RadialCoordinates[] = [
     { q: 0, r: -1 },  // corner 4 -> 5
     { q: 1, r: -1 },  // corner 5 -> 0
 ];
+
+// The wavy-line shape per path type, as multiples of the hex size: rivers bend
+// far harder than roads.
+const PATH_WAVE: Record<PathLayer, { amplitude: number, wavelength: number }> = {
+    river: { amplitude: 0.18, wavelength: 2.0 },
+    road: { amplitude: 0.1, wavelength: 1.6 },
+};
 
 export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
@@ -74,7 +81,7 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
 // half a hex of overshoot, so the marker reads clearly around the hex rather
 // than being buried inside it.
 function drawCrosshair(context: CanvasRenderingContext2D, size: number) {
-    const center = radialCoordinatesToPoint({ q: 0, r: 0 }, size);
+    const center = axialCoordinatesToPoint({ q: 0, r: 0 }, size);
     const reach = size * 1.5;
 
     context.save();
@@ -123,7 +130,7 @@ function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, size: n
         return;
     }
 
-    traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation));
+    traceHex(context, hexCorners(axialCoordinatesToPoint(hex, size, orientation), size, orientation));
     context.fillStyle = hex.terrainColor;
     context.fill();
 
@@ -138,7 +145,7 @@ function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, size: n
 }
 
 function drawHexBorder(context: CanvasRenderingContext2D, hex: Hexagon, size: number, orientation: HexOrientation) {
-    traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation));
+    traceHex(context, hexCorners(axialCoordinatesToPoint(hex, size, orientation), size, orientation));
     context.stroke();
 }
 
@@ -161,7 +168,7 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
             continue;
         }
 
-        traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation));
+        traceHex(context, hexCorners(axialCoordinatesToPoint(hex, size, orientation), size, orientation));
         context.fillStyle = faction.color;
         context.fill();
     }
@@ -179,7 +186,7 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
             continue;
         }
 
-        const corners = hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation);
+        const corners = hexCorners(axialCoordinatesToPoint(hex, size, orientation), size, orientation);
 
         const borderEdges: [Point, Point][] = [];
         for(let edge = 0; edge < 6; edge++) {
@@ -232,7 +239,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number,
     const [vbX, vbY, vbWidth, vbHeight] = (svgEl.getAttribute('viewBox') ?? '0 0 512 512')
         .split(/\s+/)
         .map(Number);
-    const hexCenter = radialCoordinatesToPoint(hex, size, orientation);
+    const hexCenter = axialCoordinatesToPoint(hex, size, orientation);
     const iconSize = size * 1.2;
     const scale = iconSize / Math.max(vbWidth, vbHeight);
 
@@ -264,12 +271,12 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
         context.shadowBlur = size * 0.15;
     }
 
-    // Both sweep in smooth, broad curves; rivers bend far harder than roads.
-    const amplitude = type === 'river' ? size * 0.18 : size * 0.1;
-    const wavelength = type === 'river' ? size * 2.0 : size * 1.6;
+    const wave = PATH_WAVE[type];
+    const amplitude = size * wave.amplitude;
+    const wavelength = size * wave.wavelength;
 
     for(const polyline of buildPathPolylines(path)) {
-        const points = polyline.map(node => radialCoordinatesToPoint(node, size, orientation));
+        const points = polyline.map(node => axialCoordinatesToPoint(node, size, orientation));
         drawWavyLine(context, points, amplitude, wavelength);
     }
 
@@ -278,7 +285,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
         const nodeRadius = size * 0.15;
 
         for(const node of nodes.values()) {
-            const center = radialCoordinatesToPoint(node, size, orientation);
+            const center = axialCoordinatesToPoint(node, size, orientation);
             const isActiveNode = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
 
             context.beginPath();

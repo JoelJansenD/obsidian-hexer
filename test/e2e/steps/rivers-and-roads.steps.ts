@@ -5,7 +5,7 @@ import pathPage from '../support/path.page';
 import itemSettingsPage from '../support/itemSettings.page';
 import { createNote } from '../support/obsidian.page';
 import { RiversAndRoadsContext } from '../support/contexts/rivers-and-roads.context';
-import { RadialCoordinates } from '../../../src/logic/hexagon';
+import { AxialCoordinates } from '../../../src/logic/hexagon';
 import { hexKey } from '../../../src/logic/HexerData';
 
 // The data table shape for a river's nodes: a row per node with q and r columns.
@@ -13,14 +13,14 @@ interface NodeTable {
     hashes(): Array<{ q: string; r: string }>;
 }
 
-function nodesFromTable(table: NodeTable): RadialCoordinates[] {
+function nodesFromTable(table: NodeTable): AxialCoordinates[] {
     return table.hashes().map(row => ({ q: Number(row.q), r: Number(row.r) }));
 }
 
 // Seeds the river, then re-selects the river layer and polygon tool: seeding
 // rebuilds the editor with default state, so the selections from the background
 // have to be re-applied before hexes can be clicked.
-async function seedRiverAndSelectTool(nodes: RadialCoordinates[]): Promise<string> {
+async function seedRiverAndSelectTool(nodes: AxialCoordinates[]): Promise<string> {
     const id = await pathPage.seedRiver(nodes);
     await editorPage.selectLayer('river');
     await editorPage.selectPaintTool('polygon');

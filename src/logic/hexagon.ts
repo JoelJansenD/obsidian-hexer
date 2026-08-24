@@ -2,7 +2,7 @@ import { hexKey } from "./HexerData";
 import { Icon } from "./icon";
 import { HexOrientation } from "./mapSettings";
 
-export interface RadialCoordinates {
+export interface AxialCoordinates {
     q: number;
     r: number;
 }
@@ -12,7 +12,7 @@ export interface Point {
     y: number;
 }
 
-export interface Hexagon extends RadialCoordinates {
+export interface Hexagon extends AxialCoordinates {
     terrainColor: string | null;
     icon: Icon | null;
     factionId: string | null;
@@ -20,19 +20,19 @@ export interface Hexagon extends RadialCoordinates {
 
 /**
  * Normalises the two ways a coordinate is passed to an overloaded method — a
- * {@link RadialCoordinates} object, or a bare `(q, r)` pair — into a single
+ * {@link AxialCoordinates} object, or a bare `(q, r)` pair — into a single
  * object, so the overload plumbing lives in one place instead of every method.
  */
-export function normalizeCoordinates(arg1: RadialCoordinates | number, arg2?: number): RadialCoordinates {
+export function normalizeCoordinates(arg1: AxialCoordinates | number, arg2?: number): AxialCoordinates {
     return typeof arg1 === 'object'
         ? { q: arg1.q, r: arg1.r }
         : { q: arg1, r: arg2! };
 }
 
-export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {
-    const result: RadialCoordinates[] = [];
+export function getArea(coordinates: AxialCoordinates, predicate: (hex: AxialCoordinates) => boolean) {
+    const result: AxialCoordinates[] = [];
     const visited = new Set<string>();
-    const stack: RadialCoordinates[] = [coordinates];
+    const stack: AxialCoordinates[] = [coordinates];
 
     while(stack.length > 0) {
         const current = stack.pop()!;
@@ -53,7 +53,7 @@ export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialC
     return result;
 }
 
-export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates[] {
+export function getNeighbours(coordinates: AxialCoordinates): AxialCoordinates[] {
     const modifiers = [
         { q: 0, r: 1 }, // North
         { q: 1, r: 0 }, // North-East
@@ -63,33 +63,33 @@ export function getNeighbours(coordinates: RadialCoordinates): RadialCoordinates
         { q: -1, r: 1 }  // North-West
     ];
 
-    const add = (coord: RadialCoordinates, mod: RadialCoordinates): RadialCoordinates => ({ q: coord.q + mod.q, r: coord.r + mod.r });
+    const add = (coord: AxialCoordinates, mod: AxialCoordinates): AxialCoordinates => ({ q: coord.q + mod.q, r: coord.r + mod.r });
     return modifiers.map(mod => add(coordinates, mod));
 }
 
-export function hexagonIsEmpty(hexagon: Hexagon) {
-    return hexagon.terrainColor === null
-        && hexagon.icon === null
-        && hexagon.factionId === null;
+export function hexIsEmpty(hex: Hexagon) {
+    return hex.terrainColor === null
+        && hex.icon === null
+        && hex.factionId === null;
 }
 
-export function pointToRadialCoordinates(x: number, y: number, size: number, orientation: HexOrientation = 'flat-top') {
+export function pointToAxialCoordinates(x: number, y: number, size: number, orientation: HexOrientation = 'flat-top') {
     const scaledX = x / size;
     const scaledY = y / size;
 
     if(orientation === 'pointy-top') {
         const q = ((Math.sqrt(3) / 3) * scaledX) - ((1 / 3) * scaledY);
         const r = (2 / 3) * scaledY;
-        return roundRadialCoordinates(q, r);
+        return roundAxialCoordinates(q, r);
     }
 
     const q = (2 / 3) * scaledX;
     const r = (-1 / 3) * scaledX + (Math.sqrt(3) / 3) * scaledY;
 
-    return roundRadialCoordinates(q, r);
+    return roundAxialCoordinates(q, r);
 }
 
-export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: number, orientation: HexOrientation = 'flat-top') : Point {
+export function axialCoordinatesToPoint(coordinate: AxialCoordinates, size: number, orientation: HexOrientation = 'flat-top') : Point {
     if(orientation === 'pointy-top') {
         const x = size * ((Math.sqrt(3) * coordinate.q) + ((Math.sqrt(3) / 2) * coordinate.r));
         const y = size * ((3 / 2) * coordinate.r);
@@ -101,9 +101,9 @@ export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: nu
     return { x, y };
 }
 
-export function roundRadialCoordinates(coordinates: RadialCoordinates) : RadialCoordinates;
-export function roundRadialCoordinates(q: number, r: number): RadialCoordinates;
-export function roundRadialCoordinates(arg1: number | RadialCoordinates, arg2?: number) {
+export function roundAxialCoordinates(coordinates: AxialCoordinates) : AxialCoordinates;
+export function roundAxialCoordinates(q: number, r: number): AxialCoordinates;
+export function roundAxialCoordinates(arg1: number | AxialCoordinates, arg2?: number) {
     const { q, r } = normalizeCoordinates(arg1, arg2);
 
     const s = -q - r;

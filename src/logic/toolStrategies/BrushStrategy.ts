@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { AxialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { HexFieldLayerDescriptor } from "./hexFieldLayers";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
@@ -13,10 +13,10 @@ export default class BrushStrategy<T> implements ToolStrategy {
         this.layers = [_field.layer];
     }
 
-    private paint(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const hexagon = data.getOrCreateHex(radialCoordinates);
-        this._field.write(hexagon, this._field.valueFromState(editorState));
-        data.setHex(hexagon);
+    private paint(data: HexerData, editorState: EditorState, axialCoordinates: AxialCoordinates) {
+        const hex = data.getOrCreateHex(axialCoordinates);
+        this._field.write(hex, this._field.valueFromState(editorState));
+        data.setHex(hex);
     }
 
     public getEvents(): RegisteredEvents {

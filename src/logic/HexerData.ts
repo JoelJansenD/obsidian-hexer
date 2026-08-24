@@ -1,6 +1,6 @@
 import { Camera, defaultCamera } from "./camera";
 import { Faction } from "./faction";
-import { Hexagon, hexagonIsEmpty, normalizeCoordinates, RadialCoordinates } from "./hexagon";
+import { Hexagon, hexIsEmpty, normalizeCoordinates, AxialCoordinates } from "./hexagon";
 import { defaultMapSettings, MapSettings } from "./mapSettings";
 import { Path } from "./path";
 
@@ -45,16 +45,16 @@ export class HexerData implements HexerState {
         this.camera = state.camera ?? defaultCamera();
     }
 
-    public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
+    public getHex(coordinates: AxialCoordinates): Hexagon | undefined;
     public getHex(q: number, r: number): Hexagon | undefined;
-    public getHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
+    public getHex(arg1: AxialCoordinates | number, arg2?: number): Hexagon | undefined {
         const { q, r } = normalizeCoordinates(arg1, arg2);
         return this.hexes.get(hexKey(q, r));
     }
 
-    public getOrCreateHex(coordinates: RadialCoordinates): Hexagon;
+    public getOrCreateHex(coordinates: AxialCoordinates): Hexagon;
     public getOrCreateHex(q: number, r: number): Hexagon;
-    public getOrCreateHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon {
+    public getOrCreateHex(arg1: AxialCoordinates | number, arg2?: number): Hexagon {
         const { q, r } = normalizeCoordinates(arg1, arg2);
         const key = hexKey(q, r);
         const hex = this.hexes.get(key);
@@ -78,19 +78,19 @@ export class HexerData implements HexerState {
         this.hexes.set(key, hex);
     }
 
-    public deleteHex(coordinates: RadialCoordinates): void;
+    public deleteHex(coordinates: AxialCoordinates): void;
     public deleteHex(q: number, r: number): void;
-    public deleteHex(arg1: RadialCoordinates | number, arg2?: number): void {
+    public deleteHex(arg1: AxialCoordinates | number, arg2?: number): void {
         const { q, r } = normalizeCoordinates(arg1, arg2);
         this.hexes.delete(hexKey(q, r));
     }
 
     /**
-     * Persists a hexagon after an erase: an empty hexagon is removed from the map
+     * Persists a hex after an erase: an empty hex is removed from the map
      * entirely, otherwise it is written back with its remaining properties.
      */
     public eraseIfEmpty(hex: Hexagon): void {
-        if(hexagonIsEmpty(hex)) {
+        if(hexIsEmpty(hex)) {
             this.deleteHex(hex.q, hex.r);
         }
         else {

@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { AxialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import { HexFieldLayerDescriptor } from "./hexFieldLayers";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
@@ -13,14 +13,14 @@ export default class EraserStrategy<T> implements ToolStrategy {
         this.layers = [_field.layer];
     }
 
-    private erase(data: HexerData, _editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const hexagon = data.getHex(radialCoordinates);
-        if(!hexagon) {
+    private erase(data: HexerData, _editorState: EditorState, axialCoordinates: AxialCoordinates) {
+        const hex = data.getHex(axialCoordinates);
+        if(!hex) {
             return;
         }
 
-        this._field.write(hexagon, null);
-        data.eraseIfEmpty(hexagon);
+        this._field.write(hex, null);
+        data.eraseIfEmpty(hex);
     }
 
     public getEvents(): RegisteredEvents {

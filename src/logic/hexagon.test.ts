@@ -1,9 +1,9 @@
-import { getArea, getNeighbours, Hexagon, hexagonIsEmpty, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint, roundRadialCoordinates } from "./hexagon";
+import { getArea, getNeighbours, Hexagon, hexIsEmpty, pointToAxialCoordinates, AxialCoordinates, axialCoordinatesToPoint, roundAxialCoordinates } from "./hexagon";
 
 describe('getArea', () => {
     const key = (q: number, r: number) => `${q},${r}`;
     const matchesColor = (hexMap: Map<string, Hexagon>, color: string | null) =>
-        (hex: RadialCoordinates) => {
+        (hex: AxialCoordinates) => {
             const found = hexMap.get(key(hex.q, hex.r));
             return found !== undefined && found.terrainColor === color;
         };
@@ -86,10 +86,10 @@ describe('getNeighbours', () => {
     });
 });
 
-describe('hexagonIsEmpty', () => {
+describe('hexIsEmpty', () => {
     it('returns true when no fields have values', () => {
         // Arrange
-        const hexagon: Hexagon = {
+        const hex: Hexagon = {
             q: 0,
             r: 0,
             terrainColor: null,
@@ -97,7 +97,7 @@ describe('hexagonIsEmpty', () => {
             factionId: null
         };
         // Act
-        const result = hexagonIsEmpty(hexagon);
+        const result = hexIsEmpty(hex);
 
         // Assert
         expect(result).toBe(true);
@@ -105,7 +105,7 @@ describe('hexagonIsEmpty', () => {
 
     it('returns false when terrainColor has a value', () => {
         // Arrange
-        const hexagon: Hexagon = {
+        const hex: Hexagon = {
             q: 0,
             r: 0,
             terrainColor: '#ff0000',
@@ -114,7 +114,7 @@ describe('hexagonIsEmpty', () => {
         };
 
         // Act
-        const result = hexagonIsEmpty(hexagon);
+        const result = hexIsEmpty(hex);
 
         // Assert
         expect(result).toBe(false);
@@ -122,7 +122,7 @@ describe('hexagonIsEmpty', () => {
 
     it('returns false when icon has a value', () => {
         // Arrange
-        const hexagon: Hexagon = {
+        const hex: Hexagon = {
             q: 0,
             r: 0,
             terrainColor: null,
@@ -131,7 +131,7 @@ describe('hexagonIsEmpty', () => {
         };
 
         // Act
-        const result = hexagonIsEmpty(hexagon);
+        const result = hexIsEmpty(hex);
 
         // Assert
         expect(result).toBe(false);
@@ -139,7 +139,7 @@ describe('hexagonIsEmpty', () => {
 
     it('returns false when factionId has a value', () => {
         // Arrange
-        const hexagon: Hexagon = {
+        const hex: Hexagon = {
             q: 0,
             r: 0,
             terrainColor: null,
@@ -148,25 +148,25 @@ describe('hexagonIsEmpty', () => {
         };
 
         // Act
-        const result = hexagonIsEmpty(hexagon);
+        const result = hexIsEmpty(hex);
 
         // Assert
         expect(result).toBe(false);
     });
 });
 
-describe('pointToRadialCoordinates', () => {
+describe('pointToAxialCoordinates', () => {
     it.for([
         [ 0, 0, 0, 0 ],
         [ 15, 8.660254, 10, 0 ],
         [ 0, 17.320508, 0, 10 ],
         [ -15, 8.660254, -10, 10 ],
-    ])('converts point (%d, %d) to radial coordinates (%i, %i)', ([x, y, q, r]) => {
+    ])('converts point (%d, %d) to axial coordinates (%i, %i)', ([x, y, q, r]) => {
         // Arrange
         const size = 1;
 
         // Act
-        const result = pointToRadialCoordinates(x, y, size);
+        const result = pointToAxialCoordinates(x, y, size);
 
         // Assert
         expect(result.q).toBe(q);
@@ -180,7 +180,7 @@ describe('pointToRadialCoordinates', () => {
         const size = 5;
 
         // Act
-        const result = pointToRadialCoordinates(x, y, size);
+        const result = pointToAxialCoordinates(x, y, size);
 
         // Assert
         expect(result.q).toBe(2);
@@ -193,12 +193,12 @@ describe('pointToRadialCoordinates', () => {
             [ 17.320508, 0, 10, 0 ],
             [ 8.660254, 15, 0, 10 ],
             [ -8.660254, 15, -10, 10 ],
-        ])('converts point (%d, %d) to radial coordinates (%i, %i)', ([x, y, q, r]) => {
+        ])('converts point (%d, %d) to axial coordinates (%i, %i)', ([x, y, q, r]) => {
             // Arrange
             const size = 1;
 
             // Act
-            const result = pointToRadialCoordinates(x, y, size, 'pointy-top');
+            const result = pointToAxialCoordinates(x, y, size, 'pointy-top');
 
             // Assert
             expect(result.q).toBe(q);
@@ -212,7 +212,7 @@ describe('pointToRadialCoordinates', () => {
             const size = 5;
 
             // Act
-            const result = pointToRadialCoordinates(x, y, size, 'pointy-top');
+            const result = pointToAxialCoordinates(x, y, size, 'pointy-top');
 
             // Assert
             expect(result.q).toBe(2);
@@ -221,18 +221,18 @@ describe('pointToRadialCoordinates', () => {
     });
 });
 
-describe('radialCoordinatesToPoint', () => {
+describe('axialCoordinatesToPoint', () => {
     it.for([
         [ 0, 0, 0, 0 ],
         [ 10, 0, 15, 8.660254 ],
         [ 0, 10, 0, 17.320508 ],
         [ -10, 10, -15, 8.660254 ],
-    ])('converts radial coordinates (%d, %d) to point (%d, %d)', ([ q, r, expectedX, expectedY ]) => {
+    ])('converts axial coordinates (%d, %d) to point (%d, %d)', ([ q, r, expectedX, expectedY ]) => {
         // Arrange
         const size = 1;
 
         // Act
-        const result = radialCoordinatesToPoint({ q, r }, size);
+        const result = axialCoordinatesToPoint({ q, r }, size);
 
         // Assert
         expect(result.x).toBeCloseTo(expectedX);
@@ -244,7 +244,7 @@ describe('radialCoordinatesToPoint', () => {
         const size = 5;
 
         // Act
-        const result = radialCoordinatesToPoint({ q: 0, r: 10 }, size);
+        const result = axialCoordinatesToPoint({ q: 0, r: 10 }, size);
 
         // Assert
         expect(result.x).toBeCloseTo(0);
@@ -257,12 +257,12 @@ describe('radialCoordinatesToPoint', () => {
             [ 10, 0, 17.320508, 0 ],
             [ 0, 10, 8.660254, 15 ],
             [ -10, 10, -8.660254, 15 ],
-        ])('converts radial coordinates (%d, %d) to point (%d, %d)', ([ q, r, expectedX, expectedY ]) => {
+        ])('converts axial coordinates (%d, %d) to point (%d, %d)', ([ q, r, expectedX, expectedY ]) => {
             // Arrange
             const size = 1;
 
             // Act
-            const result = radialCoordinatesToPoint({ q, r }, size, 'pointy-top');
+            const result = axialCoordinatesToPoint({ q, r }, size, 'pointy-top');
 
             // Assert
             expect(result.x).toBeCloseTo(expectedX);
@@ -274,7 +274,7 @@ describe('radialCoordinatesToPoint', () => {
             const size = 5;
 
             // Act
-            const result = radialCoordinatesToPoint({ q: 0, r: 10 }, size, 'pointy-top');
+            const result = axialCoordinatesToPoint({ q: 0, r: 10 }, size, 'pointy-top');
 
             // Assert
             expect(result.x).toBeCloseTo(43.30127);
@@ -283,14 +283,14 @@ describe('radialCoordinatesToPoint', () => {
     });
 });
 
-describe('roundRadialCoordinates', () => {
+describe('roundAxialCoordinates', () => {
     it.for([
         [ 1.6, 2.1, 2, 2 ],
         [ 2.1, 1.6, 2, 2 ],
         [ 2.1, 2.1, 2, 2 ]
     ])('rounds (%d, %d) to (%i, %i)', ([ q, r, expectedQ, expectedR ]) => {
         // Act
-        const result = roundRadialCoordinates(q, r);
+        const result = roundAxialCoordinates(q, r);
 
         // Assert
         expect(result.q).toBe(expectedQ);
@@ -299,7 +299,7 @@ describe('roundRadialCoordinates', () => {
 
     it('rounds negative values correctly', () => {
         // Act
-        const result = roundRadialCoordinates(-1.6, -2.1);
+        const result = roundAxialCoordinates(-1.6, -2.1);
 
         // Assert
         expect(result.q).toBe(-2);
@@ -308,7 +308,7 @@ describe('roundRadialCoordinates', () => {
 
     it('rounds negative values close to zero to zero', () => {
         // Act
-        const result = roundRadialCoordinates(-1e-9, -1e-9);
+        const result = roundAxialCoordinates(-1e-9, -1e-9);
 
         // Assert
         expect(result.q).toBe(0);

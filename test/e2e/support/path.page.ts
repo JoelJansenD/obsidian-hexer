@@ -1,4 +1,4 @@
-import { RadialCoordinates } from "../../../src/logic/hexagon";
+import { AxialCoordinates } from "../../../src/logic/hexagon";
 import { Path, PathEdge, PathNode } from "../../../src/logic/path";
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
 
@@ -13,7 +13,7 @@ class PathPage {
      * path. Returns the river's id. The editor is rebuilt with default state, so
      * callers must re-select the layer and tool afterwards.
      */
-    async seedRiver(nodes: RadialCoordinates[]): Promise<string> {
+    async seedRiver(nodes: AxialCoordinates[]): Promise<string> {
         const content = buildHexerFileContent([
             { id: SEEDED_RIVER_ID, name: 'Seeded river', nodes },
         ]);
@@ -32,7 +32,7 @@ class PathPage {
      * The editor and its state are private, so reach through the view the same
      * way getPaths reaches hexerData.
      */
-    async getActiveNode(): Promise<RadialCoordinates | null> {
+    async getActiveNode(): Promise<AxialCoordinates | null> {
         return browser.executeObsidian(({ app }) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
