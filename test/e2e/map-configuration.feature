@@ -9,3 +9,7 @@ Feature: Map Configuration
         And I set the hex orientation to pointy top
         Then the map name is updated to "The Shattered Realms"
         And the hex orientation is pointy top
+
+    Scenario: Changing the map to an empty name
+        When I change the map name to ""
+        Then a validation message is shown

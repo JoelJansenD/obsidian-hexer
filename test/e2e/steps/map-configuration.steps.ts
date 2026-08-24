@@ -17,3 +17,7 @@ Then('the map name is updated to {string}', async function (this: MapConfigurati
 Then('the hex orientation is pointy top', async function (this: MapConfigurationContext) {
     return 'pending';
 });
+
+Then('a validation message is shown', async function (this: MapConfigurationContext) {
+    return 'pending';
+});
