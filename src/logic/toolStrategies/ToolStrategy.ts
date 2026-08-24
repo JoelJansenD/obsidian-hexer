@@ -50,3 +50,14 @@ export function resolveToolStrategy(layer: Layer, tool: PaintTool): ToolStrategy
     }
     return null;
 }
+
+export function getAvailableTools(layer: Layer): PaintTool[] {
+    const tools = new Set<PaintTool>();
+    for (const createStrategy of toolStrategyFactories) {
+        const strategy = createStrategy();
+        if (strategy.layers.includes(layer)) {
+            tools.add(strategy.tool);
+        }
+    }
+    return [...tools];
+}

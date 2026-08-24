@@ -31,4 +31,8 @@
         background-color: var(--background-modifier-hover);
         color: var(--text-normal);
     }
+
+    &.hexer-tools-button-hidden {
+        display: none;
+    }
 }
