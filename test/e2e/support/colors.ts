@@ -1,4 +1,4 @@
-const COLOUR_HEX: Record<string, string> = {
+const COLOR_HEX: Record<string, string> = {
     red: '#ff0000',
     orange: '#ffa500',
     yellow: '#ffff00',
@@ -10,10 +10,10 @@ const COLOUR_HEX: Record<string, string> = {
     white: '#ffffff',
 };
 
-export function colourToHex(colour: string): string {
-    const hex = COLOUR_HEX[colour.toLowerCase()];
+export function colorToHex(color: string): string {
+    const hex = COLOR_HEX[color.toLowerCase()];
     if (!hex) {
-        throw new Error(`Unknown colour "${colour}" — add it to COLOUR_HEX in colours.ts`);
+        throw new Error(`Unknown color "${color}" — add it to COLOR_HEX in colors.ts`);
     }
     return hex;
 }

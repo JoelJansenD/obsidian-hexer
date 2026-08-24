@@ -24,7 +24,7 @@ describe('onLeftClick', () => {
         expect(hexMap.has('0,0')).toBe(false);
     });
 
-    it('clears only the terrain colour if an icon is also present', () => {
+    it('clears only the terrain color if an icon is also present', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         const icon = { name: 'castle', color: '#ff0000' };
@@ -68,7 +68,7 @@ describe('onLeftDrag', () => {
         expect(hexMap.get('2,0')).toBeUndefined();
     });
 
-    it('clears only the terrain colour as the mouse moves across hexagons that also have an icon', () => {
+    it('clears only the terrain color as the mouse moves across hexagons that also have an icon', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         const icon = { name: 'castle', color: '#ff0000' };

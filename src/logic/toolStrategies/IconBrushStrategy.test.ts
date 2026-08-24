@@ -20,7 +20,7 @@ describe('onLeftClick', () => {
             name: 'castle',
             color: '#ff0000'
         };
-        const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
+        const editorState = {...defaultEditorState, activeColor: '#ff0000', activeIcon: expectedIcon};
 
         // Act
         strategyToTest.onLeftClick(data, editorState, { q: 0, r: 0 });
@@ -38,7 +38,7 @@ describe('onLeftClick', () => {
             name: 'castle',
             color: '#ff0000'
         };
-        const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
+        const editorState = {...defaultEditorState, activeColor: '#ff0000', activeIcon: expectedIcon};
 
         // Act
         strategyToTest.onLeftClick(data, editorState, { q: 0, r: 0 });
@@ -67,7 +67,7 @@ describe('onLeftDrag', () => {
             name: 'castle',
             color: '#ff0000'
         };
-        const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
+        const editorState = {...defaultEditorState, activeColor: '#ff0000', activeIcon: expectedIcon};
 
         // Act
         strategyToTest.onLeftDrag(data, editorState, { q: 0, r: 0 });
@@ -88,7 +88,7 @@ describe('onLeftDrag', () => {
             name: 'castle',
             color: '#ff0000'
         };
-        const editorState = {...defaultEditorState, activeColour: '#ff0000', activeIcon: expectedIcon};
+        const editorState = {...defaultEditorState, activeColor: '#ff0000', activeIcon: expectedIcon};
 
         // Act
         strategyToTest.onLeftDrag(data, editorState, { q: 0, r: 0 });

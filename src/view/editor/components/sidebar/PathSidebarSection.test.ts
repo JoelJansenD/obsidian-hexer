@@ -33,7 +33,7 @@ const createPathSection = (paths: Path[]) => {
 const readRows = (parent: HTMLElement) =>
     Array.from(parent.querySelectorAll<HTMLElement>('.hexer-sidebar-list-row')).map(rowEl => ({
         name: rowEl.querySelector('.hexer-sidebar-list-row-name')!.textContent,
-        colour: rowEl.querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!.value,
+        color: rowEl.querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!.value,
     }));
 
 const getRow = (parent: HTMLElement, path: Path) => {
@@ -42,7 +42,7 @@ const getRow = (parent: HTMLElement, path: Path) => {
     return rowEl!;
 };
 
-const getColourInput = (parent: HTMLElement, path: Path) =>
+const getColorInput = (parent: HTMLElement, path: Path) =>
     getRow(parent, path).querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!;
 
 const clickButton = (parent: HTMLElement, path: Path, role: string) => {
@@ -57,14 +57,14 @@ const clickAddPath = (parent: HTMLElement) => {
     buttonEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 };
 
-const pickColour = (parent: HTMLElement, path: Path, colour: string) => {
-    const inputEl = getColourInput(parent, path);
-    inputEl.value = colour;
+const pickColor = (parent: HTMLElement, path: Path, color: string) => {
+    const inputEl = getColorInput(parent, path);
+    inputEl.value = color;
     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
 describe('Rows', () => {
-    it('displays every row with its name and colour', () => {
+    it('displays every row with its name and color', () => {
         // Arrange
         const paths = [
             createPath('Silverflow', '#1122ff'),
@@ -77,9 +77,9 @@ describe('Rows', () => {
 
         // Assert
         expect(readRows(parent)).toEqual([
-            { name: 'Silverflow', colour: '#1122ff' },
-            { name: 'Mudbrook', colour: '#8b4513' },
-            { name: 'Frostrun', colour: '#00ffee' },
+            { name: 'Silverflow', color: '#1122ff' },
+            { name: 'Mudbrook', color: '#8b4513' },
+            { name: 'Frostrun', color: '#00ffee' },
         ]);
     });
 });
@@ -114,7 +114,7 @@ describe('Adding a path', () => {
         const newPath = rivers[rivers.length - 1];
         expect(componentOptions.getEditorState().activePath).toEqual({ pathId: newPath.id, activeNode: null });
         expect(getRow(parent, newPath).dataset.editing).toBe('true');
-        expect(getColourInput(parent, newPath).disabled).toBe(false);
+        expect(getColorInput(parent, newPath).disabled).toBe(false);
         expect(getRow(parent, paths[0]).dataset.editing).toBe('false');
     });
 });
@@ -130,7 +130,7 @@ describe('Edit mode', () => {
 
         // Assert
         expect(getRow(parent, paths[0]).dataset.editing).toBe('true');
-        expect(getColourInput(parent, paths[0]).disabled).toBe(false);
+        expect(getColorInput(parent, paths[0]).disabled).toBe(false);
         expect(componentOptions.getEditorState().activePath).toEqual({ pathId: paths[0].id, activeNode: null });
     });
 
@@ -145,7 +145,7 @@ describe('Edit mode', () => {
         // Assert
         const otherRowEl = getRow(parent, paths[1]);
         expect(otherRowEl.dataset.editing).toBe('false');
-        expect(getColourInput(parent, paths[1]).disabled).toBe(true);
+        expect(getColorInput(parent, paths[1]).disabled).toBe(true);
         expect(otherRowEl.querySelector<HTMLElement>('[data-role="edit-item"]')!.style.display).toBe('none');
     });
 
@@ -160,36 +160,36 @@ describe('Edit mode', () => {
 
         // Assert
         expect(getRow(parent, paths[0]).dataset.editing).toBe('false');
-        expect(getColourInput(parent, paths[0]).disabled).toBe(true);
+        expect(getColorInput(parent, paths[0]).disabled).toBe(true);
         expect(componentOptions.getEditorState().activePath).toBeNull();
     });
 
-    it('stores the colour picked while editing', () => {
+    it('stores the color picked while editing', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
         const { parent, componentOptions } = createPathSection(paths);
         clickButton(parent, paths[0], 'edit-item');
 
         // Act
-        pickColour(parent, paths[0], '#00ff00');
+        pickColor(parent, paths[0], '#00ff00');
 
         // Assert
         expect(componentOptions.setData).toHaveBeenCalled();
         expect(componentOptions.getDataClone().rivers[0].color).toBe('#00ff00');
     });
 
-    it('keeps the stored colour after edit mode is closed', () => {
+    it('keeps the stored color after edit mode is closed', () => {
         // Arrange
         const paths = [createPath('Silverflow', '#1122ff')];
         const { parent } = createPathSection(paths);
         clickButton(parent, paths[0], 'edit-item');
-        pickColour(parent, paths[0], '#00ff00');
+        pickColor(parent, paths[0], '#00ff00');
 
         // Act
         clickButton(parent, paths[0], 'save-item');
 
         // Assert
-        expect(getColourInput(parent, paths[0]).value).toBe('#00ff00');
+        expect(getColorInput(parent, paths[0]).value).toBe('#00ff00');
     });
 });
 
@@ -267,7 +267,7 @@ describe('Refreshing', () => {
         // Assert
         const rowEl = getRow(parent, newPath);
         expect(rowEl.dataset.editing).toBe('false');
-        expect(getColourInput(parent, newPath).disabled).toBe(true);
+        expect(getColorInput(parent, newPath).disabled).toBe(true);
         expect(rowEl.querySelector<HTMLElement>('[data-role="edit-item"]')!.style.display).not.toBe('none');
     });
 });

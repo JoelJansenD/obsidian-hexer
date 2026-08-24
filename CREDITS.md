@@ -79,7 +79,7 @@ SOFTWARE.
 Game-icons.net icons are contributed by many different authors, and CC BY 3.0
 requires each author to be credited individually. The table below lists every
 game-icons.net icon shipped with this plugin and its author. All of them are
-used under CC BY 3.0 and some have been modified (recoloured and/or resized) for
+used under CC BY 3.0 and some have been modified (recolored and/or resized) for
 use in Obsidian Hexer.
 
 | Icon | Author |

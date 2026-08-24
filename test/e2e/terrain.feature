@@ -1,19 +1,19 @@
 Feature: Terrain
-  Terrains are the backdrop of hexes and can be painted in any solid colour.
+  Terrains are the backdrop of hexes and can be painted in any solid color.
 
   Background:
     Given I have opened a Hexer file
     And I have selected the terrain layer
-    And my selected colour is blue
+    And my selected color is blue
 
   Scenario: Painting an empty hex
     Given I have selected the brush tool
     When I click an empty hex
     Then the hex terrain will be painted blue
 
-  Scenario: Overwriting coloured terrain
+  Scenario: Overwriting colored terrain
     Given I have selected the brush tool
-    When I click a hex with coloured terrain
+    When I click a hex with colored terrain
     Then the hex terrain will be painted blue
 
   Scenario: Painting multiple hexes by dragging
@@ -23,7 +23,7 @@ Feature: Terrain
 
   Scenario: Erasing a hex terrain
     Given I have selected the eraser tool
-    When I click a hex with coloured terrain
+    When I click a hex with colored terrain
     Then the hex terrain will be erased
 
   Scenario: Erasing multiple hex terrains by dragging
@@ -31,7 +31,7 @@ Feature: Terrain
     When I click and drag across multiple hexes
     Then every hovered hex terrain will be erased
 
-  Scenario: Filling a hex with a terrain colour
+  Scenario: Filling a hex with a terrain color
     Given I have selected the bucket tool
-    When I click a hex with coloured terrain
-    Then every connected hex with the same terrain colour will be painted blue
+    When I click a hex with colored terrain
+    Then every connected hex with the same terrain color will be painted blue

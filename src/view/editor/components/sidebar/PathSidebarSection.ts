@@ -47,11 +47,11 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
             obsidian: this._componentOptions.obsidian,
             getId: item => item.id,
             getName: item => item.name,
-            getColour: item => item.color,
+            getColor: item => item.color,
             getFilePath: item => item.filePath,
             onEdit: this.editPath.bind(this),
             onFinish: this.closePath.bind(this),
-            onColourPicked: colour => this.savePath(path, colour),
+            onColorPicked: color => this.savePath(path, color),
             onSettings: item => this._componentOptions.obsidian.openItemSettings({
                 settings: { name: item.name, filePath: item.filePath },
                 onSave: settings => this.savePathSettings(item.id, settings),
@@ -82,14 +82,14 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
         this.renderItems();
     }
 
-    private savePath(path: Path, colour: string) {
+    private savePath(path: Path, color: string) {
         const data = this._componentOptions.getDataClone();
         const target = [...data.rivers, ...data.roads].find(p => p.id === path.id);
         if(!target) {
             return;
         }
 
-        target.color = colour;
+        target.color = color;
         this._componentOptions.setData(data);
     }
 

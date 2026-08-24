@@ -2,16 +2,16 @@ import { Given, Then, When } from "@wdio/cucumber-framework";
 import { IconContext } from "../support/contexts/icon.context";
 import editorPage from "../support/editor.page";
 import iconPage from "../support/icon.page";
-import { colourToHex } from "../support/colours";
+import { colorToHex } from "../support/colors";
 
 Given('I have selected the {word} icon', async function (this: IconContext, icon: string) {
     await iconPage.selectIcon(icon);
-    this.icon = this.icon ? { ...this.icon, name: icon } : { name: icon, color: colourToHex('black') };
+    this.icon = this.icon ? { ...this.icon, name: icon } : { name: icon, color: colorToHex('black') };
 });
 
-Given('I have selected a {word} icon colour', async function (this: IconContext, colour: string) {
-    const hex = colourToHex(colour);
-    await iconPage.setColour(hex);
+Given('I have selected a {word} icon color', async function (this: IconContext, color: string) {
+    const hex = colorToHex(color);
+    await iconPage.setColor(hex);
     this.icon = this.icon ? { ...this.icon, color: hex } : { name: 'castle', color: hex };
 });
 
@@ -20,20 +20,20 @@ When('I click a hex with an icon', async function (this: IconContext) {
     this.lastClickedHex = { q: 2, r: 2 };
 });
 
-Then('the hex will have a {word} {word} icon', async function (this: IconContext, colour: string, icon: string) {
+Then('the hex will have a {word} {word} icon', async function (this: IconContext, color: string, icon: string) {
     const hex = await editorPage.getHex(this.lastClickedHex!);
     expect(hex?.icon).not.toBeNull();
     expect(hex!.icon?.name).toBe(icon);
-    expect(hex!.icon?.color).toBe(colourToHex(colour));
+    expect(hex!.icon?.color).toBe(colorToHex(color));
 });
 
-Then('every hovered hex will have a {word} {word} icon', async function (this: IconContext, colour: string, icon: string) {
+Then('every hovered hex will have a {word} {word} icon', async function (this: IconContext, color: string, icon: string) {
     expect(this.lastDraggedHexes).not.toBeUndefined();
     this.lastDraggedHexes!.forEach(async (hex) => {
         const result = await editorPage.getHex(hex);
         expect(result?.icon).not.toBeNull();
         expect(result!.icon?.name).toBe(icon);
-        expect(result!.icon?.color).toBe(colourToHex(colour));
+        expect(result!.icon?.color).toBe(colorToHex(color));
     });
 });
 

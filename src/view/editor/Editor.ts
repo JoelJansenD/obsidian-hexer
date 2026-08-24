@@ -22,7 +22,7 @@ export default class Editor {
     private _sidebar!: EditorSidebar;
 
     private _editorState: EditorState = {
-        activeColour: '#FFFFFF',
+        activeColor: '#FFFFFF',
         activeIcon: {
             color: '#FFFFFF',
             name: 'castle'

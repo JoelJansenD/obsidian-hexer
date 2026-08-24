@@ -24,7 +24,7 @@ describe('onLeftClick', () => {
         expect(hexMap.has('0,0')).toBe(false);
     });
 
-    it('clears only the icon if a terrain colour is also present', () => {
+    it('clears only the icon if a terrain color is also present', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: { name: 'castle', color: '#ff0000' }, factionId: null });
@@ -67,7 +67,7 @@ describe('onLeftDrag', () => {
         expect(hexMap.get('2,0')).toBeUndefined();
     });
 
-    it('clears only the icon as the mouse moves across hexagons that also have a terrain colour', () => {
+    it('clears only the icon as the mouse moves across hexagons that also have a terrain color', () => {
         // Arrange
         const hexMap: HexMap = new Map<string, Hexagon>();
         hexMap.set('0,0', { q: 0, r: 0, terrainColor: '#000000', icon: { name: 'castle', color: '#ff0000' }, factionId: null });

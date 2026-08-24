@@ -2,13 +2,13 @@ import { getArea, getNeighbours, Hexagon, hexagonIsEmpty, pointToRadialCoordinat
 
 describe('getArea', () => {
     const key = (q: number, r: number) => `${q},${r}`;
-    const matchesColour = (hexMap: Map<string, Hexagon>, colour: string | null) =>
+    const matchesColor = (hexMap: Map<string, Hexagon>, color: string | null) =>
         (hex: RadialCoordinates) => {
             const found = hexMap.get(key(hex.q, hex.r));
-            return found !== undefined && found.terrainColor === colour;
+            return found !== undefined && found.terrainColor === color;
         };
 
-    it('returns all connected hexes sharing the same terrain colour', () => {
+    it('returns all connected hexes sharing the same terrain color', () => {
         // Arrange
         const hexMap = new Map<string, Hexagon>([
             [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null }],
@@ -18,7 +18,7 @@ describe('getArea', () => {
         ]);
 
         // Act
-        const result = getArea({ q: 0, r: 0 }, matchesColour(hexMap, '#ff0000'));
+        const result = getArea({ q: 0, r: 0 }, matchesColor(hexMap, '#ff0000'));
 
         // Assert
         expect(result).toHaveLength(4);
@@ -30,7 +30,7 @@ describe('getArea', () => {
         ]));
     });
 
-    it('returns all connected hexes sharing a null terrain colour', () => {
+    it('returns all connected hexes sharing a null terrain color', () => {
         // Arrange
         const hexMap = new Map<string, Hexagon>([
             [key(0, 0), { q: 0, r: 0, terrainColor: null, icon: null, factionId: null }],
@@ -39,7 +39,7 @@ describe('getArea', () => {
         ]);
 
         // Act
-        const result = getArea({ q: 0, r: 0 }, matchesColour(hexMap, null));
+        const result = getArea({ q: 0, r: 0 }, matchesColor(hexMap, null));
 
         // Assert
         expect(result).toHaveLength(3);
@@ -54,13 +54,13 @@ describe('getArea', () => {
         // Arrange
         const hexMap = new Map<string, Hexagon>([
             [key(0, 0), { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null }],
-            // A neighbour with a different terrain colour is not included.
+            // A neighbour with a different terrain color is not included.
             [key(0, 1), { q: 0, r: 1, terrainColor: '#0000ff', icon: null, factionId: null }],
             // The remaining neighbours are missing from the map entirely.
         ]);
 
         // Act
-        const result = getArea({ q: 0, r: 0 }, matchesColour(hexMap, '#ff0000'));
+        const result = getArea({ q: 0, r: 0 }, matchesColor(hexMap, '#ff0000'));
 
         // Assert
         expect(result).toEqual([{ q: 0, r: 0 }]);

@@ -21,7 +21,7 @@ export default class TerrainBucketStrategy implements ToolStrategy {
         area.forEach((hex) => {
             const hexagon = data.getHex(hex);
             if(hexagon) {
-                hexagon.terrainColor = editorState.activeColour;
+                hexagon.terrainColor = editorState.activeColor;
                 data.setHex(hexagon);
             }
         });

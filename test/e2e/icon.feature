@@ -6,7 +6,7 @@ Feature: Icon
     Given I have opened a Hexer file
     And I have selected the icon layer
     And I have selected the castle icon
-    And I have selected a blue icon colour
+    And I have selected a blue icon color
   
   Scenario: Placing an icon on an empty hex
     Given I have selected the brush tool

@@ -8,11 +8,11 @@ export interface SidebarListRowOptions<TItem> {
     obsidian: ObsidianInterop;
     getId: (item: TItem) => string;
     getName: (item: TItem) => string;
-    getColour: (item: TItem) => string;
+    getColor: (item: TItem) => string;
     getFilePath: (item: TItem) => string | null;
     onEdit?: (itemId: string) => void;
     onFinish?: () => void;
-    onColourPicked?: (colour: string) => void;
+    onColorPicked?: (color: string) => void;
     onSettings?: (item: TItem) => void;
 }
 
@@ -31,14 +31,14 @@ export default class SidebarListRow<TItem> {
         rowEl.dataset.itemId = this._options.getId(this._options.item);
         rowEl.dataset.editing = String(this._options.editMode);
 
-        const colourPicker = rowEl.createEl('input', {
+        const colorPicker = rowEl.createEl('input', {
             type: 'color',
             cls: 'hexer-sidebar-list-row-color',
         });
-        colourPicker.value = this._options.getColour(this._options.item);
-        colourPicker.disabled = !this._options.editMode;
-        colourPicker.addEventListener('input', () => {
-            this._options.onColourPicked?.(colourPicker.value);
+        colorPicker.value = this._options.getColor(this._options.item);
+        colorPicker.disabled = !this._options.editMode;
+        colorPicker.addEventListener('input', () => {
+            this._options.onColorPicked?.(colorPicker.value);
         });
 
         rowEl.createSpan({ text: this._options.getName(this._options.item), cls: "hexer-sidebar-list-row-name" });

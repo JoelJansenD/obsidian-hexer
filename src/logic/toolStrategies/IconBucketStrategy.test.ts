@@ -24,7 +24,7 @@ describe('onLeftClick', () => {
         // A connected hex of a different icon that must not be filled.
         hexMap.set('2,-1', { q: 2, r: -1, terrainColor: null, icon: { name: 'dungeon-gate', color: '#0000ff' }, factionId: null });
 
-        // A connected hex sharing the icon name but a different colour, which
+        // A connected hex sharing the icon name but a different color, which
         // must not be filled since the icon is not identical.
         hexMap.set('0,1', { q: 0, r: 1, terrainColor: null, icon: { name: 'castle', color: '#0000ff' }, factionId: null });
 

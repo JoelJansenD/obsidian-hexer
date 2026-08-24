@@ -1,6 +1,6 @@
 import { Mountain, Droplets, Shapes, Route, Shield, Settings, createElement } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
-import ColourPalette from "../../../components/ColourPalette";
+import ColorPalette from "../../../components/ColorPalette";
 import { Layer } from "../../../../logic/EditorState";
 import { ComponentOptions } from "../../Editor";
 import { HEXER_ICONS } from "../../../../logic/icon";
@@ -88,14 +88,14 @@ export default class EditorSidebar {
         const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon hexer-sidebar-section-padded' });
         
         const editorState = this._componentOptions.getEditorState();        
-        new ColourPalette(
+        new ColorPalette(
             iconSectionContent,
             {
                 dataField: 'icon',
                 value: editorState.activeIcon.color,
-                onUpdate: (newColour: string) => {
+                onUpdate: (newColor: string) => {
                     const state = this._componentOptions.getEditorState();
-                    state.activeIcon.color = newColour;
+                    state.activeIcon.color = newColor;
                     this._componentOptions.setEditorState(state);
                     this.updateIconElements();
                 }
@@ -157,14 +157,14 @@ export default class EditorSidebar {
         
         const editorState = this._componentOptions.getEditorState();
         const paletteEl = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        new ColourPalette(
+        new ColorPalette(
             paletteEl,
             {
                 dataField: 'terrain',
-                value: editorState.activeColour,
-                onUpdate: (newColour: string) => {
+                value: editorState.activeColor,
+                onUpdate: (newColor: string) => {
                     const state = this._componentOptions.getEditorState();
-                    state.activeColour = newColour;
+                    state.activeColor = newColor;
                     this._componentOptions.setEditorState(state);
                 }
             });
@@ -173,7 +173,7 @@ export default class EditorSidebar {
 
     private updateIconElements() {
         const state = this._componentOptions.getEditorState();
-        const colour = state.activeIcon.color;
+        const color = state.activeIcon.color;
         const activeIconName = state.activeIcon.name;
         
         const iconSection = this._sections.get('icon');
@@ -182,7 +182,7 @@ export default class EditorSidebar {
         const iconEls = iconSection.contentEl.querySelectorAll('.hexer-sidebar-icon-item');
         iconEls.forEach(iconEl => {
             const element = iconEl as HTMLElement;
-            element.style.color = colour;
+            element.style.color = color;
             element.toggleClass('active', element.dataset.hexerIcon === activeIconName);
         });
     }

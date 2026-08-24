@@ -42,11 +42,11 @@ export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
             obsidian: this._componentOptions.obsidian,
             getId: faction => faction.id,
             getName: faction => faction.name,
-            getColour: faction => faction.color,
+            getColor: faction => faction.color,
             getFilePath: faction => faction.filePath,
             onEdit: this.editFaction.bind(this),
             onFinish: this.closeFaction.bind(this),
-            onColourPicked: colour => this.saveColour(item.id, colour),
+            onColorPicked: color => this.saveColor(item.id, color),
             onSettings: faction => this._componentOptions.obsidian.openItemSettings({
                 settings: { name: faction.name, filePath: faction.filePath },
                 onSave: settings => this.saveFactionSettings(faction.id, settings),
@@ -70,14 +70,14 @@ export class FactionSidebarSection extends EditorListSidebarSection<Faction> {
         this.renderItems();
     }
 
-    private saveColour(factionId: string, colour: string) {
+    private saveColor(factionId: string, color: string) {
         const data = this._componentOptions.getDataClone();
         const target = data.factions.find(faction => faction.id === factionId);
         if(!target) {
             return;
         }
 
-        target.color = colour;
+        target.color = color;
         this._componentOptions.setData(data);
     }
 

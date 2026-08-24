@@ -128,7 +128,7 @@ function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, size: n
     context.fill();
 
     // Adjacent fills leave a faint antialiased seam that the grid border used to
-    // hide. Stroke the fill in its own colour so each hex covers its half of the
+    // hide. Stroke the fill in its own color so each hex covers its half of the
     // seam, keeping neighbours flush even when borders are toggled off.
     context.save();
     context.strokeStyle = hex.terrainColor;
@@ -168,7 +168,7 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
 
     // Then stroke only the edges that face a hex of a different (or no) faction,
     // leaving shared internal edges borderless so a region reads as one shape.
-    // The border is drawn opaque in the faction's own colour.
+    // The border is drawn opaque in the faction's own color.
     context.globalAlpha = 1;
     context.lineCap = 'round';
     context.lineJoin = 'round';

@@ -23,10 +23,10 @@ const selectLayer = (parent: HTMLElement, layer: Layer) => {
     return getSection(parent, layer);
 };
 
-const pickColour = (parent: HTMLElement, field: string, colour: string) => {
-    const inputEl = parent.querySelector<HTMLInputElement>(`[data-hexer-colour-field-target="${field}"]`);
+const pickColor = (parent: HTMLElement, field: string, color: string) => {
+    const inputEl = parent.querySelector<HTMLInputElement>(`[data-hexer-color-field-target="${field}"]`);
     expect(inputEl).not.toBeNull();
-    inputEl!.value = colour;
+    inputEl!.value = color;
     inputEl!.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
@@ -73,31 +73,31 @@ describe('Layers', () => {
 });
 
 describe('Terrain', () => {
-    it('stores the picked colour as the active colour', () => {
+    it('stores the picked color as the active color', () => {
         // Arrange
         const { parent, componentOptions } = createSidebar();
 
         // Act
-        pickColour(parent, 'terrain', '#123456');
+        pickColor(parent, 'terrain', '#123456');
 
         // Assert
         expect(componentOptions.setEditorState).toHaveBeenCalled();
-        expect(componentOptions.getEditorState().activeColour).toBe('#123456');
+        expect(componentOptions.getEditorState().activeColor).toBe('#123456');
     });
 });
 
 describe('Icons', () => {
-    it('stores the picked colour as the active icon colour', () => {
+    it('stores the picked color as the active icon color', () => {
         // Arrange
         const { parent, componentOptions } = createSidebar();
 
         // Act
-        pickColour(parent, 'icon', '#abcdef');
+        pickColor(parent, 'icon', '#abcdef');
 
         // Assert
         expect(componentOptions.setEditorState).toHaveBeenCalled();
         expect(componentOptions.getEditorState().activeIcon.color).toBe('#abcdef');
-        expect(componentOptions.getEditorState().activeColour).not.toBe('#abcdef');
+        expect(componentOptions.getEditorState().activeColor).not.toBe('#abcdef');
     });
 
     it('switches the active icon when another icon is clicked', () => {
@@ -118,10 +118,10 @@ describe('Icons', () => {
         expect(previousEl!.classList.contains('active')).toBe(false);
     });
 
-    it('keeps the icon colour when the icon is switched', () => {
+    it('keeps the icon color when the icon is switched', () => {
         // Arrange
         const { parent, componentOptions } = createSidebar();
-        pickColour(parent, 'icon', '#abcdef');
+        pickColor(parent, 'icon', '#abcdef');
 
         // Act
         parent.querySelector('[data-hexer-icon="dungeon-gate"]')!
