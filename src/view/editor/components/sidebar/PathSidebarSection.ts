@@ -1,9 +1,8 @@
-import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
-import SidebarListRow from "./SidebarListRow";
+import EditorItemSidebarSection from "./EditorItemSidebarSection";
+import { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
 import { Path } from "../../../../logic/path";
-import { ItemSettings } from "../../../ObsidianInterop";
 
 interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
     /** Selects the paths array (rivers or roads) this section manages. */
@@ -11,11 +10,11 @@ interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
 }
 
 /**
- * A sidebar section that lists the paths of a single layer (rivers or roads),
- * with an "add path" button. Shared by the river and road sections; the generic
- * list scaffolding lives in {@link EditorListSidebarSection}.
+ * Lists the paths of a single layer (rivers or roads), tracking the active path
+ * in the editor state. Shared by the river and road sections; the editable-item
+ * lifecycle lives in {@link EditorItemSidebarSection}.
  */
-export default class PathSidebarSection extends EditorListSidebarSection<Path> {
+export default class PathSidebarSection extends EditorItemSidebarSection<Path> {
     constructor(
         parentEl: HTMLElement,
         componentOptions: ComponentOptions,
@@ -29,81 +28,25 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
         return this._pathOptions.getPaths(data);
     }
 
-    protected addItem() {
-        const data = this._componentOptions.getDataClone();
-        const newPath = new Path(this._pathOptions.newItemName);
-        this._pathOptions.getPaths(data).push(newPath);
-        this._componentOptions.setData(data);
-        this.setActivePath(newPath);
-        this.renderItems();
+    protected createItem(data: HexerData): Path {
+        const path = new Path(this._pathOptions.newItemName);
+        this._pathOptions.getPaths(data).push(path);
+        return path;
     }
 
-    protected renderRow(listEl: HTMLElement, path: Path) {
-        const activePath = this._componentOptions.getEditorState().activePath;
-        new SidebarListRow<Path>(listEl, {
-            disableEdit: activePath !== null && activePath.pathId !== path.id,
-            editMode: activePath?.pathId === path.id,
-            item: path,
-            obsidian: this._componentOptions.obsidian,
-            getId: item => item.id,
-            getName: item => item.name,
-            getColor: item => item.color,
-            getFilePath: item => item.filePath,
-            onEdit: this.editPath.bind(this),
-            onFinish: this.closePath.bind(this),
-            onColorPicked: color => this.savePath(path, color),
-            onSettings: item => this._componentOptions.obsidian.openItemSettings({
-                settings: { name: item.name, filePath: item.filePath },
-                onSave: settings => this.savePathSettings(item.id, settings),
-            }),
-        });
+    // Saves search both path lists so an id resolves regardless of which layer's
+    // section triggered the save.
+    protected findItem(data: HexerData, id: string): Path | undefined {
+        return [...data.rivers, ...data.roads].find(path => path.id === id);
     }
 
-    private setActivePath(path: Path | null) {
+    protected getActiveId(): string | null {
+        return this._componentOptions.getEditorState().activePath?.pathId ?? null;
+    }
+
+    protected setActiveId(id: string | null): void {
         const state = this._componentOptions.getEditorState();
-        if(path === null) {
-            state.activePath = null;
-        }
-        else {
-            state.activePath = { pathId: path.id, activeNode: null };
-        }
+        state.activePath = id === null ? null : { pathId: id, activeNode: null };
         this._componentOptions.setEditorState(state);
-    }
-
-    private editPath(pathId: string) {
-        const data = this._componentOptions.getDataClone();
-        const path = this._pathOptions.getPaths(data).find(p => p.id === pathId) ?? null;
-        this.setActivePath(path);
-        this.renderItems();
-    }
-
-    private closePath() {
-        this.setActivePath(null);
-        this.renderItems();
-    }
-
-    private savePath(path: Path, color: string) {
-        const data = this._componentOptions.getDataClone();
-        const target = [...data.rivers, ...data.roads].find(p => p.id === path.id);
-        if(!target) {
-            return;
-        }
-
-        target.color = color;
-        this._componentOptions.setData(data);
-    }
-
-    private savePathSettings(pathId: string, settings: ItemSettings) {
-        const data = this._componentOptions.getDataClone();
-        const target = [...data.rivers, ...data.roads].find(p => p.id === pathId);
-        if(!target) {
-            return;
-        }
-
-        target.name = settings.name;
-        target.filePath = settings.filePath;
-
-        this._componentOptions.setData(data);
-        this.renderItems();
     }
 }
