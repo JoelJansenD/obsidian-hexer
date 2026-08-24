@@ -4,9 +4,8 @@ import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainBucketStrategy implements ToolStrategy {
-    public canBeApplied (layer: Layer, tool: PaintTool) {
-        return layer === 'terrain' && tool === 'bucket';
-    }
+    public readonly tool: PaintTool = 'bucket';
+    public readonly layers: readonly Layer[] = ['terrain'];
 
     public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         const clickedHex = data.getHex(radialCoordinates);

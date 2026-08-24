@@ -22,7 +22,8 @@ export type RegisteredEvents = {
 }
 
 export interface ToolStrategy {
-    canBeApplied: (layer: Layer, tool: PaintTool) => boolean;
+    readonly tool: PaintTool;
+    readonly layers: readonly Layer[];
     getEvents: () => RegisteredEvents;
 }
 
@@ -43,9 +44,20 @@ const toolStrategyFactories: ToolStrategyFactory[] = [
 export function resolveToolStrategy(layer: Layer, tool: PaintTool): ToolStrategy | null {
     for (const createStrategy of toolStrategyFactories) {
         const strategy = createStrategy();
-        if (strategy.canBeApplied(layer, tool)) {
+        if (strategy.tool === tool && strategy.layers.includes(layer)) {
             return strategy;
         }
     }
     return null;
+}
+
+export function getAvailableTools(layer: Layer): PaintTool[] {
+    const tools = new Set<PaintTool>();
+    for (const createStrategy of toolStrategyFactories) {
+        const strategy = createStrategy();
+        if (strategy.layers.includes(layer)) {
+            tools.add(strategy.tool);
+        }
+    }
+    return [...tools];
 }

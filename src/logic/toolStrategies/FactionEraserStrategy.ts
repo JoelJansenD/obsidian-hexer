@@ -4,9 +4,8 @@ import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class FactionEraserStrategy implements ToolStrategy {
-    public canBeApplied (layer: Layer, tool: PaintTool) {
-        return layer === 'faction' && tool === 'eraser';
-    }
+    public readonly tool: PaintTool = 'eraser';
+    public readonly layers: readonly Layer[] = ['faction'];
 
     public onLeftClick(data: HexerData, _: EditorState, radialCoordinates: RadialCoordinates) {
         this.erase(data, radialCoordinates);

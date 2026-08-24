@@ -4,9 +4,8 @@ import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class IconBrushStrategy implements ToolStrategy {
-    public canBeApplied (layer: Layer, tool: PaintTool) {
-        return layer === 'icon' && tool === 'brush';
-    }
+    public readonly tool: PaintTool = 'brush';
+    public readonly layers: readonly Layer[] = ['icon'];
 
     public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         this.paint(data, editorState, radialCoordinates);

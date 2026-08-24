@@ -1,8 +1,11 @@
 import { Brush, createElement, Eraser, IconNode, MousePointer2, PaintBucket, Pentagon } from "lucide";
 import { PaintTool } from "../../../logic/EditorState";
+import { getAvailableTools } from "../../../logic/toolStrategies/ToolStrategy";
 import { ComponentOptions } from "../Editor";
 
 export default class EditorTools {
+    private _buttons = new Map<PaintTool, HTMLElement>();
+
     constructor(private _parentEl: HTMLElement, private _componentOptions: ComponentOptions) {
         this.build();
     }
@@ -16,6 +19,17 @@ export default class EditorTools {
         this.createButton(toolsEl, PaintBucket, 'bucket');
         this.createButton(toolsEl, Eraser, 'eraser');
         this.createButton(toolsEl, Pentagon, 'polygon');
+
+        this.refresh();
+    }
+
+    public refresh() {
+        const activeLayer = this._componentOptions.getEditorState().activeLayer;
+        const availableTools = getAvailableTools(activeLayer);
+        for (const [tool, button] of this._buttons) {
+            const isAvailable = tool === 'select' || availableTools.includes(tool);
+            button.toggleClass('hexer-tools-button-hidden', !isAvailable);
+        }
     }
 
     private createButton(toolsEl: HTMLElement, icon: IconNode, paintTool: PaintTool) {
@@ -28,6 +42,7 @@ export default class EditorTools {
                 }
             }
         );
+        this._buttons.set(paintTool, button);
         button.appendChild(createElement(icon, { width: 18, height: 18 }));
         button.addEventListener('click', () => {
             toolsEl.querySelectorAll('.hexer-tools-button').forEach((b) => b.classList.remove('active'));

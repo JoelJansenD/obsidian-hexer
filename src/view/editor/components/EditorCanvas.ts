@@ -14,6 +14,7 @@ export default class EditorCanvas {
     private _canvasEl!: HTMLCanvasElement;
     private _context!: CanvasRenderingContext2D;
     private _resizeObserver!: ResizeObserver;
+    private _tools!: EditorTools;
     private _listeners = new Map<string, EventListener>();
     
     private _renderRequested = false;
@@ -70,6 +71,11 @@ export default class EditorCanvas {
         this._resizeObserver.disconnect();
     }
 
+    /** Refreshes the tool buttons so only tools available for the active layer are shown. */
+    public refreshTools() {
+        this._tools.refresh();
+    }
+
     public requestRender() {
         if(this._renderRequested) {
             return;
@@ -87,7 +93,7 @@ export default class EditorCanvas {
         this._canvasEl = canvasAreaEl.createEl('canvas', { cls: 'hexer-canvas' });
         this._context = this._canvasEl.getContext('2d')!;
         
-        const tools = new EditorTools(canvasAreaEl, this._dataOptions);
+        this._tools = new EditorTools(canvasAreaEl, this._dataOptions);
 
         this._resizeObserver = new ResizeObserver(() => {
             this.resizeCanvas();
