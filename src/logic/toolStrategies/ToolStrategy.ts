@@ -1,16 +1,11 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
-import FactionBrushStrategy from "./FactionBrushStrategy";
-import FactionBucketStrategy from "./FactionBucketStrategy";
-import FactionEraserStrategy from "./FactionEraserStrategy";
-import IconBrushStrategy from "./IconBrushStrategy";
-import IconBucketStrategy from "./IconBucketStrategy";
-import IconEraserStrategy from "./IconEraserStrategy";
+import BrushStrategy from "./BrushStrategy";
+import BucketStrategy from "./BucketStrategy";
+import EraserStrategy from "./EraserStrategy";
+import { paintableLayerAccessors } from "./HexLayerAccessor";
 import PathPolygonStrategy from "./PathPolygonStrategy";
-import TerrainBrushStrategy from "./TerrainBrushStrategy";
-import TerrainBucketStrategy from "./TerrainBucketStrategy";
-import TerrainEraserStrategy from "./TerrainEraserStrategy";
 
 export type ToolEventHandler = (data: HexerData, editorState: EditorState, coordinates: RadialCoordinates) => void;
 
@@ -29,16 +24,12 @@ export interface ToolStrategy {
 
 export type ToolStrategyFactory = () => ToolStrategy;
 const toolStrategyFactories: ToolStrategyFactory[] = [
-    () => new FactionBrushStrategy(),
-    () => new FactionBucketStrategy(),
-    () => new FactionEraserStrategy(),
-    () => new IconBrushStrategy(),
-    () => new IconBucketStrategy(),
-    () => new IconEraserStrategy(),
-    () => new PathPolygonStrategy(),
-    () => new TerrainBrushStrategy(),
-    () => new TerrainBucketStrategy(),
-    () => new TerrainEraserStrategy()
+    ...paintableLayerAccessors.flatMap((accessor) => [
+        () => new BrushStrategy(accessor),
+        () => new BucketStrategy(accessor),
+        () => new EraserStrategy(accessor)
+    ]),
+    () => new PathPolygonStrategy()
 ];
 
 export function resolveToolStrategy(layer: Layer, tool: PaintTool): ToolStrategy | null {
