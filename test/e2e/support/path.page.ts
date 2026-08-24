@@ -1,6 +1,7 @@
 import { RadialCoordinates } from "../../../src/logic/hexagon";
 import { Path, PathEdge, PathNode } from "../../../src/logic/path";
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
+import { enterEditMode } from "./editMode";
 
 class PathPage {
     async createRiver() {
@@ -48,7 +49,7 @@ class PathPage {
     }
 
     async editRiver(id: string) {
-        await this.selectAndClick(`[data-item-id="${id}"] [data-role="edit-item"]`);
+        await enterEditMode(id);
     }
 
     /**
@@ -110,7 +111,10 @@ class PathPage {
 
     private async selectAndClick(selector: string) {
         const element = browser.$(selector);
-        await element.waitForExist();
+        // Wait for clickability, not mere existence: in headless CI the element can
+        // be in the DOM but not yet interactable, so a bare waitForExist lets the
+        // click race with render and silently no-op.
+        await element.waitForClickable();
         await element.click();
     }
 }

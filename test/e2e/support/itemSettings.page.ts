@@ -7,7 +7,7 @@
 class ItemSettingsPage {
     async setName(name: string) {
         const input = browser.$('[data-hexer-setting="item-name"]');
-        await input.waitForExist();
+        await input.waitForClickable();
         await input.setValue(name);
     }
 
@@ -17,7 +17,7 @@ class ItemSettingsPage {
      */
     async attachNote(noteName: string) {
         const search = browser.$('[data-hexer-setting="item-file"]');
-        await search.waitForExist();
+        await search.waitForClickable();
         await search.click();
         await search.setValue(noteName);
 
@@ -26,6 +26,7 @@ class ItemSettingsPage {
         for (const item of items) {
             const text = await item.getText();
             if (text.includes(noteName)) {
+                await item.waitForClickable();
                 await item.click();
                 return;
             }
@@ -35,7 +36,7 @@ class ItemSettingsPage {
 
     async save() {
         const button = browser.$('[data-role="save-item-settings"]');
-        await button.waitForExist();
+        await button.waitForClickable();
         await button.click();
     }
 }

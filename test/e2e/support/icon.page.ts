@@ -7,7 +7,7 @@ class IconPage {
 
     async selectIcon(icon: string) {
         const element = browser.$(`[data-hexer-icon="${icon}"]`);
-        await element.waitForExist();
+        await element.waitForClickable();
         await element.click();
     }
 
