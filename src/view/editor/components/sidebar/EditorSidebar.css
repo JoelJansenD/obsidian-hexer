@@ -51,6 +51,32 @@
     }
 }
 
+.hexer-sidebar-section-header,
+.hexer-sidebar-config-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--background-modifier-hover);
+    }
+}
+
+.hexer-sidebar-config-button {
+    margin-top: auto;
+    flex: 0 0 auto;
+    gap: 8px;
+    border-top: 1px solid var(--divider-color);
+}
+
+.hexer-sidebar-config-button-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .hexer-sidebar-add-item {
     display: flex;
     align-items: center;

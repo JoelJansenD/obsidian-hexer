@@ -22,18 +22,9 @@
 }
 
 .hexer-sidebar-section-header {
-    align-items: center;
-    display: flex;
     flex: 0 0 auto;
-    flex-direction: row;
     justify-content: space-between;
-    padding: 8px 12px;
     width: 100%;
-    
-    &:hover {
-        background: var(--background-modifier-hover);
-        cursor: pointer;
-    }
 }
 
 .hexer-sidebar-section-icon,
