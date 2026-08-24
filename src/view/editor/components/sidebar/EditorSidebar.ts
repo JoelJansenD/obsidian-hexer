@@ -1,4 +1,4 @@
-import { Mountain, Droplets, Shapes, Route, Shield } from "lucide";
+import { Mountain, Droplets, Shapes, Route, Shield, Settings, createElement } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
 import ColourPalette from "../../../components/ColourPalette";
 import { Layer } from "../../../../logic/EditorState";
@@ -35,7 +35,33 @@ export default class EditorSidebar {
         const factionSection = this.buildFactions(this._sidebarEl);
         this._sections.set('faction', factionSection);
 
+        this.buildConfigurationButton(this._sidebarEl);
+
         this.updateIconElements();
+    }
+
+    private buildConfigurationButton(sidebarEl: HTMLElement) {
+        const buttonEl = sidebarEl.createEl('div', {
+            cls: 'hexer-sidebar-config-button',
+            attr: { 'data-hexer-role': 'configuration' },
+        });
+
+        const iconEl = buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-icon' });
+        iconEl.appendChild(createElement(Settings, { height: 16, width: 16 }));
+
+        buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-label', text: 'Map Settings' });
+
+        buttonEl.addEventListener('click', () => {
+            this._componentOptions.obsidian.openMapSettings({
+                onSave: (settings) => {
+                    const data = this._componentOptions.getDataClone();
+                    data.mapSettings = settings;
+                    this._componentOptions.setData(data);
+                }
+            });
+        });
+
+        return buttonEl;
     }
 
     private buildFactions(sidebarEl: HTMLElement) {

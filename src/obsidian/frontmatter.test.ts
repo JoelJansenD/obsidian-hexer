@@ -1,10 +1,12 @@
+import { defaultCamera } from "../logic/camera";
 import { Faction } from "../logic/faction";
 import { Hexagon } from "../logic/hexagon";
 import { HexerData, HexerState } from "../logic/HexerData";
+import { defaultMapSettings } from "../logic/mapSettings";
 import { Path } from "../logic/path";
 import { fromFrontmatter, toFrontmatter } from "./frontmatter";
 
-const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [] });
+const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [], mapSettings: defaultMapSettings(), camera: defaultCamera() });
 
 describe('toFrontmatter', () => {
     it('converts HexerData to frontmatter correctly', () => {
@@ -19,6 +21,8 @@ describe('toFrontmatter', () => {
         expect(frontmatter.hexer).toEqual({
             version: '1.0',
             size: 50,
+            mapSettings: defaultMapSettings(),
+            camera: defaultCamera(),
             hexes: { '0,0': { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null } },
             rivers: [],
             roads: [],

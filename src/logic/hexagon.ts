@@ -1,5 +1,6 @@
 import { hexKey } from "./HexerData";
 import { Icon } from "./icon";
+import { HexOrientation } from "./mapSettings";
 
 export interface RadialCoordinates {
     q: number;
@@ -61,9 +62,15 @@ export function hexagonIsEmpty(hexagon: Hexagon) {
         && hexagon.factionId === null;
 }
 
-export function pointToRadialCoordinates(x: number, y: number, size: number) {
+export function pointToRadialCoordinates(x: number, y: number, size: number, orientation: HexOrientation = 'flat-top') {
     const scaledX = x / size;
     const scaledY = y / size;
+
+    if(orientation === 'pointy-top') {
+        const q = ((Math.sqrt(3) / 3) * scaledX) - ((1 / 3) * scaledY);
+        const r = (2 / 3) * scaledY;
+        return roundRadialCoordinates(q, r);
+    }
 
     const q = (2 / 3) * scaledX;
     const r = (-1 / 3) * scaledX + (Math.sqrt(3) / 3) * scaledY;
@@ -71,7 +78,13 @@ export function pointToRadialCoordinates(x: number, y: number, size: number) {
     return roundRadialCoordinates(q, r);
 }
 
-export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: number) : Point {
+export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: number, orientation: HexOrientation = 'flat-top') : Point {
+    if(orientation === 'pointy-top') {
+        const x = size * ((Math.sqrt(3) * coordinate.q) + ((Math.sqrt(3) / 2) * coordinate.r));
+        const y = size * ((3 / 2) * coordinate.r);
+        return { x, y };
+    }
+
     const x = size * ((3 / 2) * coordinate.q);
     const y = size * (((Math.sqrt(3) / 2) * coordinate.q) + (Math.sqrt(3) * coordinate.r));
     return { x, y };

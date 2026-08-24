@@ -1,7 +1,9 @@
+import { defaultCamera } from "./camera";
 import { Hexagon } from "./hexagon";
 import { HexerData, HexerState } from "./HexerData";
+import { defaultMapSettings } from "./mapSettings";
 
-const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [] });
+const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [], mapSettings: defaultMapSettings(), camera: defaultCamera() });
 
 describe('HexerData', () => {
     it('constructor applies the provided state', () => {
@@ -16,6 +18,8 @@ describe('HexerData', () => {
             rivers: [],
             roads: [],
             factions: [],
+            mapSettings: defaultMapSettings(),
+            camera: defaultCamera(),
         };
 
         // Act

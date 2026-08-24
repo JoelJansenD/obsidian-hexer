@@ -1,5 +1,7 @@
+import { defaultCamera } from "../logic/camera";
 import { Hexagon } from "../logic/hexagon";
 import { HexerData, HexerState } from "../logic/HexerData";
+import { defaultMapSettings } from "../logic/mapSettings";
 import { Path, PathEdge, PathNode } from "../logic/path";
 
 /** Matches the leading `---\n...\n---` YAML frontmatter block of a Hexer file. */
@@ -29,6 +31,8 @@ export function toFrontmatter(data: HexerData): HexerFrontmatter {
         hexer: {
             version: data.version,
             size: data.size,
+            mapSettings: { ...data.mapSettings },
+            camera: { ...data.camera },
             hexes: Object.fromEntries(data.hexes),
             rivers: data.rivers.map(serializePath),
             roads: data.roads.map(serializePath),
@@ -42,6 +46,8 @@ export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
     return new HexerData({
         version,
         size,
+        mapSettings: { ...(frontmatter.hexer.mapSettings ?? defaultMapSettings()) },
+        camera: frontmatter.hexer.camera ?? defaultCamera(),
         hexes: new Map(Object.entries(hexes ?? {})),
         rivers: (frontmatter.hexer.rivers ?? []).map(deserializePath),
         roads: (frontmatter.hexer.roads ?? []).map(deserializePath),

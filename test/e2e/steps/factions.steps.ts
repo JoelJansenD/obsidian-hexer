@@ -122,8 +122,10 @@ When('I click an existing hex', async function (this: FactionsContext) {
 });
 
 When('I click a non-existent hex', async function (this: FactionsContext) {
-    // The fixture only seeds hexes 1,1 / 2,1 / 2,2 / 3,1, so nothing exists here.
-    const hex = { q: 5, r: 5 };
+    // The fixture only seeds hexes 1,1 / 2,1 / 2,2 / 3,1, so the hex at the centre
+    // of the camera view is empty while staying within the canvas so it can be
+    // clicked regardless of how the camera has panned.
+    const hex = await editorPage.hexInView();
     // Snapshot the seeded region so the assertion can prove it stays untouched
     // even though a different faction is active.
     this.regionHexes = [{ q: 1, r: 1 }, { q: 2, r: 1 }, { q: 2, r: 2 }];

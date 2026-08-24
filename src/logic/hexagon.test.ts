@@ -186,6 +186,39 @@ describe('pointToRadialCoordinates', () => {
         expect(result.q).toBe(2);
         expect(result.r).toBe(0);
     });
+
+    describe('pointy-top orientation', () => {
+        it.for([
+            [ 0, 0, 0, 0 ],
+            [ 17.320508, 0, 10, 0 ],
+            [ 8.660254, 15, 0, 10 ],
+            [ -8.660254, 15, -10, 10 ],
+        ])('converts point (%d, %d) to radial coordinates (%i, %i)', ([x, y, q, r]) => {
+            // Arrange
+            const size = 1;
+
+            // Act
+            const result = pointToRadialCoordinates(x, y, size, 'pointy-top');
+
+            // Assert
+            expect(result.q).toBe(q);
+            expect(result.r).toBe(r);
+        });
+
+        it('scales before converting', () => {
+            // Arrange
+            const x = 17.320508;
+            const y = 0;
+            const size = 5;
+
+            // Act
+            const result = pointToRadialCoordinates(x, y, size, 'pointy-top');
+
+            // Assert
+            expect(result.q).toBe(2);
+            expect(result.r).toBe(0);
+        });
+    });
 });
 
 describe('radialCoordinatesToPoint', () => {
@@ -216,6 +249,37 @@ describe('radialCoordinatesToPoint', () => {
         // Assert
         expect(result.x).toBeCloseTo(0);
         expect(result.y).toBeCloseTo(86.60254);
+    });
+
+    describe('pointy-top orientation', () => {
+        it.for([
+            [ 0, 0, 0, 0 ],
+            [ 10, 0, 17.320508, 0 ],
+            [ 0, 10, 8.660254, 15 ],
+            [ -10, 10, -8.660254, 15 ],
+        ])('converts radial coordinates (%d, %d) to point (%d, %d)', ([ q, r, expectedX, expectedY ]) => {
+            // Arrange
+            const size = 1;
+
+            // Act
+            const result = radialCoordinatesToPoint({ q, r }, size, 'pointy-top');
+
+            // Assert
+            expect(result.x).toBeCloseTo(expectedX);
+            expect(result.y).toBeCloseTo(expectedY);
+        });
+
+        it('scales after converting', () => {
+            // Arrange
+            const size = 5;
+
+            // Act
+            const result = radialCoordinatesToPoint({ q: 0, r: 10 }, size, 'pointy-top');
+
+            // Assert
+            expect(result.x).toBeCloseTo(43.30127);
+            expect(result.y).toBeCloseTo(75);
+        });
     });
 });
 
