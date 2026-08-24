@@ -16,12 +16,24 @@ const EDGE_NEIGHBOURS: RadialCoordinates[] = [
     { q: 1, r: -1 },  // corner 5 -> 0
 ];
 
+// The point of hex 0,0 that the view is panned to keep at the canvas centre.
+// Returned in CSS pixels, matching the coordinate space drawing code works in.
+export function getViewOffset(canvas: HTMLCanvasElement): Point {
+    return { x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 };
+}
+
 export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
     context.save();
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     context.restore();
+
+    // Pan the whole scene so hex 0,0 (which sits at point 0,0) is centred in the
+    // canvas. The translate stacks on top of the DPR transform set on resize.
+    const offset = getViewOffset(context.canvas);
+    context.save();
+    context.translate(offset.x, offset.y);
 
     for(const hex of data.hexes.values()) {
         drawHex(context, hex, data.size);
@@ -41,6 +53,32 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     for(const path of data.roads) {
         drawPath(context, path, data.size, editorState.activePath, 'road');
     }
+
+    if(data.mapSettings.displayCrosshair) {
+        drawCrosshair(context, data.size);
+    }
+
+    context.restore();
+}
+
+// Draws a crosshair centred on hex 0,0 as a map-origin guide. Each arm reaches
+// from the centre to roughly the hex's edge (~one circumradius) plus another
+// half a hex of overshoot, so the marker reads clearly around the hex rather
+// than being buried inside it.
+function drawCrosshair(context: CanvasRenderingContext2D, size: number) {
+    const center = radialCoordinatesToPoint({ q: 0, r: 0 }, size);
+    const reach = size * 1.5;
+
+    context.save();
+    context.strokeStyle = 'rgba(128, 128, 128, 0.9)';
+    context.lineWidth = Math.max(1, size * 0.03);
+    context.beginPath();
+    context.moveTo(center.x - reach, center.y);
+    context.lineTo(center.x + reach, center.y);
+    context.moveTo(center.x, center.y - reach);
+    context.lineTo(center.x, center.y + reach);
+    context.stroke();
+    context.restore();
 }
 
 function hexCorners(center: Point, size: number): Point[] {
