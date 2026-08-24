@@ -4,9 +4,8 @@ import { HexerData } from "../HexerData";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
 export default class TerrainBrushStrategy implements ToolStrategy {
-    public canBeApplied (layer: Layer, tool: PaintTool) {
-        return layer === 'terrain' && tool === 'brush';
-    }
+    public readonly tool: PaintTool = 'brush';
+    public readonly layers: readonly Layer[] = ['terrain'];
 
     public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         this.paint(data, editorState, radialCoordinates);

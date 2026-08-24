@@ -29,7 +29,8 @@ const createCanvas = () => {
 };
 
 const createStrategy = (events: RegisteredEvents): ToolStrategy => ({
-    canBeApplied: () => true,
+    tool: 'brush',
+    layers: ['terrain'],
     getEvents: () => events,
 });
 

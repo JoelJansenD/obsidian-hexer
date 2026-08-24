@@ -8,9 +8,8 @@ export default class PathPolygonStrategy implements ToolStrategy {
 
     private previousNode : PathNode | null = null;
 
-    public canBeApplied (layer: Layer, tool: PaintTool) {
-        return (layer === 'river' || layer === 'road') && tool === 'polygon';
-    }
+    public readonly tool: PaintTool = 'polygon';
+    public readonly layers: readonly Layer[] = ['river', 'road'];
 
     public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
         if(!editorState.activePath) {
