@@ -18,6 +18,17 @@ export interface Hexagon extends RadialCoordinates {
     factionId: string | null;
 };
 
+/**
+ * Normalises the two ways a coordinate is passed to an overloaded method — a
+ * {@link RadialCoordinates} object, or a bare `(q, r)` pair — into a single
+ * object, so the overload plumbing lives in one place instead of every method.
+ */
+export function normalizeCoordinates(arg1: RadialCoordinates | number, arg2?: number): RadialCoordinates {
+    return typeof arg1 === 'object'
+        ? { q: arg1.q, r: arg1.r }
+        : { q: arg1, r: arg2! };
+}
+
 export function getArea(coordinates: RadialCoordinates, predicate: (hex: RadialCoordinates) => boolean) {
     const result: RadialCoordinates[] = [];
     const visited = new Set<string>();
@@ -93,8 +104,7 @@ export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: nu
 export function roundRadialCoordinates(coordinates: RadialCoordinates) : RadialCoordinates;
 export function roundRadialCoordinates(q: number, r: number): RadialCoordinates;
 export function roundRadialCoordinates(arg1: number | RadialCoordinates, arg2?: number) {
-    const q = typeof arg1 === 'number' ? arg1 : arg1.q;
-    const r = typeof arg1 === 'number' ? arg2! : arg1.r;
+    const { q, r } = normalizeCoordinates(arg1, arg2);
 
     const s = -q - r;
     let rq = Math.round(q);

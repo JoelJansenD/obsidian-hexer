@@ -1,6 +1,6 @@
 import { Camera, defaultCamera } from "./camera";
 import { Faction } from "./faction";
-import { Hexagon, hexagonIsEmpty, RadialCoordinates } from "./hexagon";
+import { Hexagon, hexagonIsEmpty, normalizeCoordinates, RadialCoordinates } from "./hexagon";
 import { defaultMapSettings, MapSettings } from "./mapSettings";
 import { Path } from "./path";
 
@@ -48,17 +48,14 @@ export class HexerData implements HexerState {
     public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
     public getHex(q: number, r: number): Hexagon | undefined;
     public getHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
-        const q = typeof arg1 === 'object' ? arg1.q : arg1;
-        const r = typeof arg1 === 'object' ? arg1.r : arg2!; 
-        const key = hexKey(q, r);
-        return this.hexes.get(key);
+        const { q, r } = normalizeCoordinates(arg1, arg2);
+        return this.hexes.get(hexKey(q, r));
     }
 
     public getOrCreateHex(coordinates: RadialCoordinates): Hexagon;
     public getOrCreateHex(q: number, r: number): Hexagon;
     public getOrCreateHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon {
-        const q = typeof arg1 === 'object' ? arg1.q : arg1;
-        const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+        const { q, r } = normalizeCoordinates(arg1, arg2);
         const key = hexKey(q, r);
         const hex = this.hexes.get(key);
         if(hex) {
@@ -84,8 +81,7 @@ export class HexerData implements HexerState {
     public deleteHex(coordinates: RadialCoordinates): void;
     public deleteHex(q: number, r: number): void;
     public deleteHex(arg1: RadialCoordinates | number, arg2?: number): void {
-        const q = typeof arg1 === 'object' ? arg1.q : arg1;
-        const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+        const { q, r } = normalizeCoordinates(arg1, arg2);
         this.hexes.delete(hexKey(q, r));
     }
 
