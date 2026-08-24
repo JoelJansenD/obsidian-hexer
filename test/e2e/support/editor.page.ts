@@ -146,7 +146,10 @@ class EditorPage {
 
     private async selectAndClick(selector: string) {
         const element = browser.$(selector);
-        await element.waitForExist();
+        // Wait for clickability, not mere existence: in headless CI the element can
+        // be in the DOM but not yet interactable, so a bare waitForExist lets the
+        // click race with render and silently no-op.
+        await element.waitForClickable();
         await element.click();
     }
 }
