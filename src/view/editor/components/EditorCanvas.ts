@@ -1,6 +1,6 @@
 import { pointToRadialCoordinates } from "../../../logic/hexagon";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
-import render, { getViewOffset } from "../../render";
+import render from "../../render";
 import { ComponentOptions } from "../Editor";
 import EditorTools from "./EditorTools";
 
@@ -131,9 +131,9 @@ export default class EditorCanvas {
     private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {
         const data = this._dataOptions.getDataClone();
         const rect = this._canvasEl.getBoundingClientRect();
-        // Undo the view pan (see getViewOffset) so the click maps back to the
-        // same hex the renderer drew under the cursor.
-        const offset = getViewOffset(this._canvasEl);
+        // Undo the camera pan the renderer applied so the click maps back to the
+        // same hex drawn under the cursor.
+        const offset = data.camera.offset;
         const canvasX = e.clientX - rect.left - offset.x;
         const canvasY = e.clientY - rect.top - offset.y;
         const clickedHex = pointToRadialCoordinates(canvasX, canvasY, data.size);

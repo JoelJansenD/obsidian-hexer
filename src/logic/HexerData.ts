@@ -1,3 +1,4 @@
+import { Camera, defaultCamera } from "./camera";
 import { Faction } from "./faction";
 import { Hexagon, hexagonIsEmpty, RadialCoordinates } from "./hexagon";
 import { defaultMapSettings, MapSettings } from "./mapSettings";
@@ -11,6 +12,7 @@ export interface HexerState {
     roads: Path[];
     factions: Faction[];
     mapSettings: MapSettings;
+    camera: Camera;
     size: number;
 }
 
@@ -28,6 +30,7 @@ export class HexerData implements HexerState {
     public roads: Path[];
     public factions: Faction[];
     public mapSettings: MapSettings;
+    public camera: Camera;
 
     constructor(state: HexerState) {
         this.version = state.version;
@@ -39,6 +42,7 @@ export class HexerData implements HexerState {
         this.roads = state.roads;
         this.factions = state.factions;
         this.mapSettings = state.mapSettings ?? defaultMapSettings();
+        this.camera = state.camera ?? defaultCamera();
     }
 
     public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
@@ -107,7 +111,8 @@ export class HexerData implements HexerState {
         const roads = this.roads.map(path => path.clone());
         const factions = this.factions.map(faction => ({ ...faction }));
         const mapSettings = { ...this.mapSettings };
-        return new HexerData({ ...this, hexes, rivers, roads, factions, mapSettings });
+        const camera = { ...this.camera };
+        return new HexerData({ ...this, hexes, rivers, roads, factions, mapSettings, camera });
     }
 }
 
@@ -121,6 +126,10 @@ hexer:
     hexOrientation: "flat-top"
     displayHexBorders: true
     displayCrosshair: true
+  camera:
+    offset:
+      x: 0
+      y: 0
   size: 50
   hexes: {}
   rivers: []

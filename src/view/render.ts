@@ -16,12 +16,6 @@ const EDGE_NEIGHBOURS: RadialCoordinates[] = [
     { q: 1, r: -1 },  // corner 5 -> 0
 ];
 
-// The point of hex 0,0 that the view is panned to keep at the canvas centre.
-// Returned in CSS pixels, matching the coordinate space drawing code works in.
-export function getViewOffset(canvas: HTMLCanvasElement): Point {
-    return { x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 };
-}
-
 export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
     // Clear the full backing store regardless of the current DPR transform.
     context.save();
@@ -29,9 +23,10 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     context.restore();
 
-    // Pan the whole scene so hex 0,0 (which sits at point 0,0) is centred in the
-    // canvas. The translate stacks on top of the DPR transform set on resize.
-    const offset = getViewOffset(context.canvas);
+    // Pan the whole scene by the camera offset so hex 0,0 (which sits at point
+    // 0,0) lands where the camera points. The translate stacks on top of the DPR
+    // transform set on resize.
+    const offset = data.camera.offset;
     context.save();
     context.translate(offset.x, offset.y);
 
