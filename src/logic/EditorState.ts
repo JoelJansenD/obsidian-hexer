@@ -1,7 +1,11 @@
 import { Icon } from "./icon";
 import { PathNode } from "./path";
 
-export type Layer = 'terrain' | 'icon' | 'river' | 'road' | 'faction';
+/** Layers backed by a single field of a {@link Hexagon}, painted with brush/bucket/eraser. */
+export type HexFieldLayer = 'terrain' | 'icon' | 'faction';
+/** Layers backed by a Path graph, painted with the polygon tool. */
+export type PathLayer = 'river' | 'road';
+export type Layer = HexFieldLayer | PathLayer;
 export type PaintTool = 'select' | 'brush' | 'bucket' | 'eraser' | 'polygon';
 
 export interface EditorState {

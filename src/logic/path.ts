@@ -1,8 +1,6 @@
 import { hexKey } from "./HexerData";
 import { RadialCoordinates, roundRadialCoordinates } from "./hexagon";
 
-export type PathType = 'river' | 'road';
-
 export interface PathNode extends RadialCoordinates { }
 export function pathNodeEquals(a: PathNode | undefined | null, b: PathNode | undefined | null): boolean {
     return a?.q === b?.q && a?.r === b?.r;

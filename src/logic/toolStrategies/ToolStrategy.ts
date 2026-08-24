@@ -1,16 +1,11 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
-import FactionBrushStrategy from "./FactionBrushStrategy";
-import FactionBucketStrategy from "./FactionBucketStrategy";
-import FactionEraserStrategy from "./FactionEraserStrategy";
-import IconBrushStrategy from "./IconBrushStrategy";
-import IconBucketStrategy from "./IconBucketStrategy";
-import IconEraserStrategy from "./IconEraserStrategy";
+import BrushStrategy from "./BrushStrategy";
+import BucketStrategy from "./BucketStrategy";
+import EraserStrategy from "./EraserStrategy";
+import { HEX_FIELD_LAYER_DESCRIPTORS } from "./hexFieldLayers";
 import PathPolygonStrategy from "./PathPolygonStrategy";
-import TerrainBrushStrategy from "./TerrainBrushStrategy";
-import TerrainBucketStrategy from "./TerrainBucketStrategy";
-import TerrainEraserStrategy from "./TerrainEraserStrategy";
 
 export type ToolEventHandler = (data: HexerData, editorState: EditorState, coordinates: RadialCoordinates) => void;
 
@@ -27,36 +22,36 @@ export interface ToolStrategy {
     getEvents: () => RegisteredEvents;
 }
 
-export type ToolStrategyFactory = () => ToolStrategy;
-const toolStrategyFactories: ToolStrategyFactory[] = [
-    () => new FactionBrushStrategy(),
-    () => new FactionBucketStrategy(),
-    () => new FactionEraserStrategy(),
-    () => new IconBrushStrategy(),
-    () => new IconBucketStrategy(),
-    () => new IconEraserStrategy(),
-    () => new PathPolygonStrategy(),
-    () => new TerrainBrushStrategy(),
-    () => new TerrainBucketStrategy(),
-    () => new TerrainEraserStrategy()
+// One entry per (layer, tool) pairing. The hex-field layers get the three
+// generic strategies, each bound to that layer's descriptor; rivers and roads
+// share the polygon strategy. `create` runs lazily so resolving a tool builds
+// only the strategy that is actually needed.
+type ToolStrategyEntry = {
+    tool: PaintTool;
+    layer: Layer;
+    create: () => ToolStrategy;
+};
+
+const toolStrategyEntries: ToolStrategyEntry[] = [
+    ...HEX_FIELD_LAYER_DESCRIPTORS.flatMap((field): ToolStrategyEntry[] => [
+        { tool: 'brush', layer: field.layer, create: () => new BrushStrategy(field) },
+        { tool: 'bucket', layer: field.layer, create: () => new BucketStrategy(field) },
+        { tool: 'eraser', layer: field.layer, create: () => new EraserStrategy(field) },
+    ]),
+    { tool: 'polygon', layer: 'river', create: () => new PathPolygonStrategy() },
+    { tool: 'polygon', layer: 'road', create: () => new PathPolygonStrategy() },
 ];
 
 export function resolveToolStrategy(layer: Layer, tool: PaintTool): ToolStrategy | null {
-    for (const createStrategy of toolStrategyFactories) {
-        const strategy = createStrategy();
-        if (strategy.tool === tool && strategy.layers.includes(layer)) {
-            return strategy;
-        }
-    }
-    return null;
+    const entry = toolStrategyEntries.find(candidate => candidate.tool === tool && candidate.layer === layer);
+    return entry ? entry.create() : null;
 }
 
 export function getAvailableTools(layer: Layer): PaintTool[] {
     const tools = new Set<PaintTool>();
-    for (const createStrategy of toolStrategyFactories) {
-        const strategy = createStrategy();
-        if (strategy.layers.includes(layer)) {
-            tools.add(strategy.tool);
+    for (const entry of toolStrategyEntries) {
+        if (entry.layer === layer) {
+            tools.add(entry.tool);
         }
     }
     return [...tools];

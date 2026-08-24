@@ -1,10 +1,10 @@
 import { cameraViewOffset } from "../logic/camera";
-import { EditorPathState, EditorState } from "../logic/EditorState";
+import { EditorPathState, EditorState, PathLayer } from "../logic/EditorState";
 import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
-import { Path, PathEdge, PathNode, PathType } from "../logic/path";
+import { Path, PathEdge, PathNode } from "../logic/path";
 
 // Neighbour of a hex across each of its six edges, indexed by edge: edge `i`
 // runs from corner `i` to corner `i + 1`. Used to decide which edges of a
@@ -251,7 +251,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number,
     context.restore();
 }
 
-function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null, type: PathType, orientation: HexOrientation) {
+function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null, type: PathLayer, orientation: HexOrientation) {
     context.save();
 
     const isActive = path.id === activePath?.pathId;
