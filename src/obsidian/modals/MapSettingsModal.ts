@@ -17,7 +17,6 @@ export default class MapSettingsModal extends Modal {
 
     private build() {
         this.setTitle('Map Settings');
-        console.log(this._settings);
 
         new Setting(this.contentEl)
             .setName('Map Name')
@@ -27,8 +26,38 @@ export default class MapSettingsModal extends Modal {
                 .onChange(value => {
                     this._settings.name = value.trim();
                 }));
+        
+        new Setting(this.contentEl)
+            .setName('Hex Orientation')
+            .setDesc('Select if the hexes are pointy-topped or flat-topped')
+            .addDropdown(dropdown => dropdown
+                .addOption('pointy-top', 'Pointy-topped')
+                .addOption('flat-top', 'Flat-topped')
+                .setValue(this._settings.hexOrientation)
+                .onChange(value => {
+                    this._settings.hexOrientation = value as 'pointy-top' | 'flat-top'
+                }));
+        
+        new Setting(this.contentEl)
+            .setName('Display borders')
+            .setDesc('Display or hide the default borders between each hex')
+            .addToggle(toggle => toggle
+                .setValue(this._settings.displayHexBorders)
+                .onChange(value => this._settings.displayHexBorders = value));
+        
+        new Setting(this.contentEl)
+            .setName('Display crosshair')
+            .setDesc('Display or hide the crosshair drawn at the center of the map')
+            .addToggle(toggle => toggle
+                .setValue(this._settings.displayCrosshair)
+                .onChange(value => this._settings.displayCrosshair = value));
 
         new Setting(this.contentEl)
+            .addButton(button => button
+                .setButtonText('Cancel')
+                .onClick(() => {
+                    this.close();
+                }))
             .addButton(button => button
                 .setButtonText('Save')
                 .setCta()
