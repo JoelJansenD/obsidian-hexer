@@ -36,7 +36,16 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     context.translate(offset.x, offset.y);
 
     for(const hex of data.hexes.values()) {
-        drawHex(context, hex, data.size);
+        drawHexTerrain(context, hex, data.size);
+    }
+
+    // Borders are a separate pass after every terrain fill so a neighbour's fill
+    // never paints over an already-drawn border. The default grid border can be
+    // toggled off in the map settings.
+    if(data.mapSettings.displayHexBorders) {
+        for(const hex of data.hexes.values()) {
+            drawHexBorder(context, hex, data.size);
+        }
     }
 
     // Factions sit above the terrain but below the icons, so paint them as a
@@ -105,15 +114,27 @@ function traceHex(context: CanvasRenderingContext2D, corners: Point[]) {
     context.closePath();
 }
 
-function drawHex(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
-    const corners = hexCorners(radialCoordinatesToPoint(hex, size), size);
-    traceHex(context, corners);
-
-    if(hex.terrainColor) {
-        context.fillStyle = hex.terrainColor;
-        context.fill();
+function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
+    if(!hex.terrainColor) {
+        return;
     }
 
+    traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size), size));
+    context.fillStyle = hex.terrainColor;
+    context.fill();
+
+    // Adjacent fills leave a faint antialiased seam that the grid border used to
+    // hide. Stroke the fill in its own colour so each hex covers its half of the
+    // seam, keeping neighbours flush even when borders are toggled off.
+    context.save();
+    context.strokeStyle = hex.terrainColor;
+    context.lineWidth = 1;
+    context.stroke();
+    context.restore();
+}
+
+function drawHexBorder(context: CanvasRenderingContext2D, hex: Hexagon, size: number) {
+    traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size), size));
     context.stroke();
 }
 
