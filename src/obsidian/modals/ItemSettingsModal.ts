@@ -5,7 +5,7 @@ export default class ItemSettingsModal extends Modal {
 
     private readonly settings: ItemSettings;
 
-    constructor(app: App, private _options: ItemSettingsOptions) {
+    constructor(app: App, private _options: ItemSettingsOptions = {}) {
         super(app);
 
         this.settings = { ..._options.settings };

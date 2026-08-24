@@ -4,6 +4,7 @@ import { HexerData } from '../logic/HexerData';
 import { FRONTMATTER_REGEX, fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
 import ItemSettingsModal from './modals/ItemSettingsModal';
 import { FilePreviewOptions } from '../view/ObsidianInterop';
+import MapSettingsModal, { MapSettingsOptions } from './modals/MapSettingsModal';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
@@ -57,7 +58,7 @@ export class HexerView extends TextFileView {
                     openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
                     showFilePreview: options => this.showFilePreview(options),
                     openFile: (filePath, event) => this.openFile(filePath, event),
-                    openMapSettings: () => this.openMapSettings()
+                    openMapSettings: options => this.openMapSettings(options)
                 });
         }
     }
@@ -88,8 +89,9 @@ export class HexerView extends TextFileView {
         void this.app.workspace.openLinkText(filePath, this.file?.path ?? '', Keymap.isModEvent(event));
     }
     
-    private openMapSettings(): void {
-        throw new Error('Method not implemented.');
+    private openMapSettings(options: MapSettingsOptions = {}): void {
+        const modal = new MapSettingsModal(this.app, this.hexerData.mapSettings, options);
+        modal.open();
     }
 
     private showFilePreview({ filePath, event, targetEl }: FilePreviewOptions): void {

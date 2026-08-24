@@ -1,3 +1,5 @@
+import { MapSettingsOptions } from "../obsidian/modals/MapSettingsModal";
+
 /**
  * The part of a sidebar item the settings dialog edits, shared by every item
  * type that can be listed in the sidebar (paths, factions, ...).
@@ -48,5 +50,5 @@ export interface ObsidianInterop {
     showFilePreview: (options: FilePreviewOptions) => void;
     /** Opens the linked note; a mod-click opens it in a new tab. */
     openFile: (filePath: string, event: MouseEvent) => void;
-    openMapSettings: () => void;
+    openMapSettings: (options?: MapSettingsOptions) => void;
 }

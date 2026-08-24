@@ -52,7 +52,13 @@ export default class EditorSidebar {
         buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-label', text: 'Map Settings' });
 
         buttonEl.addEventListener('click', () => {
-            // TODO: open the map configuration dialog (see map-configuration.feature).
+            this._componentOptions.obsidian.openMapSettings({
+                onSave: (settings) => {
+                    const data = this._componentOptions.getDataClone();
+                    data.mapSettings = settings;
+                    this._componentOptions.setData(data);
+                }
+            });
         });
 
         return buttonEl;
