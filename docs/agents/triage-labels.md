@@ -1,0 +1,17 @@
+# Triage Labels
+
+The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+
+In this repo, humans are always involved in implementation, so there is no distinct "ready for AFK agent" state: both `ready-for-agent` and `ready-for-human` map to a single `ready` label.
+
+| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
+| -------------------------- | -------------------- | ---------------------------------------- |
+| `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
+| `needs-info`               | `needs-info`         | Waiting on reporter for more information |
+| `ready-for-agent`          | `ready`              | Fully specified, ready to be implemented |
+| `ready-for-human`          | `ready`              | Fully specified, ready to be implemented |
+| `wontfix`                  | `wontfix`            | Will not be actioned                     |
+
+When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+
+Edit the right-hand column to match whatever vocabulary you actually use.
