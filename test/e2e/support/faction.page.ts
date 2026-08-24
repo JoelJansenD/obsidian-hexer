@@ -1,5 +1,6 @@
 import { Faction } from "../../../src/logic/faction";
 import { buildHexerFileContent, SEEDED_FACTIONS, SeedFaction } from "./fixture";
+import { enterEditMode } from "./editMode";
 
 class FactionPage {
     async createFaction() {
@@ -29,10 +30,7 @@ class FactionPage {
      * The edit control only exists while the row is in view mode.
      */
     async editFaction(id: string) {
-        await this.selectAndClick(`[data-item-id="${id}"] [data-role="edit-item"]`);
-        // Entering edit mode re-renders the row; wait for that to land so callers
-        // that next click the settings gear don't race the re-render.
-        await browser.$(`[data-item-id="${id}"][data-editing="true"]`).waitForExist();
+        await enterEditMode(id);
     }
 
     /**

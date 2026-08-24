@@ -1,6 +1,7 @@
 import { RadialCoordinates } from "../../../src/logic/hexagon";
 import { Path, PathEdge, PathNode } from "../../../src/logic/path";
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
+import { enterEditMode } from "./editMode";
 
 class PathPage {
     async createRiver() {
@@ -48,10 +49,7 @@ class PathPage {
     }
 
     async editRiver(id: string) {
-        await this.selectAndClick(`[data-item-id="${id}"] [data-role="edit-item"]`);
-        // Entering edit mode re-renders the row; wait for that to land so callers
-        // that next click a hex or the settings gear don't race the re-render.
-        await browser.$(`[data-item-id="${id}"][data-editing="true"]`).waitForExist();
+        await enterEditMode(id);
     }
 
     /**
