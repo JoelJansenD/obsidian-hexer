@@ -48,4 +48,5 @@ export interface ObsidianInterop {
     showFilePreview: (options: FilePreviewOptions) => void;
     /** Opens the linked note; a mod-click opens it in a new tab. */
     openFile: (filePath: string, event: MouseEvent) => void;
+    openMapSettings: () => void;
 }

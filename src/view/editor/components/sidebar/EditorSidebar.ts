@@ -49,7 +49,7 @@ export default class EditorSidebar {
         const iconEl = buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-icon' });
         iconEl.appendChild(createElement(Settings, { height: 16, width: 16 }));
 
-        buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-label', text: 'Configuration' });
+        buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-label', text: 'Map Settings' });
 
         buttonEl.addEventListener('click', () => {
             // TODO: open the map configuration dialog (see map-configuration.feature).

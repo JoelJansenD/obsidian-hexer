@@ -1,5 +1,6 @@
 import { Faction } from "./faction";
 import { Hexagon, hexagonIsEmpty, RadialCoordinates } from "./hexagon";
+import { defaultMapSettings, MapSettings } from "./mapSettings";
 import { Path } from "./path";
 
 
@@ -9,6 +10,7 @@ export interface HexerState {
     rivers: Path[];
     roads: Path[];
     factions: Faction[];
+    mapSettings: MapSettings;
     size: number;
 }
 
@@ -25,6 +27,7 @@ export class HexerData implements HexerState {
     public rivers: Path[];
     public roads: Path[];
     public factions: Faction[];
+    public mapSettings: MapSettings;
 
     constructor(state: HexerState) {
         this.version = state.version;
@@ -35,6 +38,7 @@ export class HexerData implements HexerState {
         this.rivers = state.rivers;
         this.roads = state.roads;
         this.factions = state.factions;
+        this.mapSettings = state.mapSettings ?? defaultMapSettings();
     }
 
     public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
@@ -102,7 +106,8 @@ export class HexerData implements HexerState {
         const rivers = this.rivers.map(path => path.clone());
         const roads = this.roads.map(path => path.clone());
         const factions = this.factions.map(faction => ({ ...faction }));
-        return new HexerData({ ...this, hexes, rivers, roads, factions });
+        const mapSettings = { ...this.mapSettings };
+        return new HexerData({ ...this, hexes, rivers, roads, factions, mapSettings });
     }
 }
 
@@ -111,6 +116,11 @@ export const initialFileContent =
 `---
 hexer:
   version: "${CURRENT_VERSION}"
+  mapSettings:
+    name: ""
+    hexOrientation: "flat-top"
+    displayHexBorders: true
+    displayCrosshair: true
   size: 50
   hexes: {}
   rivers: []

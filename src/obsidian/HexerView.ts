@@ -57,6 +57,7 @@ export class HexerView extends TextFileView {
                     openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
                     showFilePreview: options => this.showFilePreview(options),
                     openFile: (filePath, event) => this.openFile(filePath, event),
+                    openMapSettings: () => this.openMapSettings()
                 });
         }
     }
@@ -85,6 +86,10 @@ export class HexerView extends TextFileView {
 
     private openFile(filePath: string, event: MouseEvent): void {
         void this.app.workspace.openLinkText(filePath, this.file?.path ?? '', Keymap.isModEvent(event));
+    }
+    
+    private openMapSettings(): void {
+        throw new Error('Method not implemented.');
     }
 
     private showFilePreview({ filePath, event, targetEl }: FilePreviewOptions): void {
