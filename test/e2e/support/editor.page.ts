@@ -1,5 +1,5 @@
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
-import { Hexagon, RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
+import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
 class EditorPage {
     get canvas() {
@@ -15,17 +15,12 @@ class EditorPage {
     }
 
     async clickHex(coordinates: RadialCoordinates) {
-        const size = await this.getHexSize();
-        const { x, y } = radialCoordinatesToPoint(coordinates, size);
-        const { width, height } = await this.canvas.getSize();
+        const offset = await this.hexPointerOffset(coordinates);
+        console.debug('[hexer-e2e] clickHex', JSON.stringify({ coordinates, offsetFromCentre: offset }));
 
-        const offset = { x: Math.round(x - width / 2), y: Math.round(y - height / 2) };
-        console.debug('[hexer-e2e] clickHex', JSON.stringify({
-            coordinates, size, canvas: { width, height }, absolutePoint: { x, y }, offsetFromCentre: offset,
-        }));
-
-        // WebdriverIO click offsets are relative to the element's centre, whereas
-        // the canvas maps clicks from its top-left corner, so re-base the point.
+        // WebdriverIO pointer offsets are relative to the element's centre, which
+        // is where the renderer centres hex 0,0, so hexPointerOffset already
+        // yields the click point directly.
         await this.canvas.click({
             x: offset.x,
             y: offset.y,
@@ -35,18 +30,11 @@ class EditorPage {
     }
 
     async doubleClickHex(coordinates: RadialCoordinates) {
-        const size = await this.getHexSize();
-        const { x, y } = radialCoordinatesToPoint(coordinates, size);
-        const { width, height } = await this.canvas.getSize();
+        const offset = await this.hexPointerOffset(coordinates);
+        console.debug('[hexer-e2e] doubleClickHex', JSON.stringify({ coordinates, offsetFromCentre: offset }));
 
-        const offset = { x: Math.round(x - width / 2), y: Math.round(y - height / 2) };
-        console.debug('[hexer-e2e] doubleClickHex', JSON.stringify({
-            coordinates, size, canvas: { width, height }, absolutePoint: { x, y }, offsetFromCentre: offset,
-        }));
-
-        // element.doubleClick() can't be offset, and the canvas maps clicks from
-        // its top-left corner, so drive two quick down/up pairs at the re-based
-        // point via the pointer action API.
+        // element.doubleClick() can't be offset, so drive two quick down/up pairs
+        // at the centre-relative point via the pointer action API.
         await browser.action('pointer', { parameters: { pointerType: 'mouse' } })
             .move({ origin: this.canvas, x: offset.x, y: offset.y })
             .down({ button: 0 }).up({ button: 0 })
@@ -57,18 +45,11 @@ class EditorPage {
     }
 
     async rightClickHex(coordinates: RadialCoordinates) {
-        const size = await this.getHexSize();
-        const { x, y } = radialCoordinatesToPoint(coordinates, size);
-        const { width, height } = await this.canvas.getSize();
+        const offset = await this.hexPointerOffset(coordinates);
+        console.debug('[hexer-e2e] rightClickHex', JSON.stringify({ coordinates, offsetFromCentre: offset }));
 
-        const offset = { x: Math.round(x - width / 2), y: Math.round(y - height / 2) };
-        console.debug('[hexer-e2e] rightClickHex', JSON.stringify({
-            coordinates, size, canvas: { width, height }, absolutePoint: { x, y }, offsetFromCentre: offset,
-        }));
-
-        // The canvas maps clicks from its top-left corner, so re-base the point,
-        // then drive a right-button (button 2) down/up pair via the pointer
-        // action API since element.click() can only issue a left click.
+        // Drive a right-button (button 2) down/up pair via the pointer action API
+        // since element.click() can only issue a left click.
         await browser.action('pointer', { parameters: { pointerType: 'mouse' } })
             .move({ origin: this.canvas, x: offset.x, y: offset.y })
             .down({ button: 2 }).up({ button: 2 })
@@ -78,20 +59,9 @@ class EditorPage {
     }
 
     async dragAcrossHexes(hexes: RadialCoordinates[]) {
-        const size = await this.getHexSize();
-        const { width, height } = await this.canvas.getSize();
+        const points = await Promise.all(hexes.map(hex => this.hexPointerOffset(hex)));
 
-        const points = hexes.map(hex => {
-            const { x, y } = radialCoordinatesToPoint(hex, size);
-            return {
-                x: Math.round(x - width / 2),
-                y: Math.round(y - height / 2),
-            };
-        });
-
-        console.debug('[hexer-e2e] dragAcrossHexes', JSON.stringify({
-            hexes, size, canvas: { width, height }, offsetsFromCentre: points,
-        }));
+        console.debug('[hexer-e2e] dragAcrossHexes', JSON.stringify({ hexes, offsetsFromCentre: points }));
 
         let builder = browser.action('pointer', { parameters: { pointerType: 'mouse' } })
             .move({ origin: this.canvas, x: points[0].x, y: points[0].y })
@@ -135,11 +105,32 @@ class EditorPage {
         console.debug(`[hexer-e2e] state (${label})`, JSON.stringify(state));
     }
 
+    // Converts a hex coordinate to a pointer offset relative to the canvas
+    // centre, the origin WebdriverIO pointer actions use. The renderer centres
+    // hex 0,0 in the canvas and pans the whole scene by the camera offset, so a
+    // hex sits at its layout point plus that pan, measured from the centre.
+    private async hexPointerOffset(coordinates: RadialCoordinates): Promise<Point> {
+        const size = await this.getHexSize();
+        const camera = await this.getCameraOffset();
+        const { x, y } = radialCoordinatesToPoint(coordinates, size);
+        return { x: Math.round(x + camera.x), y: Math.round(y + camera.y) };
+    }
+
     private async getHexSize(): Promise<number> {
         return browser.executeObsidian(({ app }) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as { hexerData?: { size?: number } } | undefined;
             return view?.hexerData?.size ?? 50;
+        });
+    }
+
+    private async getCameraOffset(): Promise<Point> {
+        return browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                hexerData?: { camera?: { offset?: { x: number; y: number } } };
+            } | undefined;
+            return view?.hexerData?.camera?.offset ?? { x: 0, y: 0 };
         });
     }
 
