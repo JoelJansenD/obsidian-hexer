@@ -39,6 +39,9 @@ An undirected connection between two path nodes.
 **Tool**:
 The active editing action: Select, Brush, Bucket (flood fill), Eraser, or Polygon (path drawing).
 
+**Editor state**:
+The current editing selection — active layer, tool, colour, icon, faction, and in-progress path. Distinct from the map data: it is what the user is editing *with*, not the map itself.
+
 **Camera**:
 The viewport's pan offset over the map.
 

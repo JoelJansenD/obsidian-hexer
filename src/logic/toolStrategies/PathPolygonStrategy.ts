@@ -4,6 +4,13 @@ import { HexerData } from "../HexerData";
 import { Path, PathEdge, PathNode, pathNodeEquals } from "../path";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
+/**
+ * Draws river/road paths node by node. The in-progress path lives in the live
+ * editor state (`editorState.activePath`): the active and previous nodes are
+ * mutated in place across events and rely on `getEditorState` returning that same
+ * object, so this strategy never calls `setEditorState` — the active layer/tool
+ * has not changed, and the canvas re-renders after each interaction on its own.
+ */
 export default class PathPolygonStrategy implements ToolStrategy {
 
     private previousNode : PathNode | null = null;
