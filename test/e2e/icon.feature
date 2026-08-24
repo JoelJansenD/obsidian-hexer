@@ -8,7 +8,7 @@ Feature: Icon
     And I have selected the castle icon
     And I have selected a blue icon colour
   
-  Scenario: Placing an icon on an empty hex hex
+  Scenario: Placing an icon on an empty hex
     Given I have selected the brush tool
     When I click an empty hex
     Then the hex will have a blue castle icon

@@ -7,7 +7,6 @@ import { GlobalContext } from "../support/contexts/global.context";
 import { buildHexerFileContent } from "../support/fixture";
 
 const HEXER_EXT = '.hexer.md';
-const EMPTY_HEX = { q: 5, r: 5 };
 
 // CI runs Obsidian in a smaller window than a typical local setup, which shrinks
 // the canvas so hexes further from the origin fall outside it and can't be
@@ -55,8 +54,9 @@ Given('Obsidian is open', async function () {
 });
 
 When('I click an empty hex', async function (this: GlobalContext) {
-    await editorPage.clickHex(EMPTY_HEX);
-    this.lastClickedHex = EMPTY_HEX;
+    const hex = await editorPage.hexInView();
+    await editorPage.clickHex(hex);
+    this.lastClickedHex = hex;
 });
 
 When('I click a hex at {int},{int}', async function (this: GlobalContext, q: number, r: number) {

@@ -1,5 +1,5 @@
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
-import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
+import { Hexagon, Point, RadialCoordinates, pointToRadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
 class EditorPage {
     get canvas() {
@@ -103,6 +103,16 @@ class EditorPage {
             };
         });
         console.debug(`[hexer-e2e] state (${label})`, JSON.stringify(state));
+    }
+
+    // Returns a hex at the centre of the current camera view. Because the
+    // renderer centres hex 0,0 and pans by the camera offset, the hex under the
+    // canvas centre is the one whose layout point equals the negated pan, so it
+    // stays clickable no matter how the camera has moved.
+    async hexInView(): Promise<RadialCoordinates> {
+        const size = await this.getHexSize();
+        const camera = await this.getCameraOffset();
+        return pointToRadialCoordinates(-camera.x, -camera.y, size);
     }
 
     // Converts a hex coordinate to a pointer offset relative to the canvas
