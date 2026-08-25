@@ -2,12 +2,9 @@
 import { createComponentOptions } from "../../../../__test/defaultEditorState";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
-import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
+import EditorListSidebarSection, { EditorListSidebarSectionOptions, SidebarListItem } from "./EditorListSidebarSection";
 
-interface FakeItem {
-    id: string;
-    label: string;
-}
+type FakeItem = SidebarListItem;
 
 const listOptions = (overrides: Partial<EditorListSidebarSectionOptions> = {}): EditorListSidebarSectionOptions => ({
     label: 'Fakes',
@@ -18,6 +15,8 @@ const listOptions = (overrides: Partial<EditorListSidebarSectionOptions> = {}): 
     ...overrides,
 });
 
+const makeItem = (id: string, name: string): FakeItem => ({ id, name, color: '#000000', filePath: null });
+
 describe('Add button', () => {
     it('renders with the configured label and role', () => {
         // Arrange & Act
@@ -27,106 +26,94 @@ describe('Add button', () => {
         expect(getAddButton(parent, 'add-thing').textContent).toContain('New thing');
     });
 
-    it('invokes addItem when clicked', () => {
+    it('creates and renders a new item when clicked', () => {
         // Arrange
-        const { parent, section } = createFakeSection([]);
+        const { parent, componentOptions } = createFakeSection([]);
 
         // Act
         getAddButton(parent).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
         // Assert
-        expect(section.addItemCalls).toBe(1);
+        expect(componentOptions.setData).toHaveBeenCalled();
+        expect(readNames(parent)).toEqual(['New fake']);
     });
 });
 
 describe('Rendering items', () => {
-    it('renders a row for each item, in order', () => {
+    it('renders a row for each item, in order, without the subclass asking', () => {
         // Arrange
         const items = [
-            { id: 'a', label: 'Alpha' },
-            { id: 'b', label: 'Beta' },
-            { id: 'c', label: 'Gamma' },
+            makeItem('a', 'Alpha'),
+            makeItem('b', 'Beta'),
+            makeItem('c', 'Gamma'),
         ];
 
-        // Act
+        // Act — the subclass never calls renderItems(); the base owns the initial render.
         const { parent } = createFakeSection(items);
 
         // Assert
-        expect(readRows(parent)).toEqual([
-            { id: 'a', label: 'Alpha' },
-            { id: 'b', label: 'Beta' },
-            { id: 'c', label: 'Gamma' },
-        ]);
+        expect(readNames(parent)).toEqual(['Alpha', 'Beta', 'Gamma']);
     });
 });
 
 describe('Refreshing', () => {
     it('re-renders to reflect the current items', () => {
         // Arrange
-        const { parent, section } = createFakeSection([{ id: 'a', label: 'Alpha' }]);
+        const { parent, section, items } = createFakeSection([makeItem('a', 'Alpha')]);
 
         // Act
-        section.setItems([
-            { id: 'b', label: 'Beta' },
-            { id: 'c', label: 'Gamma' },
-        ]);
+        replaceItems(items, [makeItem('b', 'Beta'), makeItem('c', 'Gamma')]);
         section.refresh();
 
         // Assert
-        expect(readRows(parent)).toEqual([
-            { id: 'b', label: 'Beta' },
-            { id: 'c', label: 'Gamma' },
-        ]);
+        expect(readNames(parent)).toEqual(['Beta', 'Gamma']);
     });
 
     it('renders each item once', () => {
         // Arrange
-        const { parent, section } = createFakeSection([{ id: 'a', label: 'Alpha' }]);
+        const { parent, section } = createFakeSection([makeItem('a', 'Alpha')]);
 
         // Act
         section.refresh();
         section.refresh();
 
         // Assert
-        expect(readRows(parent)).toEqual([{ id: 'a', label: 'Alpha' }]);
+        expect(readNames(parent)).toEqual(['Alpha']);
     });
 });
 
 /**
- * A minimal concrete subclass exercising only the base class's list scaffolding:
- * the add button, the render loop and refresh. The item type and row markup are
- * deliberately trivial, so the tests assert base behaviour rather than any real
- * layer's rows.
+ * A minimal concrete subclass exercising only the base class's scaffolding: the
+ * add button, the guaranteed initial render, the render loop and refresh. It
+ * deliberately does NOT call renderItems() in its constructor, so these tests
+ * also pin the initial-render guarantee the base now owns. The active-item
+ * binding is backed by an unrelated editor-state field, since the base only
+ * needs some string id it can read back.
  */
 class FakeListSidebarSection extends EditorListSidebarSection<FakeItem> {
-    public addItemCalls = 0;
-
     constructor(
         parentEl: HTMLElement,
         componentOptions: ComponentOptions,
         options: EditorListSidebarSectionOptions,
-        private _items: FakeItem[],
+        items: FakeItem[],
     ) {
-        super(parentEl, componentOptions, options);
-        this.renderItems();
+        super(
+            parentEl,
+            componentOptions,
+            options,
+            (_data: HexerData) => items,
+            name => makeItem(crypto.randomUUID(), name),
+        );
     }
 
-    public setItems(items: FakeItem[]) {
-        this._items = items;
+    protected getActiveId(): string | null {
+        return this._componentOptions.getEditorState().activeFactionId;
     }
 
-    protected getItems(_data: HexerData): FakeItem[] {
-        return this._items;
-    }
-
-    protected addItem() {
-        this.addItemCalls++;
-    }
-
-    protected renderRow(listEl: HTMLElement, item: FakeItem) {
-        const rowEl = listEl.createDiv({ cls: 'fake-row' });
-        rowEl.dataset.itemId = item.id;
-        rowEl.setText(item.label);
+    protected setActiveId(id: string | null): void {
+        const state = this._componentOptions.getEditorState();
+        state.activeFactionId = id;
+        this._componentOptions.setEditorState(state);
     }
 }
 
@@ -134,14 +121,17 @@ const createFakeSection = (items: FakeItem[], options: Partial<EditorListSidebar
     const componentOptions = createComponentOptions();
     const parent = document.createElement('div');
     const section = new FakeListSidebarSection(parent, componentOptions, listOptions(options), items);
-    return { parent, componentOptions, section };
+    return { parent, componentOptions, section, items };
 };
 
-const readRows = (parent: HTMLElement) =>
-    Array.from(parent.querySelectorAll<HTMLElement>('.fake-row')).map(rowEl => ({
-        id: rowEl.dataset.itemId,
-        label: rowEl.textContent,
-    }));
+// The item accessor closes over this array, so mutate it in place to change what
+// the section renders on the next refresh.
+const replaceItems = (items: FakeItem[], next: FakeItem[]) => {
+    items.splice(0, items.length, ...next);
+};
+
+const readNames = (parent: HTMLElement) =>
+    Array.from(parent.querySelectorAll<HTMLElement>('.hexer-sidebar-list-row-name')).map(rowEl => rowEl.textContent);
 
 const getAddButton = (parent: HTMLElement, role = 'add-fake') => {
     const buttonEl = parent.querySelector<HTMLElement>(`[data-role="${role}"]`);
