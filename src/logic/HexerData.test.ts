@@ -139,4 +139,64 @@ describe('HexerData', () => {
         // Assert
         expect(data.getHex(0, 0)).toBe(hex);
     });
+
+    describe('hexToPoint / pointToHex', () => {
+        it('hexToPoint converts using the map size and its flat-top orientation', () => {
+            // Arrange
+            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
+
+            // Act
+            const point = data.hexToPoint({ q: 10, r: 0 });
+
+            // Assert
+            expect(point.x).toBeCloseTo(15);
+            expect(point.y).toBeCloseTo(8.660254);
+        });
+
+        it('hexToPoint converts using the map size and its pointy-top orientation', () => {
+            // Arrange
+            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top' } });
+
+            // Act
+            const point = data.hexToPoint({ q: 10, r: 0 });
+
+            // Assert
+            expect(point.x).toBeCloseTo(17.320508);
+            expect(point.y).toBeCloseTo(0);
+        });
+
+        it('pointToHex converts using the map size and its flat-top orientation', () => {
+            // Arrange
+            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
+
+            // Act
+            const hex = data.pointToHex(15, 8.660254);
+
+            // Assert
+            expect(hex).toEqual({ q: 10, r: 0 });
+        });
+
+        it('pointToHex converts using the map size and its pointy-top orientation', () => {
+            // Arrange
+            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top' } });
+
+            // Act
+            const hex = data.pointToHex(17.320508, 0);
+
+            // Assert
+            expect(hex).toEqual({ q: 10, r: 0 });
+        });
+
+        it('hexToPoint scales by the map size', () => {
+            // Arrange
+            const data = new HexerData({ ...emptyState(), size: 5, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
+
+            // Act
+            const point = data.hexToPoint({ q: 0, r: 10 });
+
+            // Assert
+            expect(point.x).toBeCloseTo(0);
+            expect(point.y).toBeCloseTo(86.60254);
+        });
+    });
 });

@@ -1,6 +1,6 @@
 import { Camera, defaultCamera } from "./camera";
 import { Faction } from "./faction";
-import { Hexagon, hexagonIsEmpty, RadialCoordinates } from "./hexagon";
+import { Hexagon, hexagonIsEmpty, Point, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint } from "./hexagon";
 import { defaultMapSettings, MapSettings } from "./mapSettings";
 import { Path } from "./path";
 
@@ -100,6 +100,23 @@ export class HexerData implements HexerState {
         else {
             this.setHex(hex);
         }
+    }
+
+    /**
+     * Converts a hex coordinate to its layout point using this map's size and
+     * orientation. Callers never restate the orientation, so a pointy-top map
+     * can't silently be laid out as flat-top.
+     */
+    public hexToPoint(coordinate: RadialCoordinates): Point {
+        return radialCoordinatesToPoint(coordinate, this.size, this.mapSettings.hexOrientation);
+    }
+
+    /**
+     * Converts a layout point back to the hex coordinate under it, using this
+     * map's size and orientation. The inverse of {@link hexToPoint}.
+     */
+    public pointToHex(x: number, y: number): RadialCoordinates {
+        return pointToRadialCoordinates(x, y, this.size, this.mapSettings.hexOrientation);
     }
 
     public clone(): HexerData {

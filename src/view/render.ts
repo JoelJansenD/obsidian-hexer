@@ -1,6 +1,6 @@
 import { cameraViewOffset } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
-import { Hexagon, Point, RadialCoordinates, radialCoordinatesToPoint } from "../logic/hexagon";
+import { Hexagon, Point, RadialCoordinates } from "../logic/hexagon";
 import { HexerData } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
@@ -32,10 +32,8 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     context.save();
     context.translate(offset.x, offset.y);
 
-    const orientation = data.mapSettings.hexOrientation;
-
     for(const hex of data.hexes.values()) {
-        drawHexTerrain(context, hex, data.size, orientation);
+        drawHexTerrain(context, hex, data);
     }
 
     // Borders are a separate pass after every terrain fill so a neighbour's fill
@@ -43,27 +41,27 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     // toggled off in the map settings.
     if(data.mapSettings.displayHexBorders) {
         for(const hex of data.hexes.values()) {
-            drawHexBorder(context, hex, data.size, orientation);
+            drawHexBorder(context, hex, data);
         }
     }
 
     // Factions sit above the terrain but below the icons, so paint them as a
     // pass of their own between the two per-hex passes.
-    drawFactions(context, data, data.size);
+    drawFactions(context, data);
 
     for(const hex of data.hexes.values()) {
-        drawIcon(context, hex, data.size, orientation);
+        drawIcon(context, hex, data);
     }
 
     for(const path of data.rivers) {
-        drawPath(context, path, data.size, editorState.activePath, 'river', orientation);
+        drawPath(context, path, data, editorState.activePath, 'river');
     }
     for(const path of data.roads) {
-        drawPath(context, path, data.size, editorState.activePath, 'road', orientation);
+        drawPath(context, path, data, editorState.activePath, 'road');
     }
 
     if(data.mapSettings.displayCrosshair) {
-        drawCrosshair(context, data.size);
+        drawCrosshair(context, data);
     }
 
     context.restore();
@@ -73,13 +71,13 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
 // from the centre to roughly the hex's edge (~one circumradius) plus another
 // half a hex of overshoot, so the marker reads clearly around the hex rather
 // than being buried inside it.
-function drawCrosshair(context: CanvasRenderingContext2D, size: number) {
-    const center = radialCoordinatesToPoint({ q: 0, r: 0 }, size);
-    const reach = size * 1.5;
+function drawCrosshair(context: CanvasRenderingContext2D, data: HexerData) {
+    const center = data.hexToPoint({ q: 0, r: 0 });
+    const reach = data.size * 1.5;
 
     context.save();
     context.strokeStyle = 'rgba(128, 128, 128, 0.9)';
-    context.lineWidth = Math.max(1, size * 0.03);
+    context.lineWidth = Math.max(1, data.size * 0.03);
     context.beginPath();
     context.moveTo(center.x - reach, center.y);
     context.lineTo(center.x + reach, center.y);
@@ -118,12 +116,12 @@ function traceHex(context: CanvasRenderingContext2D, corners: Point[]) {
     context.closePath();
 }
 
-function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, size: number, orientation: HexOrientation) {
+function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerData) {
     if(!hex.terrainColor) {
         return;
     }
 
-    traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation));
+    traceHex(context, hexCorners(data.hexToPoint(hex), data.size, data.mapSettings.hexOrientation));
     context.fillStyle = hex.terrainColor;
     context.fill();
 
@@ -137,16 +135,17 @@ function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, size: n
     context.restore();
 }
 
-function drawHexBorder(context: CanvasRenderingContext2D, hex: Hexagon, size: number, orientation: HexOrientation) {
-    traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation));
+function drawHexBorder(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerData) {
+    traceHex(context, hexCorners(data.hexToPoint(hex), data.size, data.mapSettings.hexOrientation));
     context.stroke();
 }
 
-function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: number) {
+function drawFactions(context: CanvasRenderingContext2D, data: HexerData) {
     if(data.factions.length === 0) {
         return;
     }
 
+    const size = data.size;
     const factionsById = new Map(data.factions.map(faction => [faction.id, faction]));
     const orientation = data.mapSettings.hexOrientation;
 
@@ -161,7 +160,7 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
             continue;
         }
 
-        traceHex(context, hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation));
+        traceHex(context, hexCorners(data.hexToPoint(hex), size, orientation));
         context.fillStyle = faction.color;
         context.fill();
     }
@@ -179,7 +178,7 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
             continue;
         }
 
-        const corners = hexCorners(radialCoordinatesToPoint(hex, size, orientation), size, orientation);
+        const corners = hexCorners(data.hexToPoint(hex), size, orientation);
 
         const borderEdges: [Point, Point][] = [];
         for(let edge = 0; edge < 6; edge++) {
@@ -217,10 +216,12 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData, size: 
     context.restore();
 }
 
-function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number, orientation: HexOrientation) {
+function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerData) {
     if(!hex.icon) {
         return;
     }
+
+    const size = data.size;
 
     const icon = HEXER_ICONS.get(hex.icon.name);
     if(!icon) {
@@ -232,7 +233,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number,
     const [vbX, vbY, vbWidth, vbHeight] = (svgEl.getAttribute('viewBox') ?? '0 0 512 512')
         .split(/\s+/)
         .map(Number);
-    const hexCenter = radialCoordinatesToPoint(hex, size, orientation);
+    const hexCenter = data.hexToPoint(hex);
     const iconSize = size * 1.2;
     const scale = iconSize / Math.max(vbWidth, vbHeight);
 
@@ -251,8 +252,10 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, size: number,
     context.restore();
 }
 
-function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, activePath: EditorPathState | null, type: PathType, orientation: HexOrientation) {
+function drawPath(context: CanvasRenderingContext2D, path: Path, data: HexerData, activePath: EditorPathState | null, type: PathType) {
     context.save();
+
+    const size = data.size;
 
     const isActive = path.id === activePath?.pathId;
     context.strokeStyle = path.color;
@@ -269,7 +272,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
     const wavelength = type === 'river' ? size * 2.0 : size * 1.6;
 
     for(const polyline of buildPathPolylines(path)) {
-        const points = polyline.map(node => radialCoordinatesToPoint(node, size, orientation));
+        const points = polyline.map(node => data.hexToPoint(node));
         drawWavyLine(context, points, amplitude, wavelength);
     }
 
@@ -278,7 +281,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, size: number, a
         const nodeRadius = size * 0.15;
 
         for(const node of nodes.values()) {
-            const center = radialCoordinatesToPoint(node, size, orientation);
+            const center = data.hexToPoint(node);
             const isActiveNode = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
 
             context.beginPath();
