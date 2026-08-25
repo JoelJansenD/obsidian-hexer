@@ -41,7 +41,8 @@
     "typescript-eslint": "^8.64.0",
     "vitest": "^4.1.10",
     "wdio-obsidian-reporter": "^3.1.1",
-    "wdio-obsidian-service": "^3.1.1"
+    "wdio-obsidian-service": "^3.1.1",
+    "yaml": "^2.9.0"
   },
   "dependencies": {
     "lucide": "^1.24.0"

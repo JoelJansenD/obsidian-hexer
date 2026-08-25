@@ -1,6 +1,15 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            // The `obsidian` package ships types only, so tested modules that
+            // import from it (e.g. the frontmatter YAML adapter) resolve to a
+            // runtime stub instead. See test/mocks/obsidian.ts.
+            obsidian: fileURLToPath(new URL('./test/mocks/obsidian.ts', import.meta.url)),
+        },
+    },
     test: {
         globals: true,
         // Default environment for the logic tests. View/DOM tests opt into a DOM

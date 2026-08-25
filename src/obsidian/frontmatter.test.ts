@@ -4,7 +4,7 @@ import { Hexagon } from "../logic/hexagon";
 import { HexerData, HexerState } from "../logic/HexerData";
 import { defaultMapSettings } from "../logic/mapSettings";
 import { Path } from "../logic/path";
-import { fromFrontmatter, toFrontmatter } from "./frontmatter";
+import { fromFrontmatter, parseHexerDocument, serializeHexerDocument, toFrontmatter } from "./frontmatter";
 
 const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [], mapSettings: defaultMapSettings(), camera: defaultCamera() });
 
@@ -84,6 +84,45 @@ describe('fromFrontmatter', () => {
 
         // Assert
         expect(newData.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+    });
+});
+
+describe('document seam', () => {
+    it('serializeHexerDocument preserves the markdown body after the frontmatter block', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        const existing = '---\nhexer:\n  version: "1.0"\n---\n\nSome map notes.\n';
+
+        // Act
+        const serialized = serializeHexerDocument(data, existing);
+
+        // Assert
+        expect(serialized.endsWith('\n\nSome map notes.\n')).toBe(true);
+        expect(serialized.startsWith('---\n')).toBe(true);
+    });
+
+    it('round-trips a document string through parse and serialize', () => {
+        // Arrange
+        const data = new HexerData(emptyState());
+        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        const river = new Path('River 1');
+        river.addEdge({ q: 0, r: 0 }, { q: 1, r: 2 });
+        data.rivers.push(river);
+
+        // Act - write to a document string, then read it back.
+        const document = serializeHexerDocument(data, '---\nhexer:\n  version: "1.0"\n---\n\nBody kept intact.\n');
+        const restored = parseHexerDocument(document);
+
+        // Assert
+        expect(restored.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        expect(restored.rivers).toEqual([river]);
+        // A second write leaves the body untouched.
+        expect(serializeHexerDocument(restored, document)).toBe(document);
+    });
+
+    it('throws when the document has no frontmatter block', () => {
+        expect(() => parseHexerDocument('no frontmatter here')).toThrow('Missing frontmatter');
     });
 });
 

@@ -1,7 +1,9 @@
 import { defaultCamera } from "./camera";
+import { Faction } from "./faction";
 import { Hexagon } from "./hexagon";
 import { HexerData, HexerState } from "./HexerData";
 import { defaultMapSettings } from "./mapSettings";
+import { Path } from "./path";
 
 const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [], mapSettings: defaultMapSettings(), camera: defaultCamera() });
 
@@ -138,6 +140,53 @@ describe('HexerData', () => {
 
         // Assert
         expect(data.getHex(0, 0)).toBe(hex);
+    });
+
+    describe('serialization', () => {
+        it('toJSON emits hexes as a plain object and paths in their serialized shape', () => {
+            // Arrange
+            const data = new HexerData(emptyState());
+            data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+            const river = new Path('River 1');
+            river.addEdge({ q: 0, r: 0 }, { q: 1, r: 2 });
+            data.rivers.push(river);
+
+            // Act
+            const serialized = data.toJSON();
+
+            // Assert
+            expect(serialized.hexes).toEqual({ '0,0': { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null } });
+            expect(serialized.rivers).toEqual([river.toJSON()]);
+        });
+
+        it('round-trips through structured serialization', () => {
+            // Arrange
+            const data = new HexerData(emptyState());
+            data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+            data.setHex({ q: 1, r: 2, terrainColor: '#00ff00', icon: null, factionId: null });
+
+            const river = new Path('River 1');
+            river.addEdge({ q: 0, r: 0 }, { q: 1, r: 2 });
+            data.rivers.push(river);
+
+            const road = new Path('Road 1');
+            road.addEdge({ q: 1, r: 2 }, { q: 2, r: 3 });
+            data.roads.push(road);
+
+            const faction: Faction = { id: 'faction-1', name: 'Faction 1', color: '#0000ff', filePath: 'Factions/Faction 1.md' };
+            data.factions.push(faction);
+
+            // Act - mimic the on-disk write/read cycle; a Map would serialize to {}.
+            const restored = HexerData.fromJSON(JSON.parse(JSON.stringify(data.toJSON())));
+
+            // Assert
+            expect(restored.hexes).toBeInstanceOf(Map);
+            expect(restored.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+            expect(restored.getHex(1, 2)).toEqual({ q: 1, r: 2, terrainColor: '#00ff00', icon: null, factionId: null });
+            expect(restored.rivers).toEqual([river]);
+            expect(restored.roads).toEqual([road]);
+            expect(restored.factions).toEqual([faction]);
+        });
     });
 
     describe('hexToPoint / pointToHex', () => {
