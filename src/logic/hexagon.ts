@@ -62,7 +62,7 @@ export function hexagonIsEmpty(hexagon: Hexagon) {
         && hexagon.factionId === null;
 }
 
-export function pointToRadialCoordinates(x: number, y: number, size: number, orientation: HexOrientation = 'flat-top') {
+export function pointToRadialCoordinates(x: number, y: number, size: number, orientation: HexOrientation) {
     const scaledX = x / size;
     const scaledY = y / size;
 
@@ -78,7 +78,7 @@ export function pointToRadialCoordinates(x: number, y: number, size: number, ori
     return roundRadialCoordinates(q, r);
 }
 
-export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: number, orientation: HexOrientation = 'flat-top') : Point {
+export function radialCoordinatesToPoint(coordinate: RadialCoordinates, size: number, orientation: HexOrientation) : Point {
     if(orientation === 'pointy-top') {
         const x = size * ((Math.sqrt(3) * coordinate.q) + ((Math.sqrt(3) / 2) * coordinate.r));
         const y = size * ((3 / 2) * coordinate.r);

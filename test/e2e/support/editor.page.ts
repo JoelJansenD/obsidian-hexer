@@ -112,7 +112,9 @@ class EditorPage {
     async hexInView(): Promise<RadialCoordinates> {
         const size = await this.getHexSize();
         const camera = await this.getCameraOffset();
-        return pointToRadialCoordinates(-camera.x, -camera.y, size);
+        // The e2e fixtures use flat-top maps, so name that orientation explicitly
+        // rather than leaning on any implicit default.
+        return pointToRadialCoordinates(-camera.x, -camera.y, size, 'flat-top');
     }
 
     // Converts a hex coordinate to a pointer offset relative to the canvas
@@ -122,7 +124,9 @@ class EditorPage {
     private async hexPointerOffset(coordinates: RadialCoordinates): Promise<Point> {
         const size = await this.getHexSize();
         const camera = await this.getCameraOffset();
-        const { x, y } = radialCoordinatesToPoint(coordinates, size);
+        // The e2e fixtures use flat-top maps, so name that orientation explicitly
+        // rather than leaning on any implicit default.
+        const { x, y } = radialCoordinatesToPoint(coordinates, size, 'flat-top');
         return { x: Math.round(x + camera.x), y: Math.round(y + camera.y) };
     }
 

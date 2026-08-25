@@ -166,7 +166,7 @@ describe('pointToRadialCoordinates', () => {
         const size = 1;
 
         // Act
-        const result = pointToRadialCoordinates(x, y, size);
+        const result = pointToRadialCoordinates(x, y, size, 'flat-top');
 
         // Assert
         expect(result.q).toBe(q);
@@ -180,7 +180,7 @@ describe('pointToRadialCoordinates', () => {
         const size = 5;
 
         // Act
-        const result = pointToRadialCoordinates(x, y, size);
+        const result = pointToRadialCoordinates(x, y, size, 'flat-top');
 
         // Assert
         expect(result.q).toBe(2);
@@ -232,7 +232,7 @@ describe('radialCoordinatesToPoint', () => {
         const size = 1;
 
         // Act
-        const result = radialCoordinatesToPoint({ q, r }, size);
+        const result = radialCoordinatesToPoint({ q, r }, size, 'flat-top');
 
         // Assert
         expect(result.x).toBeCloseTo(expectedX);
@@ -244,7 +244,7 @@ describe('radialCoordinatesToPoint', () => {
         const size = 5;
 
         // Act
-        const result = radialCoordinatesToPoint({ q: 0, r: 10 }, size);
+        const result = radialCoordinatesToPoint({ q: 0, r: 10 }, size, 'flat-top');
 
         // Assert
         expect(result.x).toBeCloseTo(0);
