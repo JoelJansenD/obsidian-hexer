@@ -24,14 +24,14 @@ describe('EditHistory', () => {
         history.record(painted);
 
         // Assert - undo returns the empty pre-edit state
-        const undone = history.undo();
-        expect(undone?.getHex(0, 0)).toBeUndefined();
+        const undone = history.undo()!;
+        expect(undone.getHex(0, 0)).toBeUndefined();
         expect(history.canUndo).toBe(false);
         expect(history.canRedo).toBe(true);
 
         // Assert - redo reapplies the paint
-        const redone = history.redo();
-        expect(redone?.getHex(0, 0)).toEqual(hex(0, 0, '#ff0000'));
+        const redone = history.redo()!;
+        expect(redone.getHex(0, 0)).toEqual(hex(0, 0, '#ff0000'));
         expect(history.canRedo).toBe(false);
     });
 
@@ -57,9 +57,14 @@ describe('EditHistory', () => {
         history.record(first);
         history.record(second);
 
-        // Assert - each undo peels back exactly one edit
-        expect(history.undo()?.getHex(1, 0)).toBeUndefined();
-        expect(history.undo()?.getHex(0, 0)).toBeUndefined();
+        // Assert - the first undo drops only the last edit, leaving the earlier one
+        const afterFirstUndo = history.undo()!;
+        expect(afterFirstUndo.getHex(1, 0)).toBeUndefined();
+        expect(afterFirstUndo.getHex(0, 0)).toEqual(hex(0, 0, '#111111'));
+
+        // Assert - the second undo peels back to the empty starting state
+        const afterSecondUndo = history.undo()!;
+        expect(afterSecondUndo.getHex(0, 0)).toBeUndefined();
         expect(history.canUndo).toBe(false);
     });
 
@@ -78,9 +83,9 @@ describe('EditHistory', () => {
         history.record(step2, stroke);
 
         // Assert - a single undo unwinds the whole stroke back to empty
-        const undone = history.undo();
-        expect(undone?.getHex(0, 0)).toBeUndefined();
-        expect(undone?.getHex(1, 0)).toBeUndefined();
+        const undone = history.undo()!;
+        expect(undone.getHex(0, 0)).toBeUndefined();
+        expect(undone.getHex(1, 0)).toBeUndefined();
         expect(history.canUndo).toBe(false);
     });
 
@@ -98,8 +103,10 @@ describe('EditHistory', () => {
         history.record(secondStroke, Symbol('b'));
 
         // Assert - undo unwinds one stroke at a time
-        expect(history.undo()?.getHex(1, 0)).toBeUndefined();
-        expect(history.undo()?.getHex(0, 0)).toBeUndefined();
+        const afterFirstUndo = history.undo()!;
+        expect(afterFirstUndo.getHex(1, 0)).toBeUndefined();
+        expect(afterFirstUndo.getHex(0, 0)).toEqual(hex(0, 0, '#111111'));
+        expect(history.undo()!.getHex(0, 0)).toBeUndefined();
         expect(history.canUndo).toBe(false);
     });
 
@@ -132,8 +139,8 @@ describe('EditHistory', () => {
         undone.setHex(hex(9, 9, '#123456'));
 
         // Assert - redo still yields the pristine recorded state
-        const redone = history.redo();
-        expect(redone?.getHex(9, 9)).toBeUndefined();
-        expect(redone?.getHex(0, 0)).toEqual(hex(0, 0, '#ff0000'));
+        const redone = history.redo()!;
+        expect(redone.getHex(9, 9)).toBeUndefined();
+        expect(redone.getHex(0, 0)).toEqual(hex(0, 0, '#ff0000'));
     });
 });
