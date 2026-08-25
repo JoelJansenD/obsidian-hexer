@@ -5,9 +5,18 @@ import { ObsidianInterop } from "../ObsidianInterop";
 import EditorCanvas from "./components/EditorCanvas";
 import EditorSidebar from "./components/sidebar/EditorSidebar";
 
+/** Extra context attached to a data commit. */
+export interface CommitOptions {
+    /**
+     * Groups commits from a single pointer gesture into one undo entry, so a
+     * whole brush drag collapses to one undo step. Omit for discrete edits.
+     */
+    stroke?: symbol,
+}
+
 export interface DataOptions {
     getDataClone: () => HexerData,
-    setData: (data: HexerData) => void,
+    setData: (data: HexerData, commit?: CommitOptions) => void,
 }
 
 export interface ComponentOptions extends DataOptions {
@@ -46,6 +55,16 @@ export default class Editor {
         this._canvas.destroy();
     }
 
+    /**
+     * Redraws the canvas and re-renders data-driven sidebar lists. Called after
+     * the underlying data is swapped out from outside a paint interaction — for
+     * example when undo or redo restores an earlier map.
+     */
+    public refresh() {
+        this._canvas.requestRender();
+        this._sidebar.refresh();
+    }
+
     public setEditorState(state: EditorState) {
         this._editorState = state;
         this._canvas.unregisterEvents();
@@ -66,8 +85,8 @@ export default class Editor {
             obsidian: this._obsidian,
             getEditorState: () => this._editorState,
             setEditorState: state => this.setEditorState(state),
-            setData: data => {
-                this._dataOptions.setData(data);
+            setData: (data, commit) => {
+                this._dataOptions.setData(data, commit);
                 this._canvas.requestRender();
             }
         };

@@ -16,8 +16,15 @@ export default class EditorCanvas {
     private _resizeObserver!: ResizeObserver;
     private _tools!: EditorTools;
     private _listeners = new Map<string, EventListener>();
-    
+
     private _renderRequested = false;
+
+    // Identifies the in-progress pointer gesture. Every commit between a
+    // press and its release shares this key so a whole drag becomes one undo
+    // entry; null between gestures so the next press opens a fresh one.
+    private _activeStroke: symbol | null = null;
+    private _beginStroke = () => { this._activeStroke = Symbol('stroke'); };
+    private _endStroke = () => { this._activeStroke = null; };
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
@@ -68,6 +75,8 @@ export default class EditorCanvas {
      */
     public destroy() {
         this.unregisterEvents();
+        this._canvasEl.removeEventListener('mousedown', this._beginStroke);
+        this._canvasEl.removeEventListener('mouseup', this._endStroke);
         this._resizeObserver.disconnect();
     }
 
@@ -94,6 +103,14 @@ export default class EditorCanvas {
         this._context = this._canvasEl.getContext('2d')!;
         
         this._tools = new EditorTools(canvasAreaEl, this._dataOptions);
+
+        // Track pointer gestures independently of the active tool so that
+        // strokes keep coalescing across tool changes. A press opens a stroke;
+        // its release ends it. We deliberately don't end on mouseleave: a drag
+        // that wanders off the canvas and back while held stays one gesture, and
+        // the next press mints a fresh key regardless.
+        this._canvasEl.addEventListener('mousedown', this._beginStroke);
+        this._canvasEl.addEventListener('mouseup', this._endStroke);
 
         this._resizeObserver = new ResizeObserver(() => {
             this.resizeCanvas();
@@ -139,7 +156,7 @@ export default class EditorCanvas {
         const clickedHex = data.pointToHex(canvasX, canvasY);
         const editorState = this._dataOptions.getEditorState();
         handler(data, editorState, clickedHex);
-        this._dataOptions.setData(data);
+        this._dataOptions.setData(data, { stroke: this._activeStroke ?? undefined });
         this.requestRender();
     }
 }

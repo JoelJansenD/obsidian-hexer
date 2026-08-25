@@ -28,6 +28,23 @@ export class HexerPlugin extends Plugin {
             },
         });
 
+        this.addCommand({
+            id: 'hexer-undo',
+            name: 'Undo',
+            hotkeys: [{ modifiers: ['Mod'], key: 'z' }],
+            checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.undo()),
+        });
+
+        this.addCommand({
+            id: 'hexer-redo',
+            name: 'Redo',
+            hotkeys: [
+                { modifiers: ['Mod', 'Shift'], key: 'z' },
+                { modifiers: ['Mod'], key: 'y' },
+            ],
+            checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.redo()),
+        });
+
         this.registerEvent(
             this.app.workspace.on('file-menu', (menu, file) => {
                 if (file instanceof TFolder) {
@@ -94,6 +111,22 @@ export class HexerPlugin extends Plugin {
         this.register(() => {
             WorkspaceLeaf.prototype.setViewState = original;
         });
+    }
+
+    /**
+     * Runs an action against the active Hexer view, using Obsidian's checkCallback
+     * protocol: when only checking, reports whether a Hexer view is active so the
+     * command (and its hotkey) stays inert in other views.
+     */
+    private runOnActiveView(checking: boolean, action: (view: HexerView) => void): boolean {
+        const view = this.app.workspace.getActiveViewOfType(HexerView);
+        if (!view) {
+            return false;
+        }
+        if (!checking) {
+            action(view);
+        }
+        return true;
     }
 
     onunload(): void {

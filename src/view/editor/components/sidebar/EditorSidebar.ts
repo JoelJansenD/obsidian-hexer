@@ -16,6 +16,15 @@ export default class EditorSidebar {
         this.build();
     }
 
+    /** Re-renders the data-driven list sections so they reflect the current map. */
+    public refresh(): void {
+        for (const section of this._sections.values()) {
+            if (section instanceof EditorListSidebarSection) {
+                section.refresh();
+            }
+        }
+    }
+
     private build() {
         this._sidebarEl = this._parentEl.createEl('div', { cls: 'hexer-sidebar' });
 
