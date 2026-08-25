@@ -1,6 +1,7 @@
 import { Keymap, TextFileView } from 'obsidian';
-import Editor from '../view/editor/Editor';
+import Editor, { CommitOptions } from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
+import { EditHistory } from '../logic/EditHistory';
 import { parseHexerDocument, serializeHexerDocument } from './frontmatter';
 import ItemSettingsModal from './modals/ItemSettingsModal';
 import { FilePreviewOptions } from '../view/ObsidianInterop';
@@ -11,6 +12,7 @@ export const VIEW_TYPE_HEXER = 'hexer-view';
 export class HexerView extends TextFileView {
     private editor?: Editor;
     private hexerData!: HexerData;
+    private history!: EditHistory;
 
     getViewType(): string {
         return VIEW_TYPE_HEXER;
@@ -36,7 +38,29 @@ export class HexerView extends TextFileView {
         }
 
         this.hexerData = parseHexerDocument(this.data);
+        this.history = new EditHistory(this.hexerData);
         this.renderEditor();
+    }
+
+    /** Restores the previous map state, if any. Wired to a plugin command. */
+    undo(): void {
+        const restored = this.history.undo();
+        if (restored) {
+            this.applyRestoredData(restored);
+        }
+    }
+
+    /** Reapplies the most recently undone map state, if any. */
+    redo(): void {
+        const restored = this.history.redo();
+        if (restored) {
+            this.applyRestoredData(restored);
+        }
+    }
+
+    private applyRestoredData(data: HexerData): void {
+        this.persist(data);
+        this.editor?.refresh();
     }
 
     clear(): void {
@@ -52,7 +76,7 @@ export class HexerView extends TextFileView {
                 this.contentEl,
                 {
                     getDataClone: () => this.hexerData.clone(),
-                    setData: (data: HexerData) => this.setHexerData(data)
+                    setData: (data: HexerData, commit?: CommitOptions) => this.setHexerData(data, commit)
                 },
                 {
                     openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
@@ -63,7 +87,13 @@ export class HexerView extends TextFileView {
         }
     }
 
-    private setHexerData(data: HexerData): void {
+    private setHexerData(data: HexerData, commit?: CommitOptions): void {
+        this.history.record(data, commit?.stroke);
+        this.persist(data);
+    }
+
+    /** Adopts a map as the current state and writes it back to the file. */
+    private persist(data: HexerData): void {
         this.hexerData = data;
         this.data = serializeHexerDocument(data, this.data);
         this.requestSave();
