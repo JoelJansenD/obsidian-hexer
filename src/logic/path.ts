@@ -24,6 +24,15 @@ export interface PathData {
     filePath: string | null;
 }
 
+/**
+ * A {@link Path} in the shape it takes on disk. Differs from {@link PathData}
+ * only in `nodes`: a Map does not survive structured serialization (e.g.
+ * stringifyYaml), so nodes are stored as a plain keyed object instead.
+ */
+export interface SerializedPath extends Omit<PathData, 'nodes'> {
+    nodes: Record<string, PathNode>;
+}
+
 export class Path implements PathData {
     public id: string;
     public name: string;
@@ -70,6 +79,30 @@ export class Path implements PathData {
             this.nodes.set(key, { q: coordinates.q, r: coordinates.r });
         }
         return key;
+    }
+
+    /** Serializes this path to its on-disk shape. See {@link SerializedPath}. */
+    public toJSON(): SerializedPath {
+        return {
+            id: this.id,
+            name: this.name,
+            nodes: Object.fromEntries(this.nodes),
+            edges: this.edges,
+            color: this.color,
+            filePath: this.filePath,
+        };
+    }
+
+    /** Reconstructs a path from its on-disk shape. The inverse of {@link toJSON}. */
+    public static fromJSON(data: SerializedPath): Path {
+        return new Path({
+            id: data.id,
+            name: data.name,
+            nodes: new Map(Object.entries(data.nodes ?? {})),
+            edges: data.edges ?? [],
+            color: data.color,
+            filePath: data.filePath,
+        });
     }
 
     public clone(): Path {

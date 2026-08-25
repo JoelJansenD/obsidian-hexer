@@ -1,7 +1,7 @@
-import { Keymap, parseYaml, stringifyYaml, TextFileView } from 'obsidian';
+import { Keymap, TextFileView } from 'obsidian';
 import Editor from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
-import { FRONTMATTER_REGEX, fromFrontmatter, HexerFrontmatter, toFrontmatter } from './frontmatter';
+import { parseHexerDocument, serializeHexerDocument } from './frontmatter';
 import ItemSettingsModal from './modals/ItemSettingsModal';
 import { FilePreviewOptions } from '../view/ObsidianInterop';
 import MapSettingsModal, { MapSettingsOptions } from './modals/MapSettingsModal';
@@ -35,7 +35,7 @@ export class HexerView extends TextFileView {
             this.clear();
         }
 
-        this.hexerData = this.parseHexerData(this.data);
+        this.hexerData = parseHexerDocument(this.data);
         this.renderEditor();
     }
 
@@ -65,24 +65,8 @@ export class HexerView extends TextFileView {
 
     private setHexerData(data: HexerData): void {
         this.hexerData = data;
-
-        const frontmatter = stringifyYaml(toFrontmatter(data)).trim();
-        const match = FRONTMATTER_REGEX.exec(this.data);
-        const body = match ? this.data.slice(match[0].length) : '';
-        this.data = `---\n${frontmatter}\n---${body}`;
-
+        this.data = serializeHexerDocument(data, this.data);
         this.requestSave();
-    }
-
-    private parseHexerData(data: string) {
-        const match = FRONTMATTER_REGEX.exec(data);
-        if(!match) {
-            // TODO: Display warning and go to markdown view
-            throw new Error('Invalid Hexer file: Missing frontmatter');
-        }
-
-        const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
-        return fromFrontmatter(frontmatter);
     }
 
     private openFile(filePath: string, event: MouseEvent): void {

@@ -2,7 +2,7 @@ import { Camera, defaultCamera } from "./camera";
 import { Faction } from "./faction";
 import { Hexagon, hexagonIsEmpty, Point, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint } from "./hexagon";
 import { defaultMapSettings, MapSettings } from "./mapSettings";
-import { Path } from "./path";
+import { Path, SerializedPath } from "./path";
 
 
 export interface HexerState {
@@ -14,6 +14,17 @@ export interface HexerState {
     mapSettings: MapSettings;
     camera: Camera;
     size: number;
+}
+
+/**
+ * A {@link HexerData} in the shape it takes on disk. Structured serialization
+ * (e.g. stringifyYaml) does not survive Maps or class instances, so `hexes` is
+ * a plain keyed object and paths are their {@link SerializedPath} form.
+ */
+export interface SerializedHexerData extends Omit<HexerState, 'hexes' | 'rivers' | 'roads'> {
+    hexes: Record<string, Hexagon>;
+    rivers: SerializedPath[];
+    roads: SerializedPath[];
 }
 
 export type HexMap = Map<string, Hexagon>;
@@ -117,6 +128,34 @@ export class HexerData implements HexerState {
      */
     public pointToHex(x: number, y: number): RadialCoordinates {
         return pointToRadialCoordinates(x, y, this.size, this.mapSettings.hexOrientation);
+    }
+
+    /** Serializes this map to its on-disk shape. See {@link SerializedHexerData}. */
+    public toJSON(): SerializedHexerData {
+        return {
+            version: this.version,
+            size: this.size,
+            mapSettings: { ...this.mapSettings },
+            camera: { ...this.camera },
+            hexes: Object.fromEntries(this.hexes),
+            rivers: this.rivers.map(river => river.toJSON()),
+            roads: this.roads.map(road => road.toJSON()),
+            factions: this.factions.map(faction => ({ ...faction })),
+        };
+    }
+
+    /** Reconstructs a map from its on-disk shape. The inverse of {@link toJSON}. */
+    public static fromJSON(data: SerializedHexerData): HexerData {
+        return new HexerData({
+            version: data.version,
+            size: data.size,
+            mapSettings: { ...(data.mapSettings ?? defaultMapSettings()) },
+            camera: data.camera ?? defaultCamera(),
+            hexes: new Map(Object.entries(data.hexes ?? {})),
+            rivers: (data.rivers ?? []).map(Path.fromJSON),
+            roads: (data.roads ?? []).map(Path.fromJSON),
+            factions: data.factions ?? [],
+        });
     }
 
     public clone(): HexerData {

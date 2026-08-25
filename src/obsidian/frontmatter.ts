@@ -1,78 +1,47 @@
-import { defaultCamera } from "../logic/camera";
-import { Hexagon } from "../logic/hexagon";
-import { HexerData, HexerState } from "../logic/HexerData";
-import { defaultMapSettings } from "../logic/mapSettings";
-import { Path, PathEdge, PathNode } from "../logic/path";
+import { parseYaml, stringifyYaml } from "obsidian";
+import { HexerData, SerializedHexerData } from "../logic/HexerData";
 
 /** Matches the leading `---\n...\n---` YAML frontmatter block of a Hexer file. */
-export const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 
-export interface SerializedPath {
-    id: string;
-    name: string;
-    nodes: Record<string, PathNode>;
-    edges: PathEdge[];
-    color: string;
-    filePath: string | null;
-}
-
+/**
+ * A Hexer file's frontmatter: the serialized map nested under a `hexer` key, so
+ * it coexists with any other frontmatter Obsidian may write.
+ */
 export interface HexerFrontmatter {
-    hexer: Omit<HexerState, 'hexes' | 'rivers' | 'roads'> & {
-        hexes: Record<string, Hexagon>;
-        rivers: SerializedPath[];
-        roads: SerializedPath[];
-    };
+    hexer: SerializedHexerData;
 }
 
 export function toFrontmatter(data: HexerData): HexerFrontmatter {
-    // A Map does not survive structured serialization (e.g. stringifyYaml),
-    // so convert it to a plain object before it is written to disk.
-    return {
-        hexer: {
-            version: data.version,
-            size: data.size,
-            mapSettings: { ...data.mapSettings },
-            camera: { ...data.camera },
-            hexes: Object.fromEntries(data.hexes),
-            rivers: data.rivers.map(serializePath),
-            roads: data.roads.map(serializePath),
-            factions: data.factions.map(faction => ({ ...faction })),
-        },
-    };
+    return { hexer: data.toJSON() };
 }
 
 export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
-    const { version, size, hexes } = frontmatter.hexer;
-    return new HexerData({
-        version,
-        size,
-        mapSettings: { ...(frontmatter.hexer.mapSettings ?? defaultMapSettings()) },
-        camera: frontmatter.hexer.camera ?? defaultCamera(),
-        hexes: new Map(Object.entries(hexes ?? {})),
-        rivers: (frontmatter.hexer.rivers ?? []).map(deserializePath),
-        roads: (frontmatter.hexer.roads ?? []).map(deserializePath),
-        factions: frontmatter.hexer.factions ?? []
-    });
+    return HexerData.fromJSON(frontmatter.hexer);
 }
 
-export function serializePath(path: Path): SerializedPath {
-    return {
-        id: path.id,
-        name: path.name,
-        nodes: Object.fromEntries(path.nodes),
-        edges: path.edges,
-        color: path.color,
-        filePath: path.filePath
-    };
+/**
+ * Reads a Hexer document string into {@link HexerData} by parsing its leading
+ * YAML frontmatter block.
+ */
+export function parseHexerDocument(data: string): HexerData {
+    const match = FRONTMATTER_REGEX.exec(data);
+    if (!match) {
+        // TODO: Display warning and go to markdown view
+        throw new Error('Invalid Hexer file: Missing frontmatter');
+    }
+
+    const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
+    return fromFrontmatter(frontmatter);
 }
 
-function deserializePath(path: SerializedPath): Path {
-    return new Path({
-        id: path.id,
-        name: path.name,
-        nodes: new Map(Object.entries(path.nodes ?? {})),
-        edges: path.edges ?? [],
-        color: path.color,
-        filePath: path.filePath
-    });
+/**
+ * Writes {@link HexerData} back into a Hexer document string, replacing the YAML
+ * frontmatter block while preserving the markdown body that follows it.
+ */
+export function serializeHexerDocument(data: HexerData, existing: string): string {
+    const frontmatter = stringifyYaml(toFrontmatter(data)).trim();
+    const match = FRONTMATTER_REGEX.exec(existing);
+    const body = match ? existing.slice(match[0].length) : '';
+    return `---\n${frontmatter}\n---${body}`;
 }

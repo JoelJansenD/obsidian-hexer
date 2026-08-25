@@ -43,6 +43,38 @@ describe('Path', () => {
         });
     });
 
+    describe('serialization', () => {
+        it('toJSON emits nodes as a plain object so a Map survives structured serialization', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act
+            const serialized = path.toJSON();
+
+            // Assert
+            expect(serialized).toEqual({
+                id: 'test-id',
+                name: 'test',
+                nodes: { '0,0': { q: 0, r: 0 }, '1,0': { q: 1, r: 0 } },
+                edges: [{ from: '0,0', to: '1,0' }],
+                color: '#ff0000',
+                filePath: null,
+            });
+        });
+
+        it('round-trips through structured serialization', () => {
+            // Arrange
+            const path = new Path(data);
+
+            // Act - mimic the on-disk write/read cycle; a Map would serialize to {}.
+            const restored = Path.fromJSON(JSON.parse(JSON.stringify(path.toJSON())));
+
+            // Assert
+            expect(restored).toEqual(path);
+            expect(restored.nodes).toBeInstanceOf(Map);
+        });
+    });
+
     describe('addEdge', () => {
         it('doesn\'t add a duplicate edge if a node already exists', () => {
             // Arrange
