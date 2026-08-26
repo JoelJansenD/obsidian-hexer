@@ -2,7 +2,7 @@
 import { Droplets } from "lucide";
 import createHexerData from "../../../../__test/createHexerData";
 import { createComponentOptions } from "../../../../__test/defaultEditorState";
-import { PathData, createPath } from "../../../../logic/path";
+import { Path, createPath } from "../../../../logic/path";
 import { ItemSettingsOptions, ObsidianInterop } from "../../../ObsidianInterop";
 import { ComponentOptions } from "../../Editor";
 import PathSidebarSection from "./PathSidebarSection";
@@ -13,7 +13,7 @@ const makePath = (name: string, color: string) => {
     return path;
 };
 
-const createPathSection = (paths: PathData[]) => {
+const createPathSection = (paths: Path[]) => {
     const componentOptions = createComponentOptions({}, createHexerData({ rivers: paths }));
     const openItemSettings = vi.fn<(options: ItemSettingsOptions) => void>();
     componentOptions.obsidian = { openItemSettings } as unknown as ObsidianInterop;
@@ -36,16 +36,16 @@ const readRows = (parent: HTMLElement) =>
         colour: rowEl.querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!.value,
     }));
 
-const getRow = (parent: HTMLElement, path: PathData) => {
+const getRow = (parent: HTMLElement, path: Path) => {
     const rowEl = parent.querySelector<HTMLElement>(`[data-item-id="${path.id}"]`);
     expect(rowEl).not.toBeNull();
     return rowEl!;
 };
 
-const getColourInput = (parent: HTMLElement, path: PathData) =>
+const getColourInput = (parent: HTMLElement, path: Path) =>
     getRow(parent, path).querySelector<HTMLInputElement>('.hexer-sidebar-list-row-color')!;
 
-const clickButton = (parent: HTMLElement, path: PathData, role: string) => {
+const clickButton = (parent: HTMLElement, path: Path, role: string) => {
     const buttonEl = getRow(parent, path).querySelector(`[data-role="${role}"]`);
     expect(buttonEl).not.toBeNull();
     buttonEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
@@ -57,7 +57,7 @@ const clickAddPath = (parent: HTMLElement) => {
     buttonEl!.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 };
 
-const pickColour = (parent: HTMLElement, path: PathData, colour: string) => {
+const pickColour = (parent: HTMLElement, path: Path, colour: string) => {
     const inputEl = getColourInput(parent, path);
     inputEl.value = colour;
     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -194,7 +194,7 @@ describe('Edit mode', () => {
 });
 
 describe('Configuration modal', () => {
-    const openModal = (paths: PathData[]) => {
+    const openModal = (paths: Path[]) => {
         const section = createPathSection(paths);
         clickButton(section.parent, paths[0], 'edit-item');
         clickButton(section.parent, paths[0], 'item-settings');

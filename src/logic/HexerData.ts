@@ -2,7 +2,7 @@ import { Camera } from "./camera";
 import { Faction } from "./faction";
 import { Hexagon, hexagonIsEmpty, Point, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint } from "./hexagon";
 import { MapSettings } from "./mapSettings";
-import { PathData } from "./path";
+import { Path } from "./path";
 
 /**
  * A Hexer map document. `hexes` is a plain keyed object rather than a Map so the
@@ -12,8 +12,8 @@ import { PathData } from "./path";
 export interface HexerData {
     version: string;
     hexes: Record<string, Hexagon>;
-    rivers: PathData[];
-    roads: PathData[];
+    rivers: Path[];
+    roads: Path[];
     factions: Faction[];
     mapSettings: MapSettings;
     camera: Camera;

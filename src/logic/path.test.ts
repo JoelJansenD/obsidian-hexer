@@ -1,5 +1,5 @@
 import {
-    PathData,
+    Path,
     addEdge,
     addNode,
     createPath,
@@ -16,7 +16,7 @@ import {
 
 describe('Path', () => {
 
-    let data: PathData;
+    let data: Path;
 
     beforeEach(() => {
         data = {

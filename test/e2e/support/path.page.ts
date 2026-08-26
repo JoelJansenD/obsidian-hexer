@@ -1,5 +1,5 @@
 import { RadialCoordinates } from "../../../src/logic/hexagon";
-import { PathData, PathEdge, PathNode } from "../../../src/logic/path";
+import { Path, PathEdge, PathNode } from "../../../src/logic/path";
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
 import { enterEditMode } from "./editMode";
 
@@ -65,16 +65,16 @@ class PathPage {
         return browser.$(`[data-item-id="${id}"]`);
     }
 
-    async getRiver(id: string): Promise<PathData | undefined> {
+    async getRiver(id: string): Promise<Path | undefined> {
         const rivers = await this.getRivers();
         return rivers.find(river => river.id === id);
     }
 
-    async getRivers(): Promise<PathData[]> {
+    async getRivers(): Promise<Path[]> {
         return this.getPaths();
     }
 
-    private async getPaths(): Promise<PathData[]> {
+    private async getPaths(): Promise<Path[]> {
         // A path's nodes are a plain keyed object, so they cross the Obsidian
         // bridge as-is; normalise the optional fields to their defaults.
         const paths = await browser.executeObsidian(({ app }, key) => {

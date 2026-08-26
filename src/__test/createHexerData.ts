@@ -1,4 +1,4 @@
-import { PathData } from "../logic/path";
+import { Path } from "../logic/path";
 import { CURRENT_VERSION, HexerData } from "../logic/HexerData";
 import { Faction } from "../logic/faction";
 import { Hexagon } from "../logic/hexagon";
@@ -7,8 +7,8 @@ import { Camera, defaultCamera } from "../logic/camera";
 
 interface HexerDataOverrides {
     hexes?: Record<string, Hexagon>;
-    rivers?: PathData[];
-    roads?: PathData[];
+    rivers?: Path[];
+    roads?: Path[];
     factions?: Faction[];
     mapSettings?: MapSettings;
     camera?: Camera;

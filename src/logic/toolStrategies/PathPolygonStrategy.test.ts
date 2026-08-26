@@ -1,13 +1,13 @@
 import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { HexerData, hexKey } from "../HexerData";
-import { PathData, addEdge, addNode, createPath, hasEdge } from "../path";
+import { Path, addEdge, addNode, createPath, hasEdge } from "../path";
 import PathPolygonStrategy from "./PathPolygonStrategy";
 
 describe('onLeftClick', () => {
 
     let defaultHexerData: HexerData;
-    let targetPath: PathData;
+    let targetPath: Path;
     let strategyToTest: PathPolygonStrategy;
 
     beforeEach(() => {

@@ -1,11 +1,11 @@
 import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
-import { PathData, createPath } from "../../../../logic/path";
+import { Path, createPath } from "../../../../logic/path";
 
 interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
     /** Selects the paths array (rivers or roads) this section manages. */
-    getPaths: (data: HexerData) => PathData[];
+    getPaths: (data: HexerData) => Path[];
 }
 
 /**
@@ -14,7 +14,7 @@ interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
  * but the collection accessor and the active-path binding lives in
  * {@link EditorListSidebarSection}.
  */
-export default class PathSidebarSection extends EditorListSidebarSection<PathData> {
+export default class PathSidebarSection extends EditorListSidebarSection<Path> {
     constructor(
         parentEl: HTMLElement,
         componentOptions: ComponentOptions,

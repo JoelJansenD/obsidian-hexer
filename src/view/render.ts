@@ -4,7 +4,7 @@ import { Hexagon, Point, RadialCoordinates } from "../logic/hexagon";
 import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
-import { getFullEdgePath, PathData, PathEdge, PathNode, PathType } from "../logic/path";
+import { getFullEdgePath, Path, PathEdge, PathNode, PathType } from "../logic/path";
 
 // Neighbour of a hex across each of its six edges, indexed by edge: edge `i`
 // runs from corner `i` to corner `i + 1`. Used to decide which edges of a
@@ -252,7 +252,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerDa
     context.restore();
 }
 
-function drawPath(context: CanvasRenderingContext2D, path: PathData, data: HexerData, activePath: EditorPathState | null, type: PathType) {
+function drawPath(context: CanvasRenderingContext2D, path: Path, data: HexerData, activePath: EditorPathState | null, type: PathType) {
     context.save();
 
     const size = data.size;
@@ -298,7 +298,7 @@ function drawPath(context: CanvasRenderingContext2D, path: PathData, data: Hexer
 // Traces a path's edge graph into connected chains of hex points. Degree-2
 // nodes are followed through so a run of edges becomes one continuous polyline;
 // each junction (degree != 2) and each loop starts a fresh chain.
-function buildPathPolylines(path: PathData): PathNode[][] {
+function buildPathPolylines(path: Path): PathNode[][] {
     const edges = path.edges;
     if(edges.length === 0) {
         return [];

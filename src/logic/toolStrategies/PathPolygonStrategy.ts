@@ -2,7 +2,7 @@ import { EditorPathState, EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import {
-    PathData,
+    Path,
     PathEdge,
     PathNode,
     addEdge,
@@ -106,7 +106,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         removeNode(activePath, node);
     }
 
-    private getActivePath(editorState: EditorState, data: HexerData): PathData {
+    private getActivePath(editorState: EditorState, data: HexerData): Path {
         if(!editorState.activePath) {
             throw new Error('No active path in editor state.');
         }
@@ -120,11 +120,11 @@ export default class PathPolygonStrategy implements ToolStrategy {
         return targetPath;
     }
 
-    private getPath(id: string, paths: PathData[]): PathData | null {
+    private getPath(id: string, paths: Path[]): Path | null {
         return paths.find(path => path.id === id) || null;
     }
 
-    private handleCrossingPaths(crossingPaths: { edge: PathEdge; nodes: PathNode[]; }[], targetPath: PathData, radialCoordinates: RadialCoordinates) {
+    private handleCrossingPaths(crossingPaths: { edge: PathEdge; nodes: PathNode[]; }[], targetPath: Path, radialCoordinates: RadialCoordinates) {
         crossingPaths.forEach(crossing => {
             const fromNode = getNode(targetPath, crossing.edge.from);
             const toNode = getNode(targetPath, crossing.edge.to);
@@ -138,7 +138,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         });
     }
 
-    private handleNewNode(targetPath: PathData, radialCoordinates: RadialCoordinates, activePath: EditorPathState) {
+    private handleNewNode(targetPath: Path, radialCoordinates: RadialCoordinates, activePath: EditorPathState) {
         addNode(targetPath, radialCoordinates);
         if (activePath.activeNode) {
             addEdge(targetPath, activePath.activeNode, radialCoordinates);
