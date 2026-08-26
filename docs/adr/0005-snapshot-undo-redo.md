@@ -5,7 +5,7 @@
 History is intentionally **uncapped** for now. If memory ever becomes a problem, the escape hatch is a command/event ("saga") log, not a cap on snapshots.
 
 ```mermaid
-flowchart LR
+flowchart TD
     past["past[]<br/>older snapshots"]
     present(("present"))
     future["future[]<br/>undone snapshots"]

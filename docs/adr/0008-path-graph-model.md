@@ -5,7 +5,7 @@ A path (river or road) is a graph: `nodes` keyed by hex coordinate, joined by **
 Rivers and roads share the identical `Path` structure and are stored in two parallel arrays (`rivers`, `roads`). They have no functional difference in the current model — only their rendering differs — so they are kept separate rather than unified under a `type` field, pending any future divergence.
 
 ```mermaid
-flowchart LR
+flowchart TD
     n1(("0,0")) --- n2(("2,-1"))
     n2 --- n3(("3,-1"))
     n2 --- n4(("2,1"))

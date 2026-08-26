@@ -8,7 +8,7 @@ The polygon tool that edits paths is a bespoke strategy, because paths are a nod
 flowchart TD
     R(["resolveToolStrategy(layer, tool)"])
     subgraph celltools["Cell tools — accessor × tool"]
-      direction LR
+      direction TD
       ACC["HexLayerAccessor<br/>terrain · icon · faction"]
       ACC --> BR[Brush]
       ACC --> BU[Bucket]

@@ -9,7 +9,7 @@ The code is split into three layers with a strict one-directional dependency rul
 `logic` and `view` never import the `obsidian` npm package or the `obsidian` layer. When the view needs the host — open a modal, preview a note, navigate a link — it calls back through the injected **`ObsidianInterop`** port, an interface of plain function types the `obsidian` layer supplies. This keeps `logic` and `view` unit-testable without an Obsidian runtime.
 
 ```mermaid
-flowchart LR
+flowchart TD
     obsidian["obsidian<br/>plugin · view host · modals"]
     view["view<br/>canvas · editor · DOM"]
     logic["logic<br/>coords · map · tools · history"]
