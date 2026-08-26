@@ -2,13 +2,13 @@
 import { Droplets } from "lucide";
 import createHexerData from "../../../../__test/createHexerData";
 import { createComponentOptions } from "../../../../__test/defaultEditorState";
-import { Path } from "../../../../logic/path";
+import { Path, createPath } from "../../../../logic/path";
 import { ItemSettingsOptions, ObsidianInterop } from "../../../ObsidianInterop";
 import { ComponentOptions } from "../../Editor";
 import PathSidebarSection from "./PathSidebarSection";
 
-const createPath = (name: string, color: string) => {
-    const path = new Path(name);
+const makePath = (name: string, color: string) => {
+    const path = createPath(name);
     path.color = color;
     return path;
 };
@@ -67,9 +67,9 @@ describe('Rows', () => {
     it('displays every row with its name and colour', () => {
         // Arrange
         const paths = [
-            createPath('Silverflow', '#1122ff'),
-            createPath('Mudbrook', '#8b4513'),
-            createPath('Frostrun', '#00ffee'),
+            makePath('Silverflow', '#1122ff'),
+            makePath('Mudbrook', '#8b4513'),
+            makePath('Frostrun', '#00ffee'),
         ];
 
         // Act
@@ -103,7 +103,7 @@ describe('Adding a path', () => {
 
     it('opens the new path in edit mode', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff')];
+        const paths = [makePath('Silverflow', '#1122ff')];
         const { parent, componentOptions } = createPathSection(paths);
 
         // Act
@@ -122,7 +122,7 @@ describe('Adding a path', () => {
 describe('Edit mode', () => {
     it('opens edit mode for the path that is clicked', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff'), createPath('Mudbrook', '#8b4513')];
+        const paths = [makePath('Silverflow', '#1122ff'), makePath('Mudbrook', '#8b4513')];
         const { parent, componentOptions } = createPathSection(paths);
 
         // Act
@@ -136,7 +136,7 @@ describe('Edit mode', () => {
 
     it('leaves the other paths untouched while one is edited', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff'), createPath('Mudbrook', '#8b4513')];
+        const paths = [makePath('Silverflow', '#1122ff'), makePath('Mudbrook', '#8b4513')];
         const { parent } = createPathSection(paths);
 
         // Act
@@ -151,7 +151,7 @@ describe('Edit mode', () => {
 
     it('closes edit mode when the edit is finished', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff')];
+        const paths = [makePath('Silverflow', '#1122ff')];
         const { parent, componentOptions } = createPathSection(paths);
         clickButton(parent, paths[0], 'edit-item');
 
@@ -166,7 +166,7 @@ describe('Edit mode', () => {
 
     it('stores the colour picked while editing', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff')];
+        const paths = [makePath('Silverflow', '#1122ff')];
         const { parent, componentOptions } = createPathSection(paths);
         clickButton(parent, paths[0], 'edit-item');
 
@@ -180,7 +180,7 @@ describe('Edit mode', () => {
 
     it('keeps the stored colour after edit mode is closed', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff')];
+        const paths = [makePath('Silverflow', '#1122ff')];
         const { parent } = createPathSection(paths);
         clickButton(parent, paths[0], 'edit-item');
         pickColour(parent, paths[0], '#00ff00');
@@ -203,7 +203,7 @@ describe('Configuration modal', () => {
 
     it('opens the modal for the path being edited', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff'), createPath('Mudbrook', '#8b4513')];
+        const paths = [makePath('Silverflow', '#1122ff'), makePath('Mudbrook', '#8b4513')];
 
         // Act
         const { openItemSettings } = openModal(paths);
@@ -215,7 +215,7 @@ describe('Configuration modal', () => {
 
     it('applies the name and note chosen in the modal', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff')];
+        const paths = [makePath('Silverflow', '#1122ff')];
         const { parent, componentOptions, openItemSettings } = openModal(paths);
         const edited = { ...openItemSettings.mock.calls[0][0].settings };
         edited.name = 'Quicksilver';
@@ -232,7 +232,7 @@ describe('Configuration modal', () => {
 
     it('links the note on the row once the edit is finished', () => {
         // Arrange
-        const paths = [createPath('Silverflow', '#1122ff')];
+        const paths = [makePath('Silverflow', '#1122ff')];
         const { parent, openItemSettings } = openModal(paths);
         const edited = { ...openItemSettings.mock.calls[0][0].settings };
         edited.filePath = 'Rivers/Quicksilver.md';

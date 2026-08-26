@@ -1,23 +1,25 @@
 import { parseYaml, stringifyYaml } from "obsidian";
-import { HexerData, SerializedHexerData } from "../logic/HexerData";
+import { HexerData } from "../logic/HexerData";
 
 /** Matches the leading `---\n...\n---` YAML frontmatter block of a Hexer file. */
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 
 /**
- * A Hexer file's frontmatter: the serialized map nested under a `hexer` key, so
- * it coexists with any other frontmatter Obsidian may write.
+ * A Hexer file's frontmatter: the map nested under a `hexer` key, so it coexists
+ * with any other frontmatter Obsidian may write. The in-memory and on-disk
+ * shapes are identical (no Maps, no class instances), so the conversion in each
+ * direction is the identity over that key.
  */
 export interface HexerFrontmatter {
-    hexer: SerializedHexerData;
+    hexer: HexerData;
 }
 
 export function toFrontmatter(data: HexerData): HexerFrontmatter {
-    return { hexer: data.toJSON() };
+    return { hexer: data };
 }
 
 export function fromFrontmatter(frontmatter: HexerFrontmatter): HexerData {
-    return HexerData.fromJSON(frontmatter.hexer);
+    return frontmatter.hexer;
 }
 
 /**

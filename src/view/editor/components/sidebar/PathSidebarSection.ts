@@ -1,7 +1,7 @@
 import EditorListSidebarSection, { EditorListSidebarSectionOptions } from "./EditorListSidebarSection";
 import { HexerData } from "../../../../logic/HexerData";
 import { ComponentOptions } from "../../Editor";
-import { Path } from "../../../../logic/path";
+import { Path, createPath } from "../../../../logic/path";
 
 interface PathSidebarSectionOptions extends EditorListSidebarSectionOptions {
     /** Selects the paths array (rivers or roads) this section manages. */
@@ -25,7 +25,7 @@ export default class PathSidebarSection extends EditorListSidebarSection<Path> {
             componentOptions,
             options,
             options.getPaths,
-            name => new Path(name),
+            name => createPath(name),
         );
     }
 

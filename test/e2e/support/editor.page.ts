@@ -80,9 +80,9 @@ class EditorPage {
         const hex = await browser.executeObsidian(({ app }, coords) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
-                hexerData?: { getHex?: (q: number, r: number) => Hexagon | undefined };
+                hexerData?: { hexes?: Record<string, Hexagon> };
             } | undefined;
-            return view?.hexerData?.getHex?.(coords.q, coords.r) ?? null;
+            return view?.hexerData?.hexes?.[`${coords.q},${coords.r}`] ?? null;
         }, coordinates);
         console.debug('[hexer-e2e] getHex', JSON.stringify({ coordinates, hex }));
         return hex;
@@ -93,13 +93,13 @@ class EditorPage {
         const state = await browser.executeObsidian(({ app }) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
-                hexerData?: { size?: number; hexes?: Map<string, unknown> };
+                hexerData?: { size?: number; hexes?: Record<string, unknown> };
             } | undefined;
             const data = view?.hexerData;
             return {
                 hasView: !!leaf,
                 size: data?.size ?? null,
-                hexes: data?.hexes ? Array.from(data.hexes.entries()) : null,
+                hexes: data?.hexes ? Object.entries(data.hexes) : null,
             };
         });
         console.debug(`[hexer-e2e] state (${label})`, JSON.stringify(state));

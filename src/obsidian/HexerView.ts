@@ -75,7 +75,7 @@ export class HexerView extends TextFileView {
             this.editor = new Editor(
                 this.contentEl,
                 {
-                    getDataClone: () => this.hexerData.clone(),
+                    getDataClone: () => structuredClone(this.hexerData),
                     setData: (data: HexerData, commit?: CommitOptions) => this.setHexerData(data, commit)
                 },
                 {

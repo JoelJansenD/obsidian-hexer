@@ -2,7 +2,7 @@ import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { EditorState } from "../EditorState";
 import { Hexagon } from "../hexagon";
-import { HexerData, HexMap } from "../HexerData";
+import { HexerData } from "../HexerData";
 import BucketStrategy from "./BucketStrategy";
 import { factionLayerAccessor, HexLayerAccessor, iconLayerAccessor, terrainLayerAccessor } from "./HexLayerAccessor";
 
@@ -15,7 +15,7 @@ describe('BucketStrategy flood fill (terrain)', () => {
     const activeColour = '#cccccc';
 
     let strategyToTest: BucketStrategy;
-    let hexMap: HexMap;
+    let hexMap: Record<string, Hexagon>;
     let data: HexerData;
 
     const editorState: EditorState = { ...defaultEditorState, activeColour };
@@ -25,18 +25,18 @@ describe('BucketStrategy flood fill (terrain)', () => {
 
         // A connected chain and branch sharing the claimed colour, requiring the
         // fill to recurse across several hops from the clicked hex.
-        hexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', { q: 0, r: 0, terrainColor: claimedColour, icon: null, factionId: null });
-        hexMap.set('1,0', { q: 1, r: 0, terrainColor: claimedColour, icon: null, factionId: null });
-        hexMap.set('2,0', { q: 2, r: 0, terrainColor: claimedColour, icon: null, factionId: null });
-        hexMap.set('3,0', { q: 3, r: 0, terrainColor: claimedColour, icon: null, factionId: null });
-        hexMap.set('1,-1', { q: 1, r: -1, terrainColor: claimedColour, icon: null, factionId: null });
+        hexMap = {};
+        hexMap['0,0'] = { q: 0, r: 0, terrainColor: claimedColour, icon: null, factionId: null };
+        hexMap['1,0'] = { q: 1, r: 0, terrainColor: claimedColour, icon: null, factionId: null };
+        hexMap['2,0'] = { q: 2, r: 0, terrainColor: claimedColour, icon: null, factionId: null };
+        hexMap['3,0'] = { q: 3, r: 0, terrainColor: claimedColour, icon: null, factionId: null };
+        hexMap['1,-1'] = { q: 1, r: -1, terrainColor: claimedColour, icon: null, factionId: null };
 
         // A connected hex of a different colour that must not be filled.
-        hexMap.set('2,-1', { q: 2, r: -1, terrainColor: otherColour, icon: null, factionId: null });
+        hexMap['2,-1'] = { q: 2, r: -1, terrainColor: otherColour, icon: null, factionId: null };
 
         // A same-colour hex that is disconnected and must not be filled.
-        hexMap.set('10,10', { q: 10, r: 10, terrainColor: claimedColour, icon: null, factionId: null });
+        hexMap['10,10'] = { q: 10, r: 10, terrainColor: claimedColour, icon: null, factionId: null };
 
         data = createHexerData({ hexes: hexMap });
     });
@@ -46,28 +46,28 @@ describe('BucketStrategy flood fill (terrain)', () => {
         strategyToTest.getEvents().onLeftClick!(data, editorState, { q: 0, r: 0 });
 
         // Assert
-        expect(hexMap.get('0,0')!.terrainColor).toBe(activeColour);
-        expect(hexMap.get('1,0')!.terrainColor).toBe(activeColour);
-        expect(hexMap.get('2,0')!.terrainColor).toBe(activeColour);
-        expect(hexMap.get('3,0')!.terrainColor).toBe(activeColour);
-        expect(hexMap.get('1,-1')!.terrainColor).toBe(activeColour);
-        expect(hexMap.get('2,-1')!.terrainColor).toBe(otherColour);
-        expect(hexMap.get('10,10')!.terrainColor).toBe(claimedColour);
+        expect(hexMap['0,0'].terrainColor).toBe(activeColour);
+        expect(hexMap['1,0'].terrainColor).toBe(activeColour);
+        expect(hexMap['2,0'].terrainColor).toBe(activeColour);
+        expect(hexMap['3,0'].terrainColor).toBe(activeColour);
+        expect(hexMap['1,-1'].terrainColor).toBe(activeColour);
+        expect(hexMap['2,-1'].terrainColor).toBe(otherColour);
+        expect(hexMap['10,10'].terrainColor).toBe(claimedColour);
     });
 
     it('fills connected hexes sharing an empty value', () => {
         // Arrange
-        const emptyHexMap = new Map<string, Hexagon>();
-        emptyHexMap.set('0,0', { q: 0, r: 0, terrainColor: null, icon: null, factionId: null });
-        emptyHexMap.set('1,0', { q: 1, r: 0, terrainColor: null, icon: null, factionId: null });
+        const emptyHexMap: Record<string, Hexagon> = {};
+        emptyHexMap['0,0'] = { q: 0, r: 0, terrainColor: null, icon: null, factionId: null };
+        emptyHexMap['1,0'] = { q: 1, r: 0, terrainColor: null, icon: null, factionId: null };
         const emptyData = createHexerData({ hexes: emptyHexMap });
 
         // Act
         strategyToTest.getEvents().onLeftClick!(emptyData, editorState, { q: 0, r: 0 });
 
         // Assert
-        expect(emptyHexMap.get('0,0')!.terrainColor).toBe(activeColour);
-        expect(emptyHexMap.get('1,0')!.terrainColor).toBe(activeColour);
+        expect(emptyHexMap['0,0'].terrainColor).toBe(activeColour);
+        expect(emptyHexMap['1,0'].terrainColor).toBe(activeColour);
     });
 
     it('does nothing when the clicked hex does not exist', () => {
@@ -75,8 +75,8 @@ describe('BucketStrategy flood fill (terrain)', () => {
         strategyToTest.getEvents().onLeftClick!(data, editorState, { q: 99, r: 99 });
 
         // Assert
-        expect(hexMap.has('99,99')).toBe(false);
-        expect(hexMap.get('0,0')!.terrainColor).toBe(claimedColour);
+        expect('99,99' in hexMap).toBe(false);
+        expect(hexMap['0,0'].terrainColor).toBe(claimedColour);
     });
 });
 
@@ -132,10 +132,10 @@ const boundaryCases: BoundaryCase[] = [
 describe.each(boundaryCases)('BucketStrategy respects the $name boundary', ({ accessor, claimed, other, editorState, read, filled, otherValue }) => {
     it('fills connected same-value hexes but stops at a differing neighbour', () => {
         // Arrange
-        const hexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', claimed(0, 0));
-        hexMap.set('1,0', claimed(1, 0));
-        hexMap.set('2,0', other(2, 0));
+        const hexMap: Record<string, Hexagon> = {};
+        hexMap['0,0'] = claimed(0, 0);
+        hexMap['1,0'] = claimed(1, 0);
+        hexMap['2,0'] = other(2, 0);
         const data = createHexerData({ hexes: hexMap });
         const strategyToTest = new BucketStrategy(accessor);
 
@@ -143,8 +143,8 @@ describe.each(boundaryCases)('BucketStrategy respects the $name boundary', ({ ac
         strategyToTest.getEvents().onLeftClick!(data, editorState, { q: 0, r: 0 });
 
         // Assert
-        expect(read(hexMap.get('0,0')!)).toEqual(filled);
-        expect(read(hexMap.get('1,0')!)).toEqual(filled);
-        expect(read(hexMap.get('2,0')!)).toEqual(otherValue);
+        expect(read(hexMap['0,0'])).toEqual(filled);
+        expect(read(hexMap['1,0'])).toEqual(filled);
+        expect(read(hexMap['2,0'])).toEqual(otherValue);
     });
 });
