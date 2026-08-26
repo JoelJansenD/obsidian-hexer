@@ -1,9 +1,9 @@
 import { hexKey } from "./HexerData";
-import { RadialCoordinates, roundRadialCoordinates } from "./hexagon";
+import { AxialCoordinates, roundAxialCoordinates } from "./hexagon";
 
 export type PathType = 'river' | 'road';
 
-export interface PathNode extends RadialCoordinates { }
+export interface PathNode extends AxialCoordinates { }
 export function pathNodeEquals(a: PathNode | undefined | null, b: PathNode | undefined | null): boolean {
     return a?.q === b?.q && a?.r === b?.r;
 }
@@ -41,7 +41,7 @@ export function createPath(name: string): Path {
 
 // Undirected: an edge between a and b is added once, and the endpoints are
 // created as nodes if they do not exist yet.
-export function addEdge(path: Path, a: RadialCoordinates, b: RadialCoordinates): void {
+export function addEdge(path: Path, a: AxialCoordinates, b: AxialCoordinates): void {
     const from = addNode(path, a);
     const to = addNode(path, b);
     if (from === to || hasEdge(path, a, b)) {
@@ -50,7 +50,7 @@ export function addEdge(path: Path, a: RadialCoordinates, b: RadialCoordinates):
     path.edges.push({ from, to });
 }
 
-export function addNode(path: Path, coordinates: RadialCoordinates): string {
+export function addNode(path: Path, coordinates: AxialCoordinates): string {
     const key = hexKey(coordinates.q, coordinates.r);
     if (!(key in path.nodes)) {
         path.nodes[key] = { q: coordinates.q, r: coordinates.r };
@@ -59,7 +59,7 @@ export function addNode(path: Path, coordinates: RadialCoordinates): string {
 }
 
 // Returns the coordinates of every node directly connected to the given node.
-export function getConnectedNodes(path: Path, coordinates: RadialCoordinates): PathNode[] {
+export function getConnectedNodes(path: Path, coordinates: AxialCoordinates): PathNode[] {
     const key = hexKey(coordinates.q, coordinates.r);
     const neighbourKeys = path.edges
         .filter(edge => edge.from === key || edge.to === key)
@@ -70,7 +70,7 @@ export function getConnectedNodes(path: Path, coordinates: RadialCoordinates): P
         .map(neighbourKey => ({ ...path.nodes[neighbourKey] }));
 }
 
-export function getCrossingEdgesAtCoordinates(path: Path, coordinates: RadialCoordinates): { edge: PathEdge, nodes: PathNode[] }[] {
+export function getCrossingEdgesAtCoordinates(path: Path, coordinates: AxialCoordinates): { edge: PathEdge, nodes: PathNode[] }[] {
     const key = hexKey(coordinates.q, coordinates.r);
     const result: { edge: PathEdge, nodes: PathNode[] }[] = [];
     path.edges.forEach(edge => {
@@ -98,23 +98,23 @@ export function getFullEdgePath(path: Path, edge: PathEdge): PathNode[] {
         const t = steps === 0 ? 0 : i / steps;
         const q = fromNode.q + (toNode.q - fromNode.q) * t;
         const r = fromNode.r + (toNode.r - fromNode.r) * t;
-        fullPath.push(roundRadialCoordinates(q, r));
+        fullPath.push(roundAxialCoordinates(q, r));
     }
     return fullPath;
 }
 
 export function getNode(path: Path, key: string): PathNode | undefined;
-export function getNode(path: Path, coordinates: RadialCoordinates): PathNode | undefined;
-export function getNode(path: Path, arg: string | RadialCoordinates): PathNode | undefined {
+export function getNode(path: Path, coordinates: AxialCoordinates): PathNode | undefined;
+export function getNode(path: Path, arg: string | AxialCoordinates): PathNode | undefined {
     const key = typeof (arg) === 'string' ? arg : hexKey(arg.q, arg.r);
     return path.nodes[key];
 }
 
-function getDistance(a: RadialCoordinates, b: RadialCoordinates): number {
+function getDistance(a: AxialCoordinates, b: AxialCoordinates): number {
     return (Math.abs(a.q - b.q) + Math.abs(a.q + a.r - b.q - b.r) + Math.abs(a.r - b.r)) / 2;
 }
 
-export function hasEdge(path: Path, a: RadialCoordinates, b: RadialCoordinates): boolean {
+export function hasEdge(path: Path, a: AxialCoordinates, b: AxialCoordinates): boolean {
     const from = hexKey(a.q, a.r);
     const to = hexKey(b.q, b.r);
     return path.edges.some(edge => sameEdge(edge, from, to));
@@ -128,7 +128,7 @@ export function isEmpty(path: Path): boolean {
  * Moves a present node at oldCoordinates to newCoordinates.
  * @returns true if the move was successful, false if the node at oldCoordinates does not exist or if a node already exists at newCoordinates.
  */
-export function moveNode(path: Path, oldCoordinates: RadialCoordinates, newCoordinates: RadialCoordinates): boolean {
+export function moveNode(path: Path, oldCoordinates: AxialCoordinates, newCoordinates: AxialCoordinates): boolean {
     const oldKey = hexKey(oldCoordinates.q, oldCoordinates.r);
     const newKey = hexKey(newCoordinates.q, newCoordinates.r);
 
@@ -159,14 +159,14 @@ export function moveNode(path: Path, oldCoordinates: RadialCoordinates, newCoord
     return true;
 }
 
-export function removeEdge(path: Path, a: RadialCoordinates, b: RadialCoordinates): void {
+export function removeEdge(path: Path, a: AxialCoordinates, b: AxialCoordinates): void {
     const from = hexKey(a.q, a.r);
     const to = hexKey(b.q, b.r);
     path.edges = path.edges.filter(edge => !sameEdge(edge, from, to));
 }
 
 // Removes the node and any edges that touch it.
-export function removeNode(path: Path, coordinates: RadialCoordinates): void {
+export function removeNode(path: Path, coordinates: AxialCoordinates): void {
     const key = hexKey(coordinates.q, coordinates.r);
     delete path.nodes[key];
     path.edges = path.edges.filter(edge => edge.from !== key && edge.to !== key);

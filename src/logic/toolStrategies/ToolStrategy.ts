@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { AxialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import BrushStrategy from "./BrushStrategy";
 import BucketStrategy from "./BucketStrategy";
@@ -7,7 +7,7 @@ import EraserStrategy from "./EraserStrategy";
 import { paintableLayerAccessors } from "./HexLayerAccessor";
 import PathPolygonStrategy from "./PathPolygonStrategy";
 
-export type ToolEventHandler = (data: HexerData, editorState: EditorState, coordinates: RadialCoordinates) => void;
+export type ToolEventHandler = (data: HexerData, editorState: EditorState, coordinates: AxialCoordinates) => void;
 
 export type RegisteredEvents = {
     onLeftClick?: ToolEventHandler;

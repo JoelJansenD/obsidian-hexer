@@ -1,6 +1,6 @@
 import { cameraViewOffset } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
-import { Hexagon, Point, RadialCoordinates } from "../logic/hexagon";
+import { Hexagon, Point, AxialCoordinates } from "../logic/hexagon";
 import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
@@ -9,7 +9,7 @@ import { getFullEdgePath, Path, PathEdge, PathNode, PathType } from "../logic/pa
 // Neighbour of a hex across each of its six edges, indexed by edge: edge `i`
 // runs from corner `i` to corner `i + 1`. Used to decide which edges of a
 // faction hex sit on the region's outer boundary.
-const EDGE_NEIGHBOURS: RadialCoordinates[] = [
+const EDGE_NEIGHBOURS: AxialCoordinates[] = [
     { q: 1, r: 0 },   // corner 0 -> 1
     { q: 0, r: 1 },   // corner 1 -> 2
     { q: -1, r: 1 },  // corner 2 -> 3

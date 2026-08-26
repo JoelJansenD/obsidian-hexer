@@ -1,6 +1,6 @@
 import { Camera } from "./camera";
 import { Faction } from "./faction";
-import { Hexagon, hexagonIsEmpty, Point, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint } from "./hexagon";
+import { Hexagon, hexagonIsEmpty, Point, pointToAxialCoordinates, AxialCoordinates, axialCoordinatesToPoint } from "./hexagon";
 import { MapSettings } from "./mapSettings";
 import { Path } from "./path";
 
@@ -24,17 +24,17 @@ export function hexKey(q: number, r: number): string {
     return `${q},${r}`;
 }
 
-export function getHex(data: HexerData, coordinates: RadialCoordinates): Hexagon | undefined;
+export function getHex(data: HexerData, coordinates: AxialCoordinates): Hexagon | undefined;
 export function getHex(data: HexerData, q: number, r: number): Hexagon | undefined;
-export function getHex(data: HexerData, arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
+export function getHex(data: HexerData, arg1: AxialCoordinates | number, arg2?: number): Hexagon | undefined {
     const q = typeof arg1 === 'object' ? arg1.q : arg1;
     const r = typeof arg1 === 'object' ? arg1.r : arg2!;
     return data.hexes[hexKey(q, r)];
 }
 
-export function getOrCreateHex(data: HexerData, coordinates: RadialCoordinates): Hexagon;
+export function getOrCreateHex(data: HexerData, coordinates: AxialCoordinates): Hexagon;
 export function getOrCreateHex(data: HexerData, q: number, r: number): Hexagon;
-export function getOrCreateHex(data: HexerData, arg1: RadialCoordinates | number, arg2?: number): Hexagon {
+export function getOrCreateHex(data: HexerData, arg1: AxialCoordinates | number, arg2?: number): Hexagon {
     const q = typeof arg1 === 'object' ? arg1.q : arg1;
     const r = typeof arg1 === 'object' ? arg1.r : arg2!;
     const key = hexKey(q, r);
@@ -58,9 +58,9 @@ export function setHex(data: HexerData, hex: Hexagon): void {
     data.hexes[hexKey(hex.q, hex.r)] = hex;
 }
 
-export function deleteHex(data: HexerData, coordinates: RadialCoordinates): void;
+export function deleteHex(data: HexerData, coordinates: AxialCoordinates): void;
 export function deleteHex(data: HexerData, q: number, r: number): void;
-export function deleteHex(data: HexerData, arg1: RadialCoordinates | number, arg2?: number): void {
+export function deleteHex(data: HexerData, arg1: AxialCoordinates | number, arg2?: number): void {
     const q = typeof arg1 === 'object' ? arg1.q : arg1;
     const r = typeof arg1 === 'object' ? arg1.r : arg2!;
     delete data.hexes[hexKey(q, r)];
@@ -84,16 +84,16 @@ export function eraseIfEmpty(data: HexerData, hex: Hexagon): void {
  * orientation. Callers never restate the orientation, so a pointy-top map
  * can't silently be laid out as flat-top.
  */
-export function hexToPoint(data: HexerData, coordinate: RadialCoordinates): Point {
-    return radialCoordinatesToPoint(coordinate, data.size, data.mapSettings.hexOrientation);
+export function hexToPoint(data: HexerData, coordinate: AxialCoordinates): Point {
+    return axialCoordinatesToPoint(coordinate, data.size, data.mapSettings.hexOrientation);
 }
 
 /**
  * Converts a layout point back to the hex coordinate under it, using the map's
  * size and orientation. The inverse of {@link hexToPoint}.
  */
-export function pointToHex(data: HexerData, x: number, y: number): RadialCoordinates {
-    return pointToRadialCoordinates(x, y, data.size, data.mapSettings.hexOrientation);
+export function pointToHex(data: HexerData, x: number, y: number): AxialCoordinates {
+    return pointToAxialCoordinates(x, y, data.size, data.mapSettings.hexOrientation);
 }
 
 export const CURRENT_VERSION = '1.0';

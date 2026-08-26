@@ -1,5 +1,5 @@
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
-import { Hexagon, Point, RadialCoordinates, pointToRadialCoordinates, radialCoordinatesToPoint } from "../../../src/logic/hexagon";
+import { Hexagon, Point, AxialCoordinates, pointToAxialCoordinates, axialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
 class EditorPage {
     get canvas() {
@@ -14,7 +14,7 @@ class EditorPage {
         await this.selectAndClick(`[data-hexer-paint-tool="${paintTool}"]`);
     }
 
-    async clickHex(coordinates: RadialCoordinates) {
+    async clickHex(coordinates: AxialCoordinates) {
         const offset = await this.hexPointerOffset(coordinates);
         console.debug('[hexer-e2e] clickHex', JSON.stringify({ coordinates, offsetFromCentre: offset }));
 
@@ -29,7 +29,7 @@ class EditorPage {
         await this.logHexerState('after clickHex');
     }
 
-    async doubleClickHex(coordinates: RadialCoordinates) {
+    async doubleClickHex(coordinates: AxialCoordinates) {
         const offset = await this.hexPointerOffset(coordinates);
         console.debug('[hexer-e2e] doubleClickHex', JSON.stringify({ coordinates, offsetFromCentre: offset }));
 
@@ -44,7 +44,7 @@ class EditorPage {
         await this.logHexerState('after doubleClickHex');
     }
 
-    async rightClickHex(coordinates: RadialCoordinates) {
+    async rightClickHex(coordinates: AxialCoordinates) {
         const offset = await this.hexPointerOffset(coordinates);
         console.debug('[hexer-e2e] rightClickHex', JSON.stringify({ coordinates, offsetFromCentre: offset }));
 
@@ -58,7 +58,7 @@ class EditorPage {
         await this.logHexerState('after rightClickHex');
     }
 
-    async dragAcrossHexes(hexes: RadialCoordinates[]) {
+    async dragAcrossHexes(hexes: AxialCoordinates[]) {
         const points = await Promise.all(hexes.map(hex => this.hexPointerOffset(hex)));
 
         console.debug('[hexer-e2e] dragAcrossHexes', JSON.stringify({ hexes, offsetsFromCentre: points }));
@@ -76,7 +76,7 @@ class EditorPage {
         await this.logHexerState('after dragAcrossHexes');
     }
 
-    async getHex(coordinates: RadialCoordinates): Promise<Hexagon | null> {
+    async getHex(coordinates: AxialCoordinates): Promise<Hexagon | null> {
         const hex = await browser.executeObsidian(({ app }, coords) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
@@ -109,24 +109,24 @@ class EditorPage {
     // renderer centres hex 0,0 and pans by the camera offset, the hex under the
     // canvas centre is the one whose layout point equals the negated pan, so it
     // stays clickable no matter how the camera has moved.
-    async hexInView(): Promise<RadialCoordinates> {
+    async hexInView(): Promise<AxialCoordinates> {
         const size = await this.getHexSize();
         const camera = await this.getCameraOffset();
         // The e2e fixtures use flat-top maps, so name that orientation explicitly
         // rather than leaning on any implicit default.
-        return pointToRadialCoordinates(-camera.x, -camera.y, size, 'flat-top');
+        return pointToAxialCoordinates(-camera.x, -camera.y, size, 'flat-top');
     }
 
     // Converts a hex coordinate to a pointer offset relative to the canvas
     // centre, the origin WebdriverIO pointer actions use. The renderer centres
     // hex 0,0 in the canvas and pans the whole scene by the camera offset, so a
     // hex sits at its layout point plus that pan, measured from the centre.
-    private async hexPointerOffset(coordinates: RadialCoordinates): Promise<Point> {
+    private async hexPointerOffset(coordinates: AxialCoordinates): Promise<Point> {
         const size = await this.getHexSize();
         const camera = await this.getCameraOffset();
         // The e2e fixtures use flat-top maps, so name that orientation explicitly
         // rather than leaning on any implicit default.
-        const { x, y } = radialCoordinatesToPoint(coordinates, size, 'flat-top');
+        const { x, y } = axialCoordinatesToPoint(coordinates, size, 'flat-top');
         return { x: Math.round(x + camera.x), y: Math.round(y + camera.y) };
     }
 

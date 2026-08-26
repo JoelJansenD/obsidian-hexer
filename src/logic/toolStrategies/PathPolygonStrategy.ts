@@ -1,5 +1,5 @@
 import { EditorPathState, EditorState, Layer, PaintTool } from "../EditorState";
-import { RadialCoordinates } from "../hexagon";
+import { AxialCoordinates } from "../hexagon";
 import { HexerData } from "../HexerData";
 import {
     Path,
@@ -23,35 +23,35 @@ export default class PathPolygonStrategy implements ToolStrategy {
     public readonly tool: PaintTool = 'polygon';
     public readonly layers: readonly Layer[] = ['river', 'road'];
 
-    public onLeftClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+    public onLeftClick(data: HexerData, editorState: EditorState, axialCoordinates: AxialCoordinates) {
         if(!editorState.activePath) {
             return;
         }
 
         // If the clicked hex is not the same as the active node, store the active node as the previous node.
-        if(editorState.activePath.activeNode?.q !== radialCoordinates.q || editorState.activePath.activeNode.r !== radialCoordinates.r) {
+        if(editorState.activePath.activeNode?.q !== axialCoordinates.q || editorState.activePath.activeNode.r !== axialCoordinates.r) {
             this.previousNode = editorState.activePath.activeNode;
         }
 
         const targetPath = this.getActivePath(editorState, data);
-        if(getNode(targetPath, radialCoordinates)) {
-            editorState.activePath.activeNode = radialCoordinates;
+        if(getNode(targetPath, axialCoordinates)) {
+            editorState.activePath.activeNode = axialCoordinates;
             return;
         }
 
         // Break up any crossing paths to connect to the new node
-        const crossingPaths = getCrossingEdgesAtCoordinates(targetPath, radialCoordinates);
+        const crossingPaths = getCrossingEdgesAtCoordinates(targetPath, axialCoordinates);
         if(crossingPaths.length > 0) {
-            this.handleCrossingPaths(crossingPaths, targetPath, radialCoordinates);
+            this.handleCrossingPaths(crossingPaths, targetPath, axialCoordinates);
         }
         else {
-            this.handleNewNode(targetPath, radialCoordinates, editorState.activePath);
+            this.handleNewNode(targetPath, axialCoordinates, editorState.activePath);
         }
 
-        editorState.activePath.activeNode = radialCoordinates;
+        editorState.activePath.activeNode = axialCoordinates;
     }
 
-    public onLeftDoubleClick(data: HexerData, editorState: EditorState, _: RadialCoordinates) {
+    public onLeftDoubleClick(data: HexerData, editorState: EditorState, _: AxialCoordinates) {
         if(!editorState.activePath || !editorState.activePath.activeNode) {
             return;
         }
@@ -64,7 +64,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         addEdge(targetPath, this.previousNode, editorState.activePath.activeNode);
     }
 
-    public onLeftDrag(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+    public onLeftDrag(data: HexerData, editorState: EditorState, axialCoordinates: AxialCoordinates) {
         if(!editorState.activePath || !editorState.activePath.activeNode) {
             return;
         }
@@ -72,24 +72,24 @@ export default class PathPolygonStrategy implements ToolStrategy {
         const activePath = this.getActivePath(editorState, data);
         const activeNode = editorState.activePath.activeNode;
 
-        if(pathNodeEquals(activeNode, radialCoordinates)) {
+        if(pathNodeEquals(activeNode, axialCoordinates)) {
             return;
         }
 
         // If moving is successful, update the active node to the new coordinates so
         // that the node can be moved again in the next drag event.
-        if(moveNode(activePath, activeNode, radialCoordinates)) {
-            editorState.activePath.activeNode = radialCoordinates;
+        if(moveNode(activePath, activeNode, axialCoordinates)) {
+            editorState.activePath.activeNode = axialCoordinates;
         }
     }
 
-    public onRightClick(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
+    public onRightClick(data: HexerData, editorState: EditorState, axialCoordinates: AxialCoordinates) {
         if(!editorState.activePath) {
             return;
         }
 
         const activePath = this.getActivePath(editorState, data);
-        const node = getNode(activePath, radialCoordinates);
+        const node = getNode(activePath, axialCoordinates);
         if (!node) {
             return;
         }
@@ -124,7 +124,7 @@ export default class PathPolygonStrategy implements ToolStrategy {
         return paths.find(path => path.id === id) || null;
     }
 
-    private handleCrossingPaths(crossingPaths: { edge: PathEdge; nodes: PathNode[]; }[], targetPath: Path, radialCoordinates: RadialCoordinates) {
+    private handleCrossingPaths(crossingPaths: { edge: PathEdge; nodes: PathNode[]; }[], targetPath: Path, axialCoordinates: AxialCoordinates) {
         crossingPaths.forEach(crossing => {
             const fromNode = getNode(targetPath, crossing.edge.from);
             const toNode = getNode(targetPath, crossing.edge.to);
@@ -133,15 +133,15 @@ export default class PathPolygonStrategy implements ToolStrategy {
             }
 
             removeEdge(targetPath, fromNode, toNode);
-            addEdge(targetPath, fromNode, radialCoordinates);
-            addEdge(targetPath, radialCoordinates, toNode);
+            addEdge(targetPath, fromNode, axialCoordinates);
+            addEdge(targetPath, axialCoordinates, toNode);
         });
     }
 
-    private handleNewNode(targetPath: Path, radialCoordinates: RadialCoordinates, activePath: EditorPathState) {
-        addNode(targetPath, radialCoordinates);
+    private handleNewNode(targetPath: Path, axialCoordinates: AxialCoordinates, activePath: EditorPathState) {
+        addNode(targetPath, axialCoordinates);
         if (activePath.activeNode) {
-            addEdge(targetPath, activePath.activeNode, radialCoordinates);
+            addEdge(targetPath, activePath.activeNode, axialCoordinates);
         }
     }
 

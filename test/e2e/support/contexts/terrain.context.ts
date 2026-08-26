@@ -1,6 +1,6 @@
-import { RadialCoordinates } from "../../../../src/logic/hexagon";
+import { AxialCoordinates } from "../../../../src/logic/hexagon";
 
 export interface TerrainContext {
-    lastClickedHex?: RadialCoordinates;
-    lastDraggedHexes?: RadialCoordinates[];
+    lastClickedHex?: AxialCoordinates;
+    lastDraggedHexes?: AxialCoordinates[];
 }
