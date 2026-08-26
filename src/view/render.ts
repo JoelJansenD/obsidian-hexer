@@ -1,10 +1,10 @@
 import { cameraViewOffset } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, Point, RadialCoordinates } from "../logic/hexagon";
-import { HexerData } from "../logic/HexerData";
+import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
-import { Path, PathEdge, PathNode, PathType } from "../logic/path";
+import { getFullEdgePath, PathData, PathEdge, PathNode, PathType } from "../logic/path";
 
 // Neighbour of a hex across each of its six edges, indexed by edge: edge `i`
 // runs from corner `i` to corner `i + 1`. Used to decide which edges of a
@@ -32,7 +32,7 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     context.save();
     context.translate(offset.x, offset.y);
 
-    for(const hex of data.hexes.values()) {
+    for(const hex of Object.values(data.hexes)) {
         drawHexTerrain(context, hex, data);
     }
 
@@ -40,7 +40,7 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     // never paints over an already-drawn border. The default grid border can be
     // toggled off in the map settings.
     if(data.mapSettings.displayHexBorders) {
-        for(const hex of data.hexes.values()) {
+        for(const hex of Object.values(data.hexes)) {
             drawHexBorder(context, hex, data);
         }
     }
@@ -49,7 +49,7 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     // pass of their own between the two per-hex passes.
     drawFactions(context, data);
 
-    for(const hex of data.hexes.values()) {
+    for(const hex of Object.values(data.hexes)) {
         drawIcon(context, hex, data);
     }
 
@@ -72,7 +72,7 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
 // half a hex of overshoot, so the marker reads clearly around the hex rather
 // than being buried inside it.
 function drawCrosshair(context: CanvasRenderingContext2D, data: HexerData) {
-    const center = data.hexToPoint({ q: 0, r: 0 });
+    const center = hexToPoint(data, { q: 0, r: 0 });
     const reach = data.size * 1.5;
 
     context.save();
@@ -121,7 +121,7 @@ function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, data: H
         return;
     }
 
-    traceHex(context, hexCorners(data.hexToPoint(hex), data.size, data.mapSettings.hexOrientation));
+    traceHex(context, hexCorners(hexToPoint(data, hex), data.size, data.mapSettings.hexOrientation));
     context.fillStyle = hex.terrainColor;
     context.fill();
 
@@ -136,7 +136,7 @@ function drawHexTerrain(context: CanvasRenderingContext2D, hex: Hexagon, data: H
 }
 
 function drawHexBorder(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerData) {
-    traceHex(context, hexCorners(data.hexToPoint(hex), data.size, data.mapSettings.hexOrientation));
+    traceHex(context, hexCorners(hexToPoint(data, hex), data.size, data.mapSettings.hexOrientation));
     context.stroke();
 }
 
@@ -154,13 +154,13 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData) {
     // Translucent fill so the terrain underneath stays visible. Fill every hex
     // in a region first, before any borders are drawn.
     context.globalAlpha = 0.2;
-    for(const hex of data.hexes.values()) {
+    for(const hex of Object.values(data.hexes)) {
         const faction = hex.factionId ? factionsById.get(hex.factionId) : undefined;
         if(!faction) {
             continue;
         }
 
-        traceHex(context, hexCorners(data.hexToPoint(hex), size, orientation));
+        traceHex(context, hexCorners(hexToPoint(data, hex), size, orientation));
         context.fillStyle = faction.color;
         context.fill();
     }
@@ -172,18 +172,18 @@ function drawFactions(context: CanvasRenderingContext2D, data: HexerData) {
     context.lineCap = 'round';
     context.lineJoin = 'round';
     const borderWidth = size * 0.08;
-    for(const hex of data.hexes.values()) {
+    for(const hex of Object.values(data.hexes)) {
         const faction = hex.factionId ? factionsById.get(hex.factionId) : undefined;
         if(!faction) {
             continue;
         }
 
-        const corners = hexCorners(data.hexToPoint(hex), size, orientation);
+        const corners = hexCorners(hexToPoint(data, hex), size, orientation);
 
         const borderEdges: [Point, Point][] = [];
         for(let edge = 0; edge < 6; edge++) {
             const modifier = EDGE_NEIGHBOURS[edge];
-            const neighbour = data.getHex(hex.q + modifier.q, hex.r + modifier.r);
+            const neighbour = getHex(data, hex.q + modifier.q, hex.r + modifier.r);
             if(neighbour?.factionId === hex.factionId) {
                 continue;
             }
@@ -233,7 +233,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerDa
     const [vbX, vbY, vbWidth, vbHeight] = (svgEl.getAttribute('viewBox') ?? '0 0 512 512')
         .split(/\s+/)
         .map(Number);
-    const hexCenter = data.hexToPoint(hex);
+    const hexCenter = hexToPoint(data, hex);
     const iconSize = size * 1.2;
     const scale = iconSize / Math.max(vbWidth, vbHeight);
 
@@ -252,7 +252,7 @@ function drawIcon(context: CanvasRenderingContext2D, hex: Hexagon, data: HexerDa
     context.restore();
 }
 
-function drawPath(context: CanvasRenderingContext2D, path: Path, data: HexerData, activePath: EditorPathState | null, type: PathType) {
+function drawPath(context: CanvasRenderingContext2D, path: PathData, data: HexerData, activePath: EditorPathState | null, type: PathType) {
     context.save();
 
     const size = data.size;
@@ -272,7 +272,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, data: HexerData
     const wavelength = type === 'river' ? size * 2.0 : size * 1.6;
 
     for(const polyline of buildPathPolylines(path)) {
-        const points = polyline.map(node => data.hexToPoint(node));
+        const points = polyline.map(node => hexToPoint(data, node));
         drawWavyLine(context, points, amplitude, wavelength);
     }
 
@@ -280,8 +280,8 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, data: HexerData
         const nodes = path.nodes;
         const nodeRadius = size * 0.15;
 
-        for(const node of nodes.values()) {
-            const center = data.hexToPoint(node);
+        for(const node of Object.values(nodes)) {
+            const center = hexToPoint(data, node);
             const isActiveNode = activePath.activeNode?.q === node.q && activePath.activeNode?.r === node.r;
 
             context.beginPath();
@@ -298,7 +298,7 @@ function drawPath(context: CanvasRenderingContext2D, path: Path, data: HexerData
 // Traces a path's edge graph into connected chains of hex points. Degree-2
 // nodes are followed through so a run of edges becomes one continuous polyline;
 // each junction (degree != 2) and each loop starts a fresh chain.
-function buildPathPolylines(path: Path): PathNode[][] {
+function buildPathPolylines(path: PathData): PathNode[][] {
     const edges = path.edges;
     if(edges.length === 0) {
         return [];
@@ -321,7 +321,7 @@ function buildPathPolylines(path: Path): PathNode[][] {
 
     // Expands an edge into its hex points, oriented to start at `startKey`.
     const edgePoints = (edgeIndex: number, startKey: string): PathNode[] => {
-        const full = path.getFullEdgePath(edges[edgeIndex]);
+        const full = getFullEdgePath(path, edges[edgeIndex]);
         return edges[edgeIndex].from === startKey ? full : full.slice().reverse();
     };
 

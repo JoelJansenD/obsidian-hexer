@@ -1,5 +1,5 @@
 import { RadialCoordinates } from "../../../src/logic/hexagon";
-import { Path, PathEdge, PathNode } from "../../../src/logic/path";
+import { PathData, PathEdge, PathNode } from "../../../src/logic/path";
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
 import { enterEditMode } from "./editMode";
 
@@ -65,25 +65,25 @@ class PathPage {
         return browser.$(`[data-item-id="${id}"]`);
     }
 
-    async getRiver(id: string): Promise<Path | undefined> {
+    async getRiver(id: string): Promise<PathData | undefined> {
         const rivers = await this.getRivers();
         return rivers.find(river => river.id === id);
     }
 
-    async getRivers(): Promise<Path[]> {
+    async getRivers(): Promise<PathData[]> {
         return this.getPaths();
     }
 
-    private async getPaths(): Promise<Path[]> {
-        // A path's nodes are held in a Map, which cannot cross the Obsidian
-        // bridge, so send plain objects and rebuild the Path on this side.
+    private async getPaths(): Promise<PathData[]> {
+        // A path's nodes are a plain keyed object, so they cross the Obsidian
+        // bridge as-is; normalise the optional fields to their defaults.
         const paths = await browser.executeObsidian(({ app }, key) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
                 hexerData?: Record<string, Array<{
                     id: string;
                     name: string;
-                    nodes?: Map<string, PathNode>;
+                    nodes?: Record<string, PathNode>;
                     edges?: PathEdge[];
                     filePath?: string | null;
                     color?: string;
@@ -92,21 +92,14 @@ class PathPage {
             return (view?.hexerData?.[key] ?? []).map((path) => ({
                 id: path.id,
                 name: path.name,
-                nodes: path.nodes ? Object.fromEntries(path.nodes) : {},
+                nodes: path.nodes ?? {},
                 edges: path.edges ?? [],
                 filePath: path.filePath ?? null,
                 color: path.color || '#ff0000',
             }));
         }, 'rivers');
         console.debug(`[hexer-e2e] getPaths (rivers)`, JSON.stringify(paths));
-        return paths.map((path) => new Path({
-            id: path.id,
-            name: path.name,
-            nodes: new Map(Object.entries(path.nodes)),
-            edges: path.edges,
-            filePath: path.filePath,
-            color: path.color,
-        }));
+        return paths;
     }
 
     private async selectAndClick(selector: string) {

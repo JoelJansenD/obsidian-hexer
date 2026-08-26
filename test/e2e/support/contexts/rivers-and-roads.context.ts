@@ -1,10 +1,10 @@
 import { RadialCoordinates } from "../../../../src/logic/hexagon";
-import { Path } from "../../../../src/logic/path";
+import { PathData } from "../../../../src/logic/path";
 
 export interface RiversAndRoadsContext {
     lastClickedHex?: RadialCoordinates;
     previouslyClickedHex?: RadialCoordinates;
-    selectedRiver?: Path;
+    selectedRiver?: PathData;
     // The name typed into the settings dialog, checked once the path is saved.
     expectedName?: string;
     // Vault path of the note attached via the settings dialog.

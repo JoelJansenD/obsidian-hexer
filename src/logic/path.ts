@@ -13,221 +13,163 @@ export interface PathEdge {
     to: string;   // hexKey of a node
 }
 
-export type PathNodeMap = Map<string, PathNode>;
-
+/**
+ * A path (river or road) as a graph of nodes and undirected edges. `nodes` is a
+ * plain keyed object rather than a Map so the in-memory shape equals the on-disk
+ * shape — keys are `"q,r"` strings, so iteration preserves insertion order.
+ */
 export interface PathData {
     id: string;
     name: string;
-    nodes: PathNodeMap;
+    nodes: Record<string, PathNode>;
     edges: PathEdge[];
     color: string;
     filePath: string | null;
 }
 
-/**
- * A {@link Path} in the shape it takes on disk. Differs from {@link PathData}
- * only in `nodes`: a Map does not survive structured serialization (e.g.
- * stringifyYaml), so nodes are stored as a plain keyed object instead.
- */
-export interface SerializedPath extends Omit<PathData, 'nodes'> {
-    nodes: Record<string, PathNode>;
+/** A fresh, empty path with a generated id and the default colour. */
+export function createPath(name: string): PathData {
+    return {
+        id: crypto.randomUUID(),
+        name,
+        nodes: {},
+        edges: [],
+        color: '#ff0000',
+        filePath: null,
+    };
 }
 
-export class Path implements PathData {
-    public id: string;
-    public name: string;
-    public nodes: PathNodeMap;
-    public edges: PathEdge[];
-    public color: string;
-    public filePath: string | null;
+// Undirected: an edge between a and b is added once, and the endpoints are
+// created as nodes if they do not exist yet.
+export function addEdge(path: PathData, a: RadialCoordinates, b: RadialCoordinates): void {
+    const from = addNode(path, a);
+    const to = addNode(path, b);
+    if (from === to || hasEdge(path, a, b)) {
+        return;
+    }
+    path.edges.push({ from, to });
+}
 
-    constructor(name: string);
-    constructor(state: PathData);
-    constructor(arg: string | PathData) {
-        if (typeof arg === 'string') {
-            this.id = crypto.randomUUID();
-            this.name = arg;
-            this.nodes = new Map();
-            this.edges = [];
-            this.color = '#ff0000';
-            this.filePath = null;
-            return;
+export function addNode(path: PathData, coordinates: RadialCoordinates): string {
+    const key = hexKey(coordinates.q, coordinates.r);
+    if (!(key in path.nodes)) {
+        path.nodes[key] = { q: coordinates.q, r: coordinates.r };
+    }
+    return key;
+}
+
+// Returns the coordinates of every node directly connected to the given node.
+export function getConnectedNodes(path: PathData, coordinates: RadialCoordinates): PathNode[] {
+    const key = hexKey(coordinates.q, coordinates.r);
+    const neighbourKeys = path.edges
+        .filter(edge => edge.from === key || edge.to === key)
+        .map(edge => (edge.from === key ? edge.to : edge.from));
+
+    return neighbourKeys
+        .filter(neighbourKey => neighbourKey in path.nodes)
+        .map(neighbourKey => ({ ...path.nodes[neighbourKey] }));
+}
+
+export function getCrossingEdgesAtCoordinates(path: PathData, coordinates: RadialCoordinates): { edge: PathEdge, nodes: PathNode[] }[] {
+    const key = hexKey(coordinates.q, coordinates.r);
+    const result: { edge: PathEdge, nodes: PathNode[] }[] = [];
+    path.edges.forEach(edge => {
+        const fullPath = getFullEdgePath(path, edge);
+        if (fullPath.some(node => hexKey(node.q, node.r) === key)) {
+            result.push({ edge: edge, nodes: fullPath });
         }
+    });
+    return result;
+}
 
-        this.id = arg.id;
-        this.name = arg.name;
-        this.nodes = arg.nodes;
-        this.edges = arg.edges ?? [];
-        this.color = arg.color;
-        this.filePath = arg.filePath;
+export function getFullEdgePath(path: PathData, edge: PathEdge): PathNode[] {
+    const fromNode = path.nodes[edge.from];
+    const toNode = path.nodes[edge.to];
+
+    if (!fromNode || !toNode) {
+        throw new Error(`Edge references non-existent node(s): ${edge.from}, ${edge.to}`);
     }
 
-    // Undirected: an edge between a and b is added once, and the endpoints are
-    // created as nodes if they do not exist yet.
-    public addEdge(a: RadialCoordinates, b: RadialCoordinates): void {
-        const from = this.addNode(a);
-        const to = this.addNode(b);
-        if (from === to || this.hasEdge(a, b)) {
-            return;
+    // Walk the straight hex line between the endpoints: sample distance + 1
+    // evenly spaced points along the line and round each to the nearest hex.
+    const steps = getDistance(fromNode, toNode);
+    const fullPath: PathNode[] = [];
+    for (let i = 0; i <= steps; i++) {
+        const t = steps === 0 ? 0 : i / steps;
+        const q = fromNode.q + (toNode.q - fromNode.q) * t;
+        const r = fromNode.r + (toNode.r - fromNode.r) * t;
+        fullPath.push(roundRadialCoordinates(q, r));
+    }
+    return fullPath;
+}
+
+export function getNode(path: PathData, key: string): PathNode | undefined;
+export function getNode(path: PathData, coordinates: RadialCoordinates): PathNode | undefined;
+export function getNode(path: PathData, arg: string | RadialCoordinates): PathNode | undefined {
+    const key = typeof (arg) === 'string' ? arg : hexKey(arg.q, arg.r);
+    return path.nodes[key];
+}
+
+function getDistance(a: RadialCoordinates, b: RadialCoordinates): number {
+    return (Math.abs(a.q - b.q) + Math.abs(a.q + a.r - b.q - b.r) + Math.abs(a.r - b.r)) / 2;
+}
+
+export function hasEdge(path: PathData, a: RadialCoordinates, b: RadialCoordinates): boolean {
+    const from = hexKey(a.q, a.r);
+    const to = hexKey(b.q, b.r);
+    return path.edges.some(edge => sameEdge(edge, from, to));
+}
+
+export function isEmpty(path: PathData): boolean {
+    return path.edges.length === 0 && Object.keys(path.nodes).length === 0;
+}
+
+/**
+ * Moves a present node at oldCoordinates to newCoordinates.
+ * @returns true if the move was successful, false if the node at oldCoordinates does not exist or if a node already exists at newCoordinates.
+ */
+export function moveNode(path: PathData, oldCoordinates: RadialCoordinates, newCoordinates: RadialCoordinates): boolean {
+    const oldKey = hexKey(oldCoordinates.q, oldCoordinates.r);
+    const newKey = hexKey(newCoordinates.q, newCoordinates.r);
+
+    if (oldKey === newKey) {
+        return false;
+    }
+
+    if (!(oldKey in path.nodes)) {
+        return false;
+    }
+
+    if (newKey in path.nodes) {
+        return false;
+    }
+
+    delete path.nodes[oldKey];
+    path.nodes[newKey] = { q: newCoordinates.q, r: newCoordinates.r };
+
+    path.edges.forEach(edge => {
+        if (edge.from === oldKey) {
+            edge.from = newKey;
         }
-        this.edges.push({ from, to });
-    }
-
-    public addNode(coordinates: RadialCoordinates): string {
-        const key = hexKey(coordinates.q, coordinates.r);
-        if (!this.nodes.has(key)) {
-            this.nodes.set(key, { q: coordinates.q, r: coordinates.r });
+        else if (edge.to === oldKey) {
+            edge.to = newKey;
         }
-        return key;
-    }
+    });
 
-    /** Serializes this path to its on-disk shape. See {@link SerializedPath}. */
-    public toJSON(): SerializedPath {
-        return {
-            id: this.id,
-            name: this.name,
-            nodes: Object.fromEntries(this.nodes),
-            edges: this.edges,
-            color: this.color,
-            filePath: this.filePath,
-        };
-    }
+    return true;
+}
 
-    /** Reconstructs a path from its on-disk shape. The inverse of {@link toJSON}. */
-    public static fromJSON(data: SerializedPath): Path {
-        return new Path({
-            id: data.id,
-            name: data.name,
-            nodes: new Map(Object.entries(data.nodes ?? {})),
-            edges: data.edges ?? [],
-            color: data.color,
-            filePath: data.filePath,
-        });
-    }
+export function removeEdge(path: PathData, a: RadialCoordinates, b: RadialCoordinates): void {
+    const from = hexKey(a.q, a.r);
+    const to = hexKey(b.q, b.r);
+    path.edges = path.edges.filter(edge => !sameEdge(edge, from, to));
+}
 
-    public clone(): Path {
-        const nodes: PathNodeMap = new Map();
-        for (const [key, node] of this.nodes) {
-            nodes.set(key, { ...node });
-        }
-        const edges = this.edges.map(edge => ({ ...edge }));
-        return new Path({ id: this.id, name: this.name, nodes, edges, color: this.color, filePath: this.filePath });
-    }
-
-    // Returns the coordinates of every node directly connected to the given node.
-    public getConnectedNodes(coordinates: RadialCoordinates): PathNode[] {
-        const key = hexKey(coordinates.q, coordinates.r);
-        const neighbourKeys = this.edges
-            .filter(edge => edge.from === key || edge.to === key)
-            .map(edge => (edge.from === key ? edge.to : edge.from));
-
-        return neighbourKeys
-            .filter(neighbourKey => this.nodes.has(neighbourKey))
-            .map(neighbourKey => ({... this.nodes.get(neighbourKey)}))
-            .filter((node): node is PathNode => node !== undefined);
-    }
-
-    public getCrossingEdgesAtCoordinates(coordinates: RadialCoordinates): { edge: PathEdge, nodes: PathNode[] }[] {
-        const key = hexKey(coordinates.q, coordinates.r);
-        const result: { edge: PathEdge, nodes: PathNode[] }[] = [];
-        this.edges.forEach(edge => {
-            const fullPath = this.getFullEdgePath(edge);
-            if (fullPath.some(node => hexKey(node.q, node.r) === key)) {
-                result.push({edge: edge, nodes: fullPath});
-            }
-        });
-        return result;
-    }
-
-    public getFullEdgePath(edge: PathEdge): PathNode[] {
-        const fromNode = this.nodes.get(edge.from);
-        const toNode = this.nodes.get(edge.to);
-
-        if(!fromNode || !toNode) {
-            throw new Error(`Edge references non-existent node(s): ${edge.from}, ${edge.to}`);
-        }
-
-        // Walk the straight hex line between the endpoints: sample distance + 1
-        // evenly spaced points along the line and round each to the nearest hex.
-        const steps = this.getDistance(fromNode, toNode);
-        const path: PathNode[] = [];
-        for(let i = 0; i <= steps; i++) {
-            const t = steps === 0 ? 0 : i / steps;
-            const q = fromNode.q + (toNode.q - fromNode.q) * t;
-            const r = fromNode.r + (toNode.r - fromNode.r) * t;
-            path.push(roundRadialCoordinates(q, r));
-        }
-        return path;
-    }
-
-    public getNode(key: string): PathNode | undefined;
-    public getNode(coordinates: RadialCoordinates): PathNode | undefined;
-    public getNode(arg: string | RadialCoordinates): PathNode | undefined {
-        const key = typeof(arg) === 'string' ? arg : hexKey(arg.q, arg.r);
-        return this.nodes.get(key);
-    }
-
-    private getDistance(a: RadialCoordinates, b: RadialCoordinates): number {
-        return (Math.abs(a.q - b.q) + Math.abs(a.q + a.r - b.q - b.r) + Math.abs(a.r - b.r)) / 2;
-    }
-
-    public hasEdge(a: RadialCoordinates, b: RadialCoordinates): boolean {
-        const from = hexKey(a.q, a.r);
-        const to = hexKey(b.q, b.r);
-        return this.edges.some(edge => sameEdge(edge, from, to));
-    }
-
-    public isEmpty(): boolean {
-        return this.edges.length === 0 && this.nodes.size === 0;
-    }
-
-    /**
-     * Moves a present node at oldCoordinates to newCoordinates.
-     * @returns true if the move was successful, false if the node at oldCoordinates does not exist or if a node already exists at newCoordinates.
-     */
-    public moveNode(oldCoordinates: RadialCoordinates, newCoordinates: RadialCoordinates): boolean {
-        const oldKey = hexKey(oldCoordinates.q, oldCoordinates.r);
-        const newKey = hexKey(newCoordinates.q, newCoordinates.r);
-
-        if(oldKey === newKey) {
-            return false;
-        }
-
-        if (!this.nodes.has(oldKey)) {
-            return false;
-        }
-
-        if(this.nodes.has(newKey)) {
-            return false;
-        }
-
-        this.nodes.delete(oldKey);
-        this.nodes.set(newKey, { q: newCoordinates.q, r: newCoordinates.r });
-
-        this.edges.forEach(edge => {
-            if (edge.from === oldKey) {
-                edge.from = newKey;
-            } 
-            else if (edge.to === oldKey) {
-                edge.to = newKey;
-            }
-        });
-
-        return true;
-    }
-
-    public removeEdge(a: RadialCoordinates, b: RadialCoordinates): void {
-        const from = hexKey(a.q, a.r);
-        const to = hexKey(b.q, b.r);
-        this.edges = this.edges.filter(edge => !sameEdge(edge, from, to));
-    }
-
-    // Removes the node and any edges that touch it.
-    public removeNode(coordinates: RadialCoordinates): void {
-        const key = hexKey(coordinates.q, coordinates.r);
-        this.nodes.delete(key);
-        this.edges = this.edges.filter(edge => edge.from !== key && edge.to !== key);
-    }
+// Removes the node and any edges that touch it.
+export function removeNode(path: PathData, coordinates: RadialCoordinates): void {
+    const key = hexKey(coordinates.q, coordinates.r);
+    delete path.nodes[key];
+    path.edges = path.edges.filter(edge => edge.from !== key && edge.to !== key);
 }
 
 // Undirected comparison: (from, to) matches (to, from).

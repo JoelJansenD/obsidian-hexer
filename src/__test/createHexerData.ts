@@ -1,13 +1,14 @@
-import { Path } from "../logic/path";
-import { CURRENT_VERSION, HexerData, HexMap } from "../logic/HexerData";
+import { PathData } from "../logic/path";
+import { CURRENT_VERSION, HexerData } from "../logic/HexerData";
 import { Faction } from "../logic/faction";
+import { Hexagon } from "../logic/hexagon";
 import { defaultMapSettings, MapSettings } from "../logic/mapSettings";
 import { Camera, defaultCamera } from "../logic/camera";
 
 interface HexerDataOverrides {
-    hexes?: HexMap;
-    rivers?: Path[];
-    roads?: Path[];
+    hexes?: Record<string, Hexagon>;
+    rivers?: PathData[];
+    roads?: PathData[];
     factions?: Faction[];
     mapSettings?: MapSettings;
     camera?: Camera;
@@ -15,14 +16,14 @@ interface HexerDataOverrides {
 }
 
 export default function createHexerData(overrides: HexerDataOverrides = {}): HexerData {
-    return new HexerData({
+    return {
         version: CURRENT_VERSION,
-        hexes: overrides.hexes ?? new Map(),
+        hexes: overrides.hexes ?? {},
         rivers: overrides.rivers ?? [],
         roads: overrides.roads ?? [],
         factions: overrides.factions ?? [],
         mapSettings: overrides.mapSettings ?? defaultMapSettings(),
         camera: overrides.camera ?? defaultCamera(),
         size: overrides.size ?? 50
-    });
+    };
 }

@@ -7,6 +7,7 @@ import { createNote } from '../support/obsidian.page';
 import { RiversAndRoadsContext } from '../support/contexts/rivers-and-roads.context';
 import { RadialCoordinates } from '../../../src/logic/hexagon';
 import { hexKey } from '../../../src/logic/HexerData';
+import { getConnectedNodes, hasEdge } from '../../../src/logic/path';
 
 // The data table shape for a river's nodes: a row per node with q and r columns.
 interface NodeTable {
@@ -101,10 +102,10 @@ When('I drag the node at {int},{int} to the hex at {int},{int}', async function 
     expect(this.selectedRiver).toBeDefined();
     const from = { q: fq, r: fr };
     const to = { q: tq, r: tr };
-    expect(this.selectedRiver!.nodes.has(hexKey(fq, fr))).toBe(true);
+    expect(hexKey(fq, fr) in this.selectedRiver!.nodes).toBe(true);
     // Capture the node's neighbours before the drag, since the assertions need to
     // know which edges should have moved with it.
-    this.nodesConnectedToDragged = this.selectedRiver!.getConnectedNodes(from);
+    this.nodesConnectedToDragged = getConnectedNodes(this.selectedRiver!, from);
     await editorPage.dragAcrossHexes([from, to]);
     this.draggedFromHex = from;
     this.draggedToHex = to;
@@ -143,7 +144,7 @@ Then('the hex is added to the river', async function (this: RiversAndRoadsContex
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
     const key = hexKey(this.lastClickedHex!.q, this.lastClickedHex!.r);
-    expect(river!.nodes.has(key)).toBe(true);
+    expect(key in river!.nodes).toBe(true);
 });
 
 Then('an edge is added between the two clicked hexes', async function (this: RiversAndRoadsContext) {
@@ -152,21 +153,21 @@ Then('an edge is added between the two clicked hexes', async function (this: Riv
     expect(this.lastClickedHex).toBeDefined();
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
-    expect(river!.hasEdge(this.previouslyClickedHex!, this.lastClickedHex!)).toBe(true);
+    expect(hasEdge(river!, this.previouslyClickedHex!, this.lastClickedHex!)).toBe(true);
 });
 
 Then('an edge is added between the hexes at {int},{int} and {int},{int}', async function (this: RiversAndRoadsContext, aq: number, ar: number, bq: number, br: number) {
     expect(this.selectedRiver).toBeDefined();
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
-    expect(river!.hasEdge({ q: aq, r: ar }, { q: bq, r: br })).toBe(true);
+    expect(hasEdge(river!, { q: aq, r: ar }, { q: bq, r: br })).toBe(true);
 });
 
 Then('the edge between the hexes at {int},{int} and {int},{int} is removed', async function (this: RiversAndRoadsContext, aq: number, ar: number, bq: number, br: number) {
     expect(this.selectedRiver).toBeDefined();
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
-    expect(river!.hasEdge({ q: aq, r: ar }, { q: bq, r: br })).toBe(false);
+    expect(hasEdge(river!, { q: aq, r: ar }, { q: bq, r: br })).toBe(false);
 });
 
 Then('the hex is selected', async function (this: RiversAndRoadsContext) {
@@ -190,7 +191,7 @@ Then('no hex is added to the river', async function (this: RiversAndRoadsContext
     expect(river).toBeDefined();
     // `selectedRiver` was read before the hex was clicked, so its nodes are the
     // baseline the click must not have changed.
-    expect(river!.nodes.size).toBe(this.selectedRiver!.nodes.size);
+    expect(Object.keys(river!.nodes).length).toBe(Object.keys(this.selectedRiver!.nodes).length);
 });
 
 Then('the hex is removed from the river', async function (this: RiversAndRoadsContext) {
@@ -199,7 +200,7 @@ Then('the hex is removed from the river', async function (this: RiversAndRoadsCo
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
     const key = hexKey(this.lastClickedHex!.q, this.lastClickedHex!.r);
-    expect(river!.nodes.has(key)).toBe(false);
+    expect(key in river!.nodes).toBe(false);
 });
 
 Then('all edges attached to the hex are removed', async function (this: RiversAndRoadsContext) {
@@ -217,7 +218,7 @@ Then('the following nodes are still present:', async function (this: RiversAndRo
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
     for (const node of nodesFromTable(table)) {
-        expect(river!.nodes.has(hexKey(node.q, node.r))).toBe(true);
+        expect(hexKey(node.q, node.r) in river!.nodes).toBe(true);
     }
 });
 
@@ -227,9 +228,9 @@ Then('the node is moved to the hex at {int},{int}', async function (this: Rivers
     const river = await pathPage.getRiver(this.selectedRiver!.id);
     expect(river).toBeDefined();
     // The node now sits on the target hex...
-    expect(river!.nodes.has(hexKey(q, r))).toBe(true);
+    expect(hexKey(q, r) in river!.nodes).toBe(true);
     // ...and no longer on the hex it was dragged from.
-    expect(river!.nodes.has(hexKey(this.draggedFromHex!.q, this.draggedFromHex!.r))).toBe(false);
+    expect(hexKey(this.draggedFromHex!.q, this.draggedFromHex!.r) in river!.nodes).toBe(false);
 });
 
 Then('all edges for the node are updated', async function (this: RiversAndRoadsContext) {
@@ -245,6 +246,6 @@ Then('all edges for the node are updated', async function (this: RiversAndRoadsC
     expect(staleEdges.length).toBe(0);
     // ...and every neighbour it had is now connected to it at the target hex.
     for (const neighbour of this.nodesConnectedToDragged!) {
-        expect(river!.hasEdge(this.draggedToHex!, neighbour)).toBe(true);
+        expect(hasEdge(river!, this.draggedToHex!, neighbour)).toBe(true);
     }
 });

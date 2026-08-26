@@ -2,7 +2,6 @@ import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { EditorState } from "../EditorState";
 import { Hexagon } from "../hexagon";
-import { HexMap } from "../HexerData";
 import BrushStrategy from "./BrushStrategy";
 import { factionLayerAccessor, HexLayerAccessor, iconLayerAccessor, terrainLayerAccessor } from "./HexLayerAccessor";
 
@@ -49,19 +48,19 @@ describe.each(cases)('BrushStrategy ($name)', ({ accessor, editorState, read, ex
 
     it('creates and paints an empty hex when clicked', () => {
         // Arrange
-        const hexMap: HexMap = new Map<string, Hexagon>();
+        const hexMap: Record<string, Hexagon> = {};
         const data = createHexerData({ hexes: hexMap });
 
         // Act
         strategyToTest.getEvents().onLeftClick!(data, editorState, { q: 0, r: 0 });
 
         // Assert
-        expect(read(hexMap.get('0,0')!)).toEqual(expected);
+        expect(read(hexMap['0,0'])).toEqual(expected);
     });
 
     it('paints hexes as the mouse drags across them, creating them as needed', () => {
         // Arrange
-        const hexMap: HexMap = new Map<string, Hexagon>();
+        const hexMap: Record<string, Hexagon> = {};
         const data = createHexerData({ hexes: hexMap });
 
         // Act
@@ -71,8 +70,8 @@ describe.each(cases)('BrushStrategy ($name)', ({ accessor, editorState, read, ex
         drag(data, editorState, { q: 2, r: 0 });
 
         // Assert
-        expect(read(hexMap.get('0,0')!)).toEqual(expected);
-        expect(read(hexMap.get('1,0')!)).toEqual(expected);
-        expect(read(hexMap.get('2,0')!)).toEqual(expected);
+        expect(read(hexMap['0,0'])).toEqual(expected);
+        expect(read(hexMap['1,0'])).toEqual(expected);
+        expect(read(hexMap['2,0'])).toEqual(expected);
     });
 });

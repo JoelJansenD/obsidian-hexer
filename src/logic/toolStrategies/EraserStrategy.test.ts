@@ -1,7 +1,7 @@
 import createHexerData from "../../__test/createHexerData";
 import defaultEditorState from "../../__test/defaultEditorState";
 import { Hexagon } from "../hexagon";
-import { HexMap } from "../HexerData";
+
 import EraserStrategy from "./EraserStrategy";
 import { factionLayerAccessor, HexLayerAccessor, iconLayerAccessor, terrainLayerAccessor } from "./HexLayerAccessor";
 
@@ -58,38 +58,38 @@ describe.each(cases)('EraserStrategy ($name)', ({ accessor, only, withOther, rea
 
     it('removes the hex from the map when it is empty after erasing', () => {
         // Arrange
-        const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', only(0, 0));
+        const hexMap: Record<string, Hexagon> = {};
+        hexMap['0,0'] = only(0, 0);
         const data = createHexerData({ hexes: hexMap });
 
         // Act
         strategyToTest.getEvents().onLeftClick!(data, defaultEditorState, { q: 0, r: 0 });
 
         // Assert
-        expect(hexMap.has('0,0')).toBe(false);
+        expect('0,0' in hexMap).toBe(false);
     });
 
     it('clears only this layer when another layer is present', () => {
         // Arrange
-        const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', withOther(0, 0));
+        const hexMap: Record<string, Hexagon> = {};
+        hexMap['0,0'] = withOther(0, 0);
         const data = createHexerData({ hexes: hexMap });
 
         // Act
         strategyToTest.getEvents().onLeftClick!(data, defaultEditorState, { q: 0, r: 0 });
 
         // Assert
-        const result = hexMap.get('0,0')!;
+        const result = hexMap['0,0'];
         expect(readSelf(result)).toBeNull();
         expect(readOther(result)).toEqual(expectedOther);
     });
 
     it('erases hexes as the mouse drags across them', () => {
         // Arrange
-        const hexMap: HexMap = new Map<string, Hexagon>();
-        hexMap.set('0,0', only(0, 0));
-        hexMap.set('1,0', only(1, 0));
-        hexMap.set('2,0', only(2, 0));
+        const hexMap: Record<string, Hexagon> = {};
+        hexMap['0,0'] = only(0, 0);
+        hexMap['1,0'] = only(1, 0);
+        hexMap['2,0'] = only(2, 0);
         const data = createHexerData({ hexes: hexMap });
 
         // Act
@@ -99,8 +99,8 @@ describe.each(cases)('EraserStrategy ($name)', ({ accessor, only, withOther, rea
         drag(data, defaultEditorState, { q: 2, r: 0 });
 
         // Assert
-        expect(hexMap.has('0,0')).toBe(false);
-        expect(hexMap.has('1,0')).toBe(false);
-        expect(hexMap.has('2,0')).toBe(false);
+        expect('0,0' in hexMap).toBe(false);
+        expect('1,0' in hexMap).toBe(false);
+        expect('2,0' in hexMap).toBe(false);
     });
 });

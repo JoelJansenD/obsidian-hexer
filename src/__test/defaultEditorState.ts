@@ -32,7 +32,7 @@ export const createComponentOptions = (overrides: Partial<EditorState> = {}, ini
     });
     let data = initialData ?? createHexerData();
     return {
-        getDataClone: () => data.clone(),
+        getDataClone: () => structuredClone(data),
         setData: vi.fn(next => data = next),
         getEditorState: () => state,
         setEditorState: vi.fn((next: EditorState) => { state = cloneEditorState(next); }),

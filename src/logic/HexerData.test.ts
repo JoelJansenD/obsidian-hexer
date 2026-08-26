@@ -1,43 +1,24 @@
-import { defaultCamera } from "./camera";
-import { Faction } from "./faction";
 import { Hexagon } from "./hexagon";
-import { HexerData, HexerState } from "./HexerData";
+import {
+    HexerData,
+    eraseIfEmpty,
+    getHex,
+    getOrCreateHex,
+    hexToPoint,
+    pointToHex,
+    setHex,
+} from "./HexerData";
+import createHexerData from "../__test/createHexerData";
 import { defaultMapSettings } from "./mapSettings";
-import { Path } from "./path";
-
-const emptyState = (): HexerState => ({ version: '1.0', size: 50, hexes: new Map<string, Hexagon>(), rivers: [], roads: [], factions: [], mapSettings: defaultMapSettings(), camera: defaultCamera() });
 
 describe('HexerData', () => {
-    it('constructor applies the provided state', () => {
-        // Arrange
-        const initial: HexerState = {
-            version: '1.0',
-            size: 50,
-            hexes: new Map([
-                ['0,0', { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null }],
-                ['1,1', { q: 1, r: 1, terrainColor: '#0000ff', icon: null, factionId: null }],
-            ]),
-            rivers: [],
-            roads: [],
-            factions: [],
-            mapSettings: defaultMapSettings(),
-            camera: defaultCamera(),
-        };
-
-        // Act
-        const result = new HexerData(initial);
-
-        // Assert
-        expect(result).toEqual(initial);
-    });
-
     it('getHex returns the correct hex data', () => {
         // Arrange
-        const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        const data = createHexerData();
+        setHex(data, { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
-        const hex = data.getHex(0, 0);
+        const hex = getHex(data, 0, 0);
 
         // Assert
         expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
@@ -45,11 +26,11 @@ describe('HexerData', () => {
 
     it('getHex returns the correct hex data when provided with coordinates', () => {
         // Arrange
-        const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        const data = createHexerData();
+        setHex(data, { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
-        const hex = data.getHex({ q: 0, r: 0 });
+        const hex = getHex(data, { q: 0, r: 0 });
 
         // Assert
         expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
@@ -57,10 +38,10 @@ describe('HexerData', () => {
 
     it('getHex returns undefined for non-existent hex', () => {
         // Arrange
-        const data = new HexerData(emptyState());
+        const data = createHexerData();
 
         // Act
-        const hex = data.getHex(1, 1);
+        const hex = getHex(data, 1, 1);
 
         // Assert
         expect(hex).toBeUndefined();
@@ -68,11 +49,11 @@ describe('HexerData', () => {
 
     it('setHex adds new hex data correctly', () => {
         // Arrange
-        const data = new HexerData(emptyState());
+        const data = createHexerData();
 
         // Act
-        data.setHex({ q: 1, r: 1, terrainColor: '#0000ff', icon: null, factionId: null });
-        const hex = data.getHex(1, 1);
+        setHex(data, { q: 1, r: 1, terrainColor: '#0000ff', icon: null, factionId: null });
+        const hex = getHex(data, 1, 1);
 
         // Assert
         expect(hex).toEqual({ q: 1, r: 1, terrainColor: '#0000ff', icon: null, factionId: null });
@@ -80,12 +61,12 @@ describe('HexerData', () => {
 
     it('setHex updates the hex data correctly', () => {
         // Arrange
-        const data = new HexerData(emptyState());
-        data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
+        const data = createHexerData();
+        setHex(data, { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
-        data.setHex({ q: 0, r: 0, terrainColor: '#00ff00', icon: null, factionId: null });
-        const hex = data.getHex(0, 0);
+        setHex(data, { q: 0, r: 0, terrainColor: '#00ff00', icon: null, factionId: null });
+        const hex = getHex(data, 0, 0);
 
         // Assert
         expect(hex).toEqual({ q: 0, r: 0, terrainColor: '#00ff00', icon: null, factionId: null });
@@ -93,12 +74,12 @@ describe('HexerData', () => {
 
     it('getOrCreateHex returns the existing hex without altering it', () => {
         // Arrange
-        const data = new HexerData(emptyState());
+        const data = createHexerData();
         const existing: Hexagon = { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null };
-        data.setHex(existing);
+        setHex(data, existing);
 
         // Act
-        const hex = data.getOrCreateHex({ q: 0, r: 0 });
+        const hex = getOrCreateHex(data, { q: 0, r: 0 });
 
         // Assert
         expect(hex).toBe(existing);
@@ -107,95 +88,48 @@ describe('HexerData', () => {
 
     it('getOrCreateHex creates and stores a new empty hex when none exists', () => {
         // Arrange
-        const data = new HexerData(emptyState());
+        const data = createHexerData();
 
         // Act
-        const hex = data.getOrCreateHex({ q: 1, r: 1 });
+        const hex = getOrCreateHex(data, { q: 1, r: 1 });
 
         // Assert
         expect(hex).toEqual({ q: 1, r: 1, terrainColor: null, icon: null, factionId: null });
-        expect(data.getHex(1, 1)).toBe(hex);
+        expect(getHex(data, 1, 1)).toBe(hex);
     });
 
     it('eraseIfEmpty removes the hex from the map when it is empty', () => {
         // Arrange
-        const data = new HexerData(emptyState());
+        const data = createHexerData();
         const hex: Hexagon = { q: 0, r: 0, terrainColor: null, icon: null, factionId: null };
-        data.setHex(hex);
+        setHex(data, hex);
 
         // Act
-        data.eraseIfEmpty(hex);
+        eraseIfEmpty(data, hex);
 
         // Assert
-        expect(data.getHex(0, 0)).toBeUndefined();
+        expect(getHex(data, 0, 0)).toBeUndefined();
     });
 
     it('eraseIfEmpty persists the hex when it still has content', () => {
         // Arrange
-        const data = new HexerData(emptyState());
+        const data = createHexerData();
         const hex: Hexagon = { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null };
 
         // Act
-        data.eraseIfEmpty(hex);
+        eraseIfEmpty(data, hex);
 
         // Assert
-        expect(data.getHex(0, 0)).toBe(hex);
-    });
-
-    describe('serialization', () => {
-        it('toJSON emits hexes as a plain object and paths in their serialized shape', () => {
-            // Arrange
-            const data = new HexerData(emptyState());
-            data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
-            const river = new Path('River 1');
-            river.addEdge({ q: 0, r: 0 }, { q: 1, r: 2 });
-            data.rivers.push(river);
-
-            // Act
-            const serialized = data.toJSON();
-
-            // Assert
-            expect(serialized.hexes).toEqual({ '0,0': { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null } });
-            expect(serialized.rivers).toEqual([river.toJSON()]);
-        });
-
-        it('round-trips through structured serialization', () => {
-            // Arrange
-            const data = new HexerData(emptyState());
-            data.setHex({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
-            data.setHex({ q: 1, r: 2, terrainColor: '#00ff00', icon: null, factionId: null });
-
-            const river = new Path('River 1');
-            river.addEdge({ q: 0, r: 0 }, { q: 1, r: 2 });
-            data.rivers.push(river);
-
-            const road = new Path('Road 1');
-            road.addEdge({ q: 1, r: 2 }, { q: 2, r: 3 });
-            data.roads.push(road);
-
-            const faction: Faction = { id: 'faction-1', name: 'Faction 1', color: '#0000ff', filePath: 'Factions/Faction 1.md' };
-            data.factions.push(faction);
-
-            // Act - mimic the on-disk write/read cycle; a Map would serialize to {}.
-            const restored = HexerData.fromJSON(JSON.parse(JSON.stringify(data.toJSON())));
-
-            // Assert
-            expect(restored.hexes).toBeInstanceOf(Map);
-            expect(restored.getHex(0, 0)).toEqual({ q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
-            expect(restored.getHex(1, 2)).toEqual({ q: 1, r: 2, terrainColor: '#00ff00', icon: null, factionId: null });
-            expect(restored.rivers).toEqual([river]);
-            expect(restored.roads).toEqual([road]);
-            expect(restored.factions).toEqual([faction]);
-        });
+        expect(getHex(data, 0, 0)).toBe(hex);
     });
 
     describe('hexToPoint / pointToHex', () => {
         it('hexToPoint converts using the map size and its flat-top orientation', () => {
             // Arrange
-            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
+            const data = createHexerData({ size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
 
             // Act
-            const point = data.hexToPoint({ q: 10, r: 0 });
+            const point = hexToPoint(data, { q: 10, r: 0 });
 
             // Assert
             expect(point.x).toBeCloseTo(15);
@@ -204,10 +138,10 @@ describe('HexerData', () => {
 
         it('hexToPoint converts using the map size and its pointy-top orientation', () => {
             // Arrange
-            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top' } });
+            const data = createHexerData({ size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top' } });
 
             // Act
-            const point = data.hexToPoint({ q: 10, r: 0 });
+            const point = hexToPoint(data, { q: 10, r: 0 });
 
             // Assert
             expect(point.x).toBeCloseTo(17.320508);
@@ -216,10 +150,10 @@ describe('HexerData', () => {
 
         it('pointToHex converts using the map size and its flat-top orientation', () => {
             // Arrange
-            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
+            const data = createHexerData({ size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
 
             // Act
-            const hex = data.pointToHex(15, 8.660254);
+            const hex = pointToHex(data, 15, 8.660254);
 
             // Assert
             expect(hex).toEqual({ q: 10, r: 0 });
@@ -227,10 +161,10 @@ describe('HexerData', () => {
 
         it('pointToHex converts using the map size and its pointy-top orientation', () => {
             // Arrange
-            const data = new HexerData({ ...emptyState(), size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top' } });
+            const data = createHexerData({ size: 1, mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top' } });
 
             // Act
-            const hex = data.pointToHex(17.320508, 0);
+            const hex = pointToHex(data, 17.320508, 0);
 
             // Assert
             expect(hex).toEqual({ q: 10, r: 0 });
@@ -238,10 +172,10 @@ describe('HexerData', () => {
 
         it('hexToPoint scales by the map size', () => {
             // Arrange
-            const data = new HexerData({ ...emptyState(), size: 5, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
+            const data = createHexerData({ size: 5, mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top' } });
 
             // Act
-            const point = data.hexToPoint({ q: 0, r: 10 });
+            const point = hexToPoint(data, { q: 0, r: 10 });
 
             // Assert
             expect(point.x).toBeCloseTo(0);

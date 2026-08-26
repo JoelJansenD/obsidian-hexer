@@ -1,6 +1,6 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
 import { RadialCoordinates } from "../hexagon";
-import { HexerData } from "../HexerData";
+import { getOrCreateHex, HexerData, setHex } from "../HexerData";
 import { HexLayerAccessor } from "./HexLayerAccessor";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
 
@@ -13,9 +13,9 @@ export default class BrushStrategy implements ToolStrategy {
     }
 
     private paint(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const hexagon = data.getOrCreateHex(radialCoordinates);
+        const hexagon = getOrCreateHex(data, radialCoordinates);
         this.accessor.apply(hexagon, editorState);
-        data.setHex(hexagon);
+        setHex(data, hexagon);
     }
 
     public getEvents(): RegisteredEvents {

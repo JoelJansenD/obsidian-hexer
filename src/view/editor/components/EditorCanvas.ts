@@ -1,4 +1,5 @@
 import { cameraViewOffset } from "../../../logic/camera";
+import { pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { ComponentOptions } from "../Editor";
@@ -153,7 +154,7 @@ export default class EditorCanvas {
         const offset = cameraViewOffset(data.camera, this._canvasEl.clientWidth, this._canvasEl.clientHeight);
         const canvasX = e.clientX - rect.left - offset.x;
         const canvasY = e.clientY - rect.top - offset.y;
-        const clickedHex = data.pointToHex(canvasX, canvasY);
+        const clickedHex = pointToHex(data, canvasX, canvasY);
         const editorState = this._dataOptions.getEditorState();
         handler(data, editorState, clickedHex);
         this._dataOptions.setData(data, { stroke: this._activeStroke ?? undefined });

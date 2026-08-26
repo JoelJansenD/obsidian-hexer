@@ -1,175 +1,99 @@
-import { Camera, defaultCamera } from "./camera";
+import { Camera } from "./camera";
 import { Faction } from "./faction";
 import { Hexagon, hexagonIsEmpty, Point, pointToRadialCoordinates, RadialCoordinates, radialCoordinatesToPoint } from "./hexagon";
-import { defaultMapSettings, MapSettings } from "./mapSettings";
-import { Path, SerializedPath } from "./path";
+import { MapSettings } from "./mapSettings";
+import { PathData } from "./path";
 
-
-export interface HexerState {
+/**
+ * A Hexer map document. `hexes` is a plain keyed object rather than a Map so the
+ * in-memory shape equals the on-disk shape — keys are `"q,r"` strings, so
+ * iteration preserves insertion order and no serialization seam is needed.
+ */
+export interface HexerData {
     version: string;
-    hexes: HexMap;
-    rivers: Path[];
-    roads: Path[];
+    hexes: Record<string, Hexagon>;
+    rivers: PathData[];
+    roads: PathData[];
     factions: Faction[];
     mapSettings: MapSettings;
     camera: Camera;
     size: number;
 }
 
-/**
- * A {@link HexerData} in the shape it takes on disk. Structured serialization
- * (e.g. stringifyYaml) does not survive Maps or class instances, so `hexes` is
- * a plain keyed object and paths are their {@link SerializedPath} form.
- */
-export interface SerializedHexerData extends Omit<HexerState, 'hexes' | 'rivers' | 'roads'> {
-    hexes: Record<string, Hexagon>;
-    rivers: SerializedPath[];
-    roads: SerializedPath[];
-}
-
-export type HexMap = Map<string, Hexagon>;
-
 export function hexKey(q: number, r: number): string {
     return `${q},${r}`;
 }
 
-export class HexerData implements HexerState {
-    public hexes: HexMap;
-    public readonly version: string;
-    public size: number;
-    public rivers: Path[];
-    public roads: Path[];
-    public factions: Faction[];
-    public mapSettings: MapSettings;
-    public camera: Camera;
+export function getHex(data: HexerData, coordinates: RadialCoordinates): Hexagon | undefined;
+export function getHex(data: HexerData, q: number, r: number): Hexagon | undefined;
+export function getHex(data: HexerData, arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
+    const q = typeof arg1 === 'object' ? arg1.q : arg1;
+    const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+    return data.hexes[hexKey(q, r)];
+}
 
-    constructor(state: HexerState) {
-        this.version = state.version;
-        this.hexes = state.hexes instanceof Map
-            ? state.hexes
-            : new Map(Object.entries(state.hexes));
-        this.size = state.size;
-        this.rivers = state.rivers;
-        this.roads = state.roads;
-        this.factions = state.factions;
-        this.mapSettings = state.mapSettings ?? defaultMapSettings();
-        this.camera = state.camera ?? defaultCamera();
+export function getOrCreateHex(data: HexerData, coordinates: RadialCoordinates): Hexagon;
+export function getOrCreateHex(data: HexerData, q: number, r: number): Hexagon;
+export function getOrCreateHex(data: HexerData, arg1: RadialCoordinates | number, arg2?: number): Hexagon {
+    const q = typeof arg1 === 'object' ? arg1.q : arg1;
+    const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+    const key = hexKey(q, r);
+    const hex = data.hexes[key];
+    if(hex) {
+        return hex;
     }
 
-    public getHex(coordinates: RadialCoordinates): Hexagon | undefined;
-    public getHex(q: number, r: number): Hexagon | undefined;
-    public getHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon | undefined {
-        const q = typeof arg1 === 'object' ? arg1.q : arg1;
-        const r = typeof arg1 === 'object' ? arg1.r : arg2!; 
-        const key = hexKey(q, r);
-        return this.hexes.get(key);
-    }
+    const newHex = {
+        q: q,
+        r: r,
+        terrainColor: null,
+        icon: null,
+        factionId: null
+    };
+    data.hexes[key] = newHex;
+    return newHex;
+}
 
-    public getOrCreateHex(coordinates: RadialCoordinates): Hexagon;
-    public getOrCreateHex(q: number, r: number): Hexagon;
-    public getOrCreateHex(arg1: RadialCoordinates | number, arg2?: number): Hexagon {
-        const q = typeof arg1 === 'object' ? arg1.q : arg1;
-        const r = typeof arg1 === 'object' ? arg1.r : arg2!;
-        const key = hexKey(q, r);
-        const hex = this.hexes.get(key);
-        if(hex) {
-            return hex;
-        }
+export function setHex(data: HexerData, hex: Hexagon): void {
+    data.hexes[hexKey(hex.q, hex.r)] = hex;
+}
 
-        const newHex = {
-            q: q,
-            r: r,
-            terrainColor: null,
-            icon: null,
-            factionId: null
-        };
-        this.hexes.set(key, newHex);
-        return newHex;
-    }
+export function deleteHex(data: HexerData, coordinates: RadialCoordinates): void;
+export function deleteHex(data: HexerData, q: number, r: number): void;
+export function deleteHex(data: HexerData, arg1: RadialCoordinates | number, arg2?: number): void {
+    const q = typeof arg1 === 'object' ? arg1.q : arg1;
+    const r = typeof arg1 === 'object' ? arg1.r : arg2!;
+    delete data.hexes[hexKey(q, r)];
+}
 
-    public setHex(hex: Hexagon): void {
-        const key = hexKey(hex.q, hex.r);
-        this.hexes.set(key, hex);
+/**
+ * Persists a hexagon after an erase: an empty hexagon is removed from the map
+ * entirely, otherwise it is written back with its remaining properties.
+ */
+export function eraseIfEmpty(data: HexerData, hex: Hexagon): void {
+    if(hexagonIsEmpty(hex)) {
+        deleteHex(data, hex.q, hex.r);
     }
+    else {
+        setHex(data, hex);
+    }
+}
 
-    public deleteHex(coordinates: RadialCoordinates): void;
-    public deleteHex(q: number, r: number): void;
-    public deleteHex(arg1: RadialCoordinates | number, arg2?: number): void {
-        const q = typeof arg1 === 'object' ? arg1.q : arg1;
-        const r = typeof arg1 === 'object' ? arg1.r : arg2!;
-        this.hexes.delete(hexKey(q, r));
-    }
+/**
+ * Converts a hex coordinate to its layout point using the map's size and
+ * orientation. Callers never restate the orientation, so a pointy-top map
+ * can't silently be laid out as flat-top.
+ */
+export function hexToPoint(data: HexerData, coordinate: RadialCoordinates): Point {
+    return radialCoordinatesToPoint(coordinate, data.size, data.mapSettings.hexOrientation);
+}
 
-    /**
-     * Persists a hexagon after an erase: an empty hexagon is removed from the map
-     * entirely, otherwise it is written back with its remaining properties.
-     */
-    public eraseIfEmpty(hex: Hexagon): void {
-        if(hexagonIsEmpty(hex)) {
-            this.deleteHex(hex.q, hex.r);
-        }
-        else {
-            this.setHex(hex);
-        }
-    }
-
-    /**
-     * Converts a hex coordinate to its layout point using this map's size and
-     * orientation. Callers never restate the orientation, so a pointy-top map
-     * can't silently be laid out as flat-top.
-     */
-    public hexToPoint(coordinate: RadialCoordinates): Point {
-        return radialCoordinatesToPoint(coordinate, this.size, this.mapSettings.hexOrientation);
-    }
-
-    /**
-     * Converts a layout point back to the hex coordinate under it, using this
-     * map's size and orientation. The inverse of {@link hexToPoint}.
-     */
-    public pointToHex(x: number, y: number): RadialCoordinates {
-        return pointToRadialCoordinates(x, y, this.size, this.mapSettings.hexOrientation);
-    }
-
-    /** Serializes this map to its on-disk shape. See {@link SerializedHexerData}. */
-    public toJSON(): SerializedHexerData {
-        return {
-            version: this.version,
-            size: this.size,
-            mapSettings: { ...this.mapSettings },
-            camera: { ...this.camera },
-            hexes: Object.fromEntries(this.hexes),
-            rivers: this.rivers.map(river => river.toJSON()),
-            roads: this.roads.map(road => road.toJSON()),
-            factions: this.factions.map(faction => ({ ...faction })),
-        };
-    }
-
-    /** Reconstructs a map from its on-disk shape. The inverse of {@link toJSON}. */
-    public static fromJSON(data: SerializedHexerData): HexerData {
-        return new HexerData({
-            version: data.version,
-            size: data.size,
-            mapSettings: { ...(data.mapSettings ?? defaultMapSettings()) },
-            camera: data.camera ?? defaultCamera(),
-            hexes: new Map(Object.entries(data.hexes ?? {})),
-            rivers: (data.rivers ?? []).map(Path.fromJSON),
-            roads: (data.roads ?? []).map(Path.fromJSON),
-            factions: data.factions ?? [],
-        });
-    }
-
-    public clone(): HexerData {
-        const hexes: HexMap = new Map();
-        for (const [key, hex] of this.hexes) {
-            hexes.set(key, { ...hex });
-        }
-        const rivers = this.rivers.map(path => path.clone());
-        const roads = this.roads.map(path => path.clone());
-        const factions = this.factions.map(faction => ({ ...faction }));
-        const mapSettings = { ...this.mapSettings };
-        const camera = { ...this.camera };
-        return new HexerData({ ...this, hexes, rivers, roads, factions, mapSettings, camera });
-    }
+/**
+ * Converts a layout point back to the hex coordinate under it, using the map's
+ * size and orientation. The inverse of {@link hexToPoint}.
+ */
+export function pointToHex(data: HexerData, x: number, y: number): RadialCoordinates {
+    return pointToRadialCoordinates(x, y, data.size, data.mapSettings.hexOrientation);
 }
 
 export const CURRENT_VERSION = '1.0';

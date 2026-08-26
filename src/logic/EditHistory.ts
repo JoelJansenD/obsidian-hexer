@@ -17,7 +17,7 @@ export class EditHistory {
     private openStroke: symbol | null = null;
 
     constructor(initial: HexerData) {
-        this.present = initial.clone();
+        this.present = structuredClone(initial);
     }
 
     /** Whether there is a prior state to fall back to. */
@@ -41,7 +41,7 @@ export class EditHistory {
         if (!coalesce) {
             this.past.push(this.present);
         }
-        this.present = next.clone();
+        this.present = structuredClone(next);
         this.future.length = 0;
         this.openStroke = stroke ?? null;
     }
@@ -55,7 +55,7 @@ export class EditHistory {
         this.future.push(this.present);
         this.present = previous;
         this.openStroke = null;
-        return this.present.clone();
+        return structuredClone(this.present);
     }
 
     /** Steps forward one entry, returning the reapplied state, or null if there is none. */
@@ -67,6 +67,6 @@ export class EditHistory {
         this.past.push(this.present);
         this.present = next;
         this.openStroke = null;
-        return this.present.clone();
+        return structuredClone(this.present);
     }
 }
