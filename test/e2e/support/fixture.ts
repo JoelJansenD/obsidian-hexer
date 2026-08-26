@@ -50,6 +50,20 @@ export function buildHexerFileContent(rivers: SeedRiver[] = [], factions: SeedFa
         '---',
         'hexer:',
         `  version: "${CURRENT_VERSION}"`,
+        // Emit the full document shape the app itself writes (see
+        // initialFileContent). fromFrontmatter is the identity, so a fixture that
+        // omitted mapSettings/camera would load them as undefined and every
+        // click — which reads camera.offset and mapSettings.hexOrientation —
+        // would throw.
+        '  mapSettings:',
+        '    name: ""',
+        '    hexOrientation: "flat-top"',
+        '    displayHexBorders: true',
+        '    displayCrosshair: true',
+        '  camera:',
+        '    offset:',
+        '      x: 0',
+        '      y: 0',
         '  size: 50',
         '  hexes:',
     ];

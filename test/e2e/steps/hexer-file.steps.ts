@@ -1,12 +1,15 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { fileExplorer, openContextMenu, workspace } from '../support/obsidian.page';
-import { CURRENT_VERSION } from '../../../src/logic/HexerData';
+import { CURRENT_VERSION, initialFileContent } from '../../../src/logic/HexerData';
 import { obsidianPage } from 'wdio-obsidian-service';
 
 const HEXER_EXT = '.hexer.md';
 
 Given('a Hexer file exists', async () => {
-    await obsidianPage.write(`test${HEXER_EXT}`, `---\nhexer:\n  version: ${CURRENT_VERSION}\n  hexes: {}\n---\n`);
+    // Write the app's canonical empty document. fromFrontmatter is the identity,
+    // so opening a hand-rolled partial file (missing camera/mapSettings/rivers/…)
+    // would make the editor's first render throw.
+    await obsidianPage.write(`test${HEXER_EXT}`, initialFileContent);
 });
 
 Given('I have no open views', async () => {
