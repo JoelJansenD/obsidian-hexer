@@ -1,4 +1,3 @@
-import { cameraTransform } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, Point, AxialCoordinates } from "../logic/hexagon";
 import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
@@ -25,13 +24,15 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     context.restore();
 
-    // Pan and zoom the whole scene: hex 0,0 (at point 0,0) lands at the camera's
-    // origin, and map distances are scaled by the zoom around it. Both stack on
-    // top of the DPR transform set on resize.
-    const transform = cameraTransform(data.camera, context.canvas.clientWidth, context.canvas.clientHeight);
+    // Pan and zoom the whole scene so the camera's centre point (a map point)
+    // lands at the viewport centre, scaled by the zoom. Draws map point `p` at
+    // `centre + zoom * (p - offset)`; hit-testing in EditorCanvas inverts this.
+    // Stacks on top of the DPR transform set on resize.
+    const { offset, zoom } = data.camera;
     context.save();
-    context.translate(transform.origin.x, transform.origin.y);
-    context.scale(transform.scale, transform.scale);
+    context.translate(context.canvas.clientWidth / 2, context.canvas.clientHeight / 2);
+    context.scale(zoom, zoom);
+    context.translate(-offset.x, -offset.y);
 
     for(const hex of Object.values(data.hexes)) {
         drawHexTerrain(context, hex, data);

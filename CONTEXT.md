@@ -59,7 +59,7 @@ The two kinds of path. Rivers bend harder than roads; otherwise identical.
 ### Editing
 
 **Camera**:
-How the map is currently framed in the viewport: a pan **offset** plus a **zoom** magnification. The offset is kept centre-relative so it survives resizes. The camera lives in the map and rides undo snapshots; a camera-only move persists to the file but records no undo step.
+How the map is currently framed in the viewport: the map point it is centred on (**offset**) plus a **zoom** magnification. Being a map point, the centre survives resizes. The camera lives in the map and rides undo snapshots; a camera-only move persists to the file but records no undo step.
 _Avoid_: Viewport, scroll, pan (as a noun)
 
 **Zoom**:
