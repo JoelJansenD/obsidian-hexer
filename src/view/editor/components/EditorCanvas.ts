@@ -1,5 +1,6 @@
 import { screenToMap } from "../../../logic/camera";
-import { pointToHex } from "../../../logic/HexerData";
+import { CameraStrategy } from "../../../logic/CameraStrategy";
+import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { ComponentOptions } from "../Editor";
@@ -26,6 +27,11 @@ export default class EditorCanvas {
     private _activeStroke: symbol | null = null;
     private _beginStroke = () => { this._activeStroke = Symbol('stroke'); };
     private _endStroke = () => { this._activeStroke = null; };
+
+    // Always-on pan/zoom gesture handling, independent of the active paint tool.
+    private _cameraStrategy = new CameraStrategy();
+    private _pointerOverCanvas = false;
+    private _cameraCleanups: (() => void)[] = [];
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
@@ -78,6 +84,10 @@ export default class EditorCanvas {
         this.unregisterEvents();
         this._canvasEl.removeEventListener('mousedown', this._beginStroke);
         this._canvasEl.removeEventListener('mouseup', this._endStroke);
+        for (const cleanup of this._cameraCleanups) {
+            cleanup();
+        }
+        this._cameraCleanups = [];
         this._resizeObserver.disconnect();
     }
 
@@ -113,6 +123,8 @@ export default class EditorCanvas {
         this._canvasEl.addEventListener('mousedown', this._beginStroke);
         this._canvasEl.addEventListener('mouseup', this._endStroke);
 
+        this.registerCameraEvents();
+
         this._resizeObserver = new ResizeObserver(() => {
             this.resizeCanvas();
             this.requestRender();
@@ -146,7 +158,105 @@ export default class EditorCanvas {
         }
     }
 
+    /**
+     * Wires the always-on pan/zoom gestures to the canvas: middle-drag and
+     * Space+left-drag pan, cursor-anchored wheel zoom. Every camera move commits
+     * with `commitHistory: false`, so it persists but records no undo entry. The
+     * gesture state lives in the {@link CameraStrategy}; this only forwards DOM
+     * events to it and commits whatever camera it returns.
+     */
+    private registerCameraEvents() {
+        const add = (target: EventTarget, type: string, listener: EventListener, options?: AddEventListenerOptions) => {
+            target.addEventListener(type, listener, options);
+            this._cameraCleanups.push(() => target.removeEventListener(type, listener, options));
+        };
+
+        // A pan begins on the middle button, or the left button while Space is
+        // held. preventDefault stops the browser's middle-click autoscroll.
+        add(this._canvasEl, 'mousedown', (e) => {
+            const event = e as MouseEvent;
+            if (this._cameraStrategy.beginPan(event.button, { x: event.clientX, y: event.clientY })) {
+                event.preventDefault();
+                this.updateCursor();
+            }
+        });
+
+        add(this._canvasEl, 'mousemove', (e) => {
+            if (!this._cameraStrategy.isPanning) {
+                return;
+            }
+            const event = e as MouseEvent;
+            const data = this._dataOptions.getDataClone();
+            const panned = this._cameraStrategy.pan(data.camera, { x: event.clientX, y: event.clientY });
+            if (!panned) {
+                return;
+            }
+            data.camera = panned;
+            this.commitCamera(data);
+        });
+
+        // A pan can end past the canvas edge, so watch for the release on the window.
+        add(window, 'mouseup', () => {
+            if (!this._cameraStrategy.isPanning) {
+                return;
+            }
+            this._cameraStrategy.endPan();
+            this.updateCursor();
+        });
+
+        // passive: false so preventDefault can stop the editor pane from scrolling.
+        add(this._canvasEl, 'wheel', (e) => {
+            const event = e as WheelEvent;
+            event.preventDefault();
+            const rect = this._canvasEl.getBoundingClientRect();
+            const data = this._dataOptions.getDataClone();
+            data.camera = this._cameraStrategy.zoom(
+                data.camera,
+                { x: event.clientX - rect.left, y: event.clientY - rect.top },
+                event.deltaY,
+                this._canvasEl.clientWidth,
+                this._canvasEl.clientHeight);
+            this.commitCamera(data);
+        }, { passive: false });
+
+        // Space arms left-drag panning, but only while the pointer is over the
+        // canvas, so it never swallows the space bar elsewhere in the app.
+        add(this._canvasEl, 'mouseenter', () => { this._pointerOverCanvas = true; });
+        add(this._canvasEl, 'mouseleave', () => { this._pointerOverCanvas = false; });
+        add(window, 'keydown', (e) => {
+            const event = e as KeyboardEvent;
+            if (event.code !== 'Space' || !this._pointerOverCanvas) {
+                return;
+            }
+            event.preventDefault();
+            this._cameraStrategy.setSpaceHeld(true);
+            this.updateCursor();
+        });
+        add(window, 'keyup', (e) => {
+            if ((e as KeyboardEvent).code !== 'Space') {
+                return;
+            }
+            this._cameraStrategy.setSpaceHeld(false);
+            this.updateCursor();
+        });
+    }
+
+    /** Adopts a camera-only move: persists and saves it, but records no undo entry. */
+    private commitCamera(data: HexerData) {
+        this._dataOptions.setData(data, { commitHistory: false });
+        this.requestRender();
+    }
+
+    /** Reflects the gesture state on the canvas cursor: grab when armed, grabbing mid-pan. */
+    private updateCursor() {
+        this._canvasEl.style.cursor = this._cameraStrategy.cursor ?? '';
+    }
+
     private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {
+        // A pan gesture (middle-drag or Space+left-drag) suppresses the paint tool.
+        if (this._cameraStrategy.isPanning) {
+            return;
+        }
         const data = this._dataOptions.getDataClone();
         const rect = this._canvasEl.getBoundingClientRect();
         // Invert the pan-and-zoom the renderer applied so the click maps back to
