@@ -1,5 +1,5 @@
 import { EditorState, Layer, PaintTool } from "../EditorState";
-import { getArea, RadialCoordinates } from "../hexagon";
+import { getArea, AxialCoordinates } from "../hexagon";
 import { getHex, HexerData, setHex } from "../HexerData";
 import { HexLayerAccessor } from "./HexLayerAccessor";
 import { RegisteredEvents, ToolStrategy } from "./ToolStrategy";
@@ -12,13 +12,13 @@ export default class BucketStrategy implements ToolStrategy {
         this.layers = [accessor.layer];
     }
 
-    private fill(data: HexerData, editorState: EditorState, radialCoordinates: RadialCoordinates) {
-        const clickedHex = getHex(data, radialCoordinates);
+    private fill(data: HexerData, editorState: EditorState, axialCoordinates: AxialCoordinates) {
+        const clickedHex = getHex(data, axialCoordinates);
         if(!clickedHex) {
             return;
         }
 
-        const area = getArea(radialCoordinates, (hex) => {
+        const area = getArea(axialCoordinates, (hex) => {
             const existing = getHex(data, hex);
             return existing !== undefined && this.accessor.matches(existing, clickedHex);
         });

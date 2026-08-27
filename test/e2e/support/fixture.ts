@@ -1,5 +1,5 @@
 import { CURRENT_VERSION } from "../../../src/logic/HexerData";
-import { RadialCoordinates } from "../../../src/logic/hexagon";
+import { AxialCoordinates } from "../../../src/logic/hexagon";
 
 /**
  * A stable id for the river a scenario seeds, so steps can target it by id after
@@ -10,7 +10,7 @@ export const SEEDED_RIVER_ID = '00000000-0000-4000-8000-000000000001';
 export interface SeedRiver {
     id: string;
     name: string;
-    nodes: RadialCoordinates[];
+    nodes: AxialCoordinates[];
 }
 
 export interface SeedFaction {
@@ -33,7 +33,7 @@ const SEEDED_FACTION_HEX_COUNT = 3;
 
 // The hexes every Hexer fixture file starts with. Terrain and icon scenarios act
 // on these (e.g. "a hex with coloured terrain"), so they stay constant.
-const STANDARD_HEXES: RadialCoordinates[] = [
+const STANDARD_HEXES: AxialCoordinates[] = [
     { q: 1, r: 1 },
     { q: 2, r: 1 },
     { q: 2, r: 2 },
