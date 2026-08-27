@@ -19,4 +19,4 @@ flowchart TD
 
 ## Consequences
 
-The boundary lint is currently misconfigured — the middle layer's pattern points at a non-existent `src/view/rendering`, so every file under `src/view` is unclassified and the `view` rules never fire. One violation has already slipped through (`ObsidianInterop.ts` imports from the `obsidian` layer). Fixing the config, and deciding whether `ObsidianInterop` becomes a documented exception, is tracked in [#65](https://github.com/JoelJansenD/obsidian-hexer/issues/65). This ADR describes the intended, enforced boundary.
+The boundary lint is currently misconfigured — the middle layer's pattern points at a non-existent `src/view/rendering`, so every file under `src/view` is unclassified and the `view` rules never fire. One violation has already slipped through (`ObsidianInterop.ts` imports from the `obsidian` layer). Fixing the config, and deciding whether `ObsidianInterop` becomes a documented exception, is tracked in [#65](https://github.com/JoelJansenD/obsidian-hexer/issues/65). This ADR describes the intended boundary.
