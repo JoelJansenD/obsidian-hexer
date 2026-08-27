@@ -1,3 +1,4 @@
+import { screenToMap } from "../../../logic/camera";
 import { pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
@@ -149,12 +150,13 @@ export default class EditorCanvas {
         const data = this._dataOptions.getDataClone();
         const rect = this._canvasEl.getBoundingClientRect();
         // Invert the pan-and-zoom the renderer applied so the click maps back to
-        // the same hex drawn under the cursor at any zoom: reverse the viewport
-        // centring, undo the zoom, then re-add the camera's centre point.
-        const { offset, zoom } = data.camera;
-        const mapX = offset.x + (e.clientX - rect.left - this._canvasEl.clientWidth / 2) / zoom;
-        const mapY = offset.y + (e.clientY - rect.top - this._canvasEl.clientHeight / 2) / zoom;
-        const clickedHex = pointToHex(data, mapX, mapY);
+        // the same hex drawn under the cursor at any zoom.
+        const mapPoint = screenToMap(
+            data.camera,
+            this._canvasEl.clientWidth,
+            this._canvasEl.clientHeight,
+            { x: e.clientX - rect.left, y: e.clientY - rect.top });
+        const clickedHex = pointToHex(data, mapPoint.x, mapPoint.y);
         const editorState = this._dataOptions.getEditorState();
         handler(data, editorState, clickedHex);
         this._dataOptions.setData(data, { stroke: this._activeStroke ?? undefined });
