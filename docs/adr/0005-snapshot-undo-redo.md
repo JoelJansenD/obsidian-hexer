@@ -1,6 +1,6 @@
 # Undo/redo by whole-map snapshots
 
-`EditHistory` implements undo/redo by cloning the entire `HexerData` on every committed edit — `past` and `future` stacks of full snapshots — rather than a command/diff log. Snapshots are trivial to reason about and match the plain-data model (a snapshot is just a `structuredClone`), at the cost of memory proportional to map size × history depth.
+`EditHistory` implements undo/redo by cloning the entire `HexerData` on every committed edit (`past` and `future` stacks of full snapshots) rather than a command/diff log. Snapshots are trivial to reason about and match the plain-data model (a snapshot is just a `structuredClone`), at the cost of memory proportional to map size × history depth.
 
 History is intentionally **uncapped** for now. If memory ever becomes a problem, the escape hatch is a command/event ("saga") log, not a cap on snapshots.
 

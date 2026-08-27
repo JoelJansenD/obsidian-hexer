@@ -18,4 +18,4 @@ sequenceDiagram
 
 ## Consequences
 
-The ownership model is settled; its current implementation is not yet tuned. Today a single edit performs several full-map clones (read, history, render) and re-serializes the whole map on every commit — wasteful during a drag. Two optimizations are tracked without disturbing the model: collapsing the redundant clones ([#62](https://github.com/JoelJansenD/obsidian-hexer/issues/62)) and moving serialization to the lazy `getViewData` save seam ([#64](https://github.com/JoelJansenD/obsidian-hexer/issues/64)).
+The ownership model is settled; its current implementation is not yet tuned. Today a single edit performs several full-map clones (read, history, render) and re-serializes the whole map on every commit, wasteful during a drag. Two optimizations are tracked without disturbing the model: collapsing the redundant clones ([#62](https://github.com/JoelJansenD/obsidian-hexer/issues/62)) and moving serialization to the lazy `getViewData` save seam ([#64](https://github.com/JoelJansenD/obsidian-hexer/issues/64)).
