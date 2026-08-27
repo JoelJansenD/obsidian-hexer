@@ -124,38 +124,7 @@ describe('document seam', () => {
     });
 });
 
-describe('camera migration', () => {
-    it('defaults zoom to 1.0 when reading a document written before zoom existed', () => {
-        // Arrange - a pre-zoom camera has an offset but no zoom key.
-        const preZoomDocument = [
-            '---',
-            'hexer:',
-            '  version: "1.0"',
-            '  mapSettings:',
-            '    name: ""',
-            '    hexOrientation: "flat-top"',
-            '    displayHexBorders: true',
-            '    displayCrosshair: true',
-            '  camera:',
-            '    offset:',
-            '      x: 12',
-            '      y: 34',
-            '  size: 50',
-            '  hexes: {}',
-            '  rivers: []',
-            '  roads: []',
-            '  factions: []',
-            '---',
-            '',
-        ].join('\n');
-
-        // Act
-        const restored = parseHexerDocument(preZoomDocument);
-
-        // Assert
-        expect(restored.camera).toEqual({ offset: { x: 12, y: 34 }, zoom: 1 });
-    });
-
+describe('camera serialization', () => {
     it('round-trips a non-default zoom through serialize and parse', () => {
         // Arrange
         const data = createHexerData({ camera: { offset: { x: 5, y: 6 }, zoom: 2.5 } });

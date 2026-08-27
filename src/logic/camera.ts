@@ -10,20 +10,15 @@ export interface Camera {
      */
     offset: Point;
     /**
-     * View magnification applied on top of the pan: `1` is unscaled, `2` draws
-     * the map twice as large. Pure view scale — it never touches the map's
-     * intrinsic hex `size`.
+     * View magnification applied on top of the pan. `1` shows the map at its
+     * natural scale; higher values magnify the view so less of the map fits in
+     * the viewport, lower values show more of it. Pure view scale — it never
+     * touches the map's intrinsic hex `size`.
      */
     zoom: number;
 }
 
-/**
- * A camera as it may appear in a document written before `zoom` existed, so
- * {@link normalizeCamera} can fill the missing field in.
- */
-type StoredCamera = Omit<Camera, 'zoom'> & { zoom?: number };
-
-/** The zoom a freshly created or reset camera uses: unscaled. */
+/** The zoom a freshly created or reset camera uses: the map at its natural scale. */
 export const DEFAULT_ZOOM = 1;
 
 /** The camera a freshly created map starts with, centred on hex 0,0, unscaled. */
@@ -31,18 +26,6 @@ export function defaultCamera(): Camera {
     return {
         offset: { x: 0, y: 0 },
         zoom: DEFAULT_ZOOM,
-    };
-}
-
-/**
- * Fills in camera fields absent from an older document. Pre-zoom maps have no
- * `zoom`, which defaults to {@link DEFAULT_ZOOM}; a camera that already carries
- * a zoom is returned unchanged.
- */
-export function normalizeCamera(camera: StoredCamera): Camera {
-    return {
-        offset: camera.offset,
-        zoom: camera.zoom ?? DEFAULT_ZOOM,
     };
 }
 
