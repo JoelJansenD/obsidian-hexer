@@ -1,9 +1,10 @@
-import { screenToMap } from "../../../logic/camera";
+import { fitCamera, screenToMap } from "../../../logic/camera";
 import { CameraStrategy } from "../../../logic/CameraStrategy";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { ComponentOptions } from "../Editor";
+import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
 
 const LEFT_MOUSE_BUTTON_CLICK = 0;
@@ -17,6 +18,7 @@ export default class EditorCanvas {
     private _context!: CanvasRenderingContext2D;
     private _resizeObserver!: ResizeObserver;
     private _tools!: EditorTools;
+    private _actionBar!: EditorActionBar;
     private _listeners = new Map<string, EventListener>();
 
     private _renderRequested = false;
@@ -114,6 +116,7 @@ export default class EditorCanvas {
         this._context = this._canvasEl.getContext('2d')!;
         
         this._tools = new EditorTools(canvasAreaEl, this._dataOptions);
+        this._actionBar = new EditorActionBar(canvasAreaEl, { onZoomToFit: () => this.zoomToFit() });
 
         // Track pointer gestures independently of the active tool so that
         // strokes keep coalescing across tool changes. A press opens a stroke;
@@ -239,6 +242,13 @@ export default class EditorCanvas {
             this._cameraStrategy.setSpaceHeld(false);
             this.updateCursor();
         });
+    }
+
+    /** Frames the whole map in the viewport. A camera-only move, like pan and zoom. */
+    private zoomToFit() {
+        const data = this._dataOptions.getDataClone();
+        data.camera = fitCamera(data, this._canvasEl.clientWidth, this._canvasEl.clientHeight);
+        this.commitCamera(data);
     }
 
     /** Adopts a camera-only move: persists and saves it, but records no undo entry. */
