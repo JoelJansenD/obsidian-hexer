@@ -8,6 +8,7 @@ import {
     MIN_ZOOM,
     defaultCamera,
     fitCamera,
+    mapToScreen,
     panCamera,
     screenToMap,
     zoomCameraAt,
@@ -20,6 +21,43 @@ describe('defaultCamera', () => {
 
         // Assert
         expect(camera).toEqual({ offset: { x: 0, y: 0 }, zoom: DEFAULT_ZOOM });
+    });
+});
+
+describe('mapToScreen', () => {
+    it('draws the camera centre point at the viewport centre', () => {
+        // Arrange
+        const camera: Camera = { offset: { x: 200, y: -50 }, zoom: 1 };
+
+        // Act
+        const screen = mapToScreen(camera, 800, 600, { x: 200, y: -50 });
+
+        // Assert
+        expect(screen).toEqual({ x: 400, y: 300 });
+    });
+
+    it('scales map distances from the centre by the zoom', () => {
+        // Arrange - zoom 2 draws a 50 map-unit offset as 100 screen px.
+        const camera: Camera = { offset: { x: 0, y: 0 }, zoom: 2 };
+
+        // Act
+        const screen = mapToScreen(camera, 800, 600, { x: 50, y: 0 });
+
+        // Assert
+        expect(screen).toEqual({ x: 500, y: 300 });
+    });
+
+    it('inverts screenToMap exactly at any pan and zoom', () => {
+        // Arrange
+        const camera: Camera = { offset: { x: 17, y: -42 }, zoom: 0.35 };
+        const mapPoint = { x: 123, y: -456 };
+
+        // Act
+        const roundTripped = screenToMap(camera, 1024, 768, mapToScreen(camera, 1024, 768, mapPoint));
+
+        // Assert
+        expect(roundTripped.x).toBeCloseTo(mapPoint.x, 9);
+        expect(roundTripped.y).toBeCloseTo(mapPoint.y, 9);
     });
 });
 

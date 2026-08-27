@@ -36,6 +36,19 @@ export const MAX_ZOOM = 5;
 export const ZOOM_STEP = 1.1;
 
 /**
+ * Converts a map point to the screen point (CSS pixels, relative to the canvas)
+ * it is drawn at: the camera centre lands at the viewport centre, and map
+ * distances are scaled by the zoom around it. The renderer positions the scene
+ * through this; {@link screenToMap} is its inverse.
+ */
+export function mapToScreen(camera: Camera, viewportWidth: number, viewportHeight: number, point: Point): Point {
+    return {
+        x: viewportWidth / 2 + camera.zoom * (point.x - camera.offset.x),
+        y: viewportHeight / 2 + camera.zoom * (point.y - camera.offset.y),
+    };
+}
+
+/**
  * Converts a point in screen space (CSS pixels, relative to the canvas) to the
  * map point drawn under it, inverting the pan and zoom the renderer applies:
  * reverse the viewport centring, undo the zoom, then re-add the camera centre.
