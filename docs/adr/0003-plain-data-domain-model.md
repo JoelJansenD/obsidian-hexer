@@ -1,6 +1,6 @@
 # Model domain data as interfaces + free functions, not classes
 
-Domain data (`HexerData`, `Hexagon`, `Path`, `Faction`, …) are plain TypeScript interfaces manipulated by free functions, not classes with methods. Because the data carry no behaviour, they are directly serializable: the in-memory value *is* the on-disk value, with nothing to strip or rehydrate at the persistence boundary (see [ADR 0001](./0001-map-stored-in-frontmatter.md)).
+Domain data (`HexerData`, `Hexagon`, `Path`, `Faction`, …) are plain TypeScript interfaces manipulated by pure functions, not classes with methods. Because the data carry no behaviour, they are directly serializable, as the in-memory value equals the on-disk value, with nothing to strip or rehydrate at the persistence boundary (see [ADR 0001](./0001-map-stored-in-frontmatter.md)).
 
 Classes are reserved for stateful or polymorphic collaborators (tool strategies, `EditHistory`, and the view components), where identity and behaviour matter.
 

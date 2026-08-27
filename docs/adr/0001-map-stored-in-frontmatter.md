@@ -2,7 +2,7 @@
 
 A Hexer map lives entirely in the YAML frontmatter of a `.hexer.md` note, nested under a single `hexer:` key. Frontmatter is Obsidian's native metadata mechanism, so the map travels with an ordinary note (portable, linkable, versionable), and the `hexer:` namespace keeps it from colliding with other plugins' or the user's own frontmatter fields.
 
-The on-disk shape is deliberately identical to the in-memory shape: `hexes` and path `nodes` are plain objects keyed by `"q,r"` strings rather than `Map`s. Parsing is then a near-identity operation: fast JSON-style record access and O(1) keyed lookup on update, with no shape-transform seam to maintain.
+The on-disk shape is deliberately identical to the in-memory shape: `hexes` and path `nodes` are plain objects keyed by `"q,r"` strings rather than `Map`s. This allows for one-to-one parsing and O(1) keyed lookup on update.
 
 ## Consequences
 

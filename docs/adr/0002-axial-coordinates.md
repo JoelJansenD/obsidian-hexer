@@ -6,4 +6,4 @@ The map owns the `size` and `orientation` (flat-top / pointy-top) that turn a co
 
 ## Considered options
 
-Offset and doubled coordinates were rejected: they complicate neighbour and distance maths that axial + cube handle cleanly. (The type was previously misnamed `RadialCoordinates`; it is now `AxialCoordinates`.)
+Offset and doubled coordinates were rejected: they complicate neighbour and distance maths that axial + cube handle cleanly.
