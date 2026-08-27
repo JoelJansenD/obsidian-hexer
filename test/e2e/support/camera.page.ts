@@ -1,0 +1,168 @@
+import { AxialCoordinates, Point, axialCoordinatesToPoint } from "../../../src/logic/hexagon";
+import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
+import editorPage from "./editor.page";
+
+const MIDDLE_MOUSE_BUTTON = 1;
+
+interface CameraState {
+    offset: Point;
+    zoom: number;
+}
+
+class CameraPage {
+    /** The live camera (map-space centre offset + zoom). */
+    async getCamera(): Promise<CameraState> {
+        const { camera } = await this.readCameraAndSize();
+        return camera;
+    }
+
+    /** Whether an undo step is available — false right after a fresh load. */
+    async canUndo(): Promise<boolean> {
+        return browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as { history?: { canUndo?: boolean } } | undefined;
+            return view?.history?.canUndo ?? false;
+        });
+    }
+
+    /**
+     * Wraps the view's requestSave so a later {@link wasSaveRequested} can tell
+     * whether a gesture asked the host to persist — i.e. marked the document
+     * dirty. Install after any seeding but before the gesture under test.
+     */
+    async spyOnSaveRequests(): Promise<void> {
+        await browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                requestSave: () => void;
+                __saveRequested?: boolean;
+                __saveSpied?: boolean;
+            } | undefined;
+            if (!view) {
+                return;
+            }
+            view.__saveRequested = false;
+            if (!view.__saveSpied) {
+                const original = view.requestSave.bind(view);
+                view.requestSave = () => { view.__saveRequested = true; return original(); };
+                view.__saveSpied = true;
+            }
+        });
+    }
+
+    async wasSaveRequested(): Promise<boolean> {
+        return browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as { __saveRequested?: boolean } | undefined;
+            return view?.__saveRequested ?? false;
+        });
+    }
+
+    /**
+     * Reseeds the open view with content spread across a wide area — the standard
+     * hexes near the origin plus a river whose nodes reach far out — so it starts
+     * partly off-screen at the default camera. A fresh load, so no undo history.
+     */
+    async seedWideContent(): Promise<void> {
+        const content = buildHexerFileContent([
+            { id: SEEDED_RIVER_ID, name: 'Seeded river', nodes: [{ q: -6, r: 4 }, { q: 7, r: -3 }, { q: 9, r: 6 }] },
+        ]);
+        await browser.executeObsidian(({ app }, data) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as { setViewData?: (data: string, clear: boolean) => void } | undefined;
+            view?.setViewData?.(data, true);
+        }, content);
+    }
+
+    /** Drags with the middle mouse button from the canvas centre by a pixel delta. */
+    async middleDrag(dx: number, dy: number): Promise<void> {
+        await browser.action('pointer', { parameters: { pointerType: 'mouse' } })
+            .move({ origin: editorPage.canvas, x: 0, y: 0 })
+            .down({ button: MIDDLE_MOUSE_BUTTON })
+            .move({ origin: editorPage.canvas, x: Math.round(dx), y: Math.round(dy), duration: 50 })
+            .up({ button: MIDDLE_MOUSE_BUTTON })
+            .perform();
+    }
+
+    /** Scrolls the wheel over a hex's centre. A negative delta scrolls up (zooms in). */
+    async wheelOverHex(hex: AxialCoordinates, deltaY: number): Promise<void> {
+        const offset = await this.hexScreenOffset(hex);
+        await browser.action('wheel')
+            .scroll({ origin: editorPage.canvas, x: Math.round(offset.x), y: Math.round(offset.y), deltaX: 0, deltaY })
+            .perform();
+    }
+
+    /** Clicks the zoom-to-fit button on the action bar. */
+    async clickZoomToFit(): Promise<void> {
+        const button = browser.$('[aria-label="Zoom to fit"]');
+        await button.waitForClickable();
+        await button.click();
+    }
+
+    /**
+     * A hex's centre as a pixel offset from the canvas centre, under the live
+     * camera: `zoom * (mapPoint - offset)`. This is where the renderer draws it,
+     * and the origin WebdriverIO pointer/wheel offsets use.
+     */
+    async hexScreenOffset(hex: AxialCoordinates): Promise<Point> {
+        const { camera, size } = await this.readCameraAndSize();
+        return this.toScreenOffset(hex, camera, size);
+    }
+
+    /** Every hex and path node as a pixel offset from the canvas centre. */
+    async allContentScreenOffsets(): Promise<Point[]> {
+        const { camera, size } = await this.readCameraAndSize();
+        const content = await browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                hexerData?: {
+                    hexes?: Record<string, { q: number; r: number }>;
+                    rivers?: Array<{ nodes?: Record<string, { q: number; r: number }> }>;
+                    roads?: Array<{ nodes?: Record<string, { q: number; r: number }> }>;
+                };
+            } | undefined;
+            const data = view?.hexerData;
+            const nodesOf = (paths: Array<{ nodes?: Record<string, { q: number; r: number }> }> = []) =>
+                paths.flatMap(path => Object.values(path.nodes ?? {}).map(node => ({ q: node.q, r: node.r })));
+            return [
+                ...Object.values(data?.hexes ?? {}).map(hex => ({ q: hex.q, r: hex.r })),
+                ...nodesOf(data?.rivers),
+                ...nodesOf(data?.roads),
+            ];
+        });
+        return content.map(coordinate => this.toScreenOffset(coordinate, camera, size));
+    }
+
+    /** The canvas display size in CSS pixels. */
+    async canvasSize(): Promise<{ width: number; height: number }> {
+        return editorPage.canvas.getSize();
+    }
+
+    private toScreenOffset(coordinate: AxialCoordinates, camera: CameraState, size: number): Point {
+        // The e2e fixtures use flat-top maps, so name that orientation explicitly.
+        const point = axialCoordinatesToPoint(coordinate, size, 'flat-top');
+        return {
+            x: camera.zoom * (point.x - camera.offset.x),
+            y: camera.zoom * (point.y - camera.offset.y),
+        };
+    }
+
+    private async readCameraAndSize(): Promise<{ camera: CameraState; size: number }> {
+        return browser.executeObsidian(({ app }) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                hexerData?: { camera?: { offset?: { x: number; y: number }; zoom?: number }; size?: number };
+            } | undefined;
+            const data = view?.hexerData;
+            return {
+                camera: {
+                    offset: data?.camera?.offset ?? { x: 0, y: 0 },
+                    zoom: data?.camera?.zoom ?? 1,
+                },
+                size: data?.size ?? 50,
+            };
+        });
+    }
+}
+
+export default new CameraPage();

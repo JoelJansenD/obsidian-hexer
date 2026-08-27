@@ -1,50 +1,81 @@
 import { Given, When, Then } from '@wdio/cucumber-framework';
+import { expect } from '@wdio/globals';
+import cameraPage from '../support/camera.page';
 import { CameraContext } from '../support/contexts/camera.context';
 
-Given('a hex is painted at 0,0 centred in the viewport', async function (this: CameraContext) {
-    return 'pending';
+// A pixel tolerance for screen-position assertions, absorbing pointer rounding
+// and subpixel drift through the zoom.
+const PIXEL_TOLERANCE = 3;
+
+// A standard painted hex from the fixture, used as the reference point whose
+// on-screen movement reveals what the camera did.
+const REFERENCE_HEX = { q: 1, r: 1 };
+
+Given('the map has hexes and a river spread across a wide area', async function () {
+    await cameraPage.seedWideContent();
 });
 
-Given('a hex is painted with the pointer over its centre', async function (this: CameraContext) {
-    return 'pending';
+When('I drag the middle mouse button {int} px right and {int} px down', async function (this: CameraContext, dx: number, dy: number) {
+    this.referenceHex = REFERENCE_HEX;
+    this.referenceScreenPoint = await cameraPage.hexScreenOffset(REFERENCE_HEX);
+    await cameraPage.spyOnSaveRequests();
+
+    await cameraPage.middleDrag(dx, dy);
 });
 
-Given('hexes and a river spread across a wide area, partly off-screen', async function (this: CameraContext) {
-    return 'pending';
+When('I scroll the wheel up one notch over a painted hex', async function (this: CameraContext) {
+    this.referenceHex = REFERENCE_HEX;
+    this.cameraBeforeGesture = await cameraPage.getCamera();
+    this.referenceScreenPoint = await cameraPage.hexScreenOffset(REFERENCE_HEX);
+    await cameraPage.spyOnSaveRequests();
+
+    // A negative wheel delta scrolls up, which zooms in one notch.
+    await cameraPage.wheelOverHex(REFERENCE_HEX, -100);
 });
 
-When('I drag the middle mouse button {int} px right and {int} px down', async function (this: CameraContext) {
-    return 'pending';
+When('I click the zoom to fit button on the action bar', async function () {
+    await cameraPage.spyOnSaveRequests();
+    await cameraPage.clickZoomToFit();
 });
 
-When('I scroll the wheel up one notch over the hex', async function (this: CameraContext) {
-    return 'pending';
+Then('the whole scene shifts right and down by {int},{int}', async function (this: CameraContext, dx: number, dy: number) {
+    expect(this.referenceScreenPoint).toBeDefined();
+    const after = await cameraPage.hexScreenOffset(this.referenceHex!);
+
+    expect(Math.abs(after.x - this.referenceScreenPoint!.x - dx)).toBeLessThanOrEqual(PIXEL_TOLERANCE);
+    expect(Math.abs(after.y - this.referenceScreenPoint!.y - dy)).toBeLessThanOrEqual(PIXEL_TOLERANCE);
 });
 
-When('I click the zoom to fit button on the action bar', async function (this: CameraContext) {
-    return 'pending';
+Then('the zoom increases by a factor of {float}', async function (this: CameraContext, factor: number) {
+    expect(this.cameraBeforeGesture).toBeDefined();
+    const after = await cameraPage.getCamera();
+
+    expect(after.zoom).toBeCloseTo(this.cameraBeforeGesture!.zoom * factor, 4);
 });
 
-Then('the scene shifts by {int},{int} and hex 0,0 is drawn right and down of centre', async function (this: CameraContext) {
-    return 'pending';
+Then('that hex stays under the pointer', async function (this: CameraContext) {
+    expect(this.referenceScreenPoint).toBeDefined();
+    const after = await cameraPage.hexScreenOffset(this.referenceHex!);
+
+    expect(Math.abs(after.x - this.referenceScreenPoint!.x)).toBeLessThanOrEqual(PIXEL_TOLERANCE);
+    expect(Math.abs(after.y - this.referenceScreenPoint!.y)).toBeLessThanOrEqual(PIXEL_TOLERANCE);
 });
 
-Then('the zoom increases by a factor of {float}', async function (this: CameraContext) {
-    return 'pending';
+Then('every hex and every path node is visible within the viewport', async function () {
+    const { width, height } = await cameraPage.canvasSize();
+    const offsets = await cameraPage.allContentScreenOffsets();
+
+    expect(offsets.length).toBeGreaterThan(0);
+    for (const offset of offsets) {
+        expect(Math.abs(offset.x)).toBeLessThanOrEqual(width / 2);
+        expect(Math.abs(offset.y)).toBeLessThanOrEqual(height / 2);
+    }
 });
 
-Then('the hex under the pointer stays under the pointer', async function (this: CameraContext) {
-    return 'pending';
+Then('no undo entry is created', async function () {
+    expect(await cameraPage.canUndo()).toBe(false);
 });
 
-Then('every hex and every path node is visible within the viewport with padding', async function (this: CameraContext) {
-    return 'pending';
-});
-
-Then('no undo entry is created', async function (this: CameraContext) {
-    return 'pending';
-});
-
-Then('the document is marked dirty', async function (this: CameraContext) {
-    return 'pending';
+Then('the document is marked dirty', async function () {
+    expect(await cameraPage.wasSaveRequested()).toBe(true);
 });

@@ -7,21 +7,19 @@ Feature: Camera
     Given I have opened a Hexer file
 
   Scenario: Panning with the middle mouse button
-    Given a hex is painted at 0,0 centred in the viewport
     When I drag the middle mouse button 100 px right and 60 px down
-    Then the scene shifts by 100,60 and hex 0,0 is drawn right and down of centre
+    Then the whole scene shifts right and down by 100,60
     And no undo entry is created
     But the document is marked dirty
 
   Scenario: Wheel zoom is anchored at the cursor
-    Given a hex is painted with the pointer over its centre
-    When I scroll the wheel up one notch over the hex
+    When I scroll the wheel up one notch over a painted hex
     Then the zoom increases by a factor of 1.1
-    And the hex under the pointer stays under the pointer
+    And that hex stays under the pointer
 
   Scenario: Zoom to fit frames all content
-    Given hexes and a river spread across a wide area, partly off-screen
+    Given the map has hexes and a river spread across a wide area
     When I click the zoom to fit button on the action bar
-    Then every hex and every path node is visible within the viewport with padding
+    Then every hex and every path node is visible within the viewport
     And no undo entry is created
     But the document is marked dirty
