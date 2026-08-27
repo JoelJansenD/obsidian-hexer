@@ -88,7 +88,11 @@ export class HexerView extends TextFileView {
     }
 
     private setHexerData(data: HexerData, commit?: CommitOptions): void {
-        this.history.record(data, commit?.stroke);
+        // A camera-only move (commitHistory: false) still persists and saves, but
+        // records no undo entry — panning and zooming never become undo steps.
+        if (commit?.commitHistory !== false) {
+            this.history.record(data, commit?.stroke);
+        }
         this.persist(data);
     }
 
