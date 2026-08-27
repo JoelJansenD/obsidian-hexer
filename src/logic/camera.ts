@@ -30,14 +30,43 @@ export function defaultCamera(): Camera {
 }
 
 /**
- * The point on the canvas that map point 0,0 is drawn at: the viewport centre
- * shifted by the camera's pan. Returned in CSS pixels, matching the coordinate
- * space drawing and hit-testing work in. Both the renderer and click handling
- * go through this so they agree on where each hex sits.
+ * The camera's pan-and-zoom mapping between map space and screen space, both in
+ * CSS pixels. Rendering configures the canvas from {@link origin} and
+ * {@link scale}; hit-testing runs {@link toMap} on the cursor. Both come from
+ * this one construction, so they cannot disagree about where a hex sits.
  */
-export function cameraViewOffset(camera: Camera, viewportWidth: number, viewportHeight: number): Point {
-    return {
+export interface CameraTransform {
+    /** Where map point (0,0) is drawn on screen: the viewport centre plus pan. */
+    readonly origin: Point;
+    /** The zoom magnification this transform applies. */
+    readonly scale: number;
+    /** Maps a point from map space to screen space. */
+    toScreen(point: Point): Point;
+    /** Maps a point from screen space back to map space. The inverse of {@link toScreen}. */
+    toMap(point: Point): Point;
+}
+
+/**
+ * Builds the {@link CameraTransform} for a camera over a viewport of the given
+ * size. Map origin lands at the viewport centre shifted by the pan, and map
+ * distances are scaled by the zoom around that origin.
+ */
+export function cameraTransform(camera: Camera, viewportWidth: number, viewportHeight: number): CameraTransform {
+    const origin: Point = {
         x: viewportWidth / 2 + camera.offset.x,
         y: viewportHeight / 2 + camera.offset.y,
+    };
+    const scale = camera.zoom;
+    return {
+        origin,
+        scale,
+        toScreen: (point) => ({
+            x: origin.x + scale * point.x,
+            y: origin.y + scale * point.y,
+        }),
+        toMap: (point) => ({
+            x: (point.x - origin.x) / scale,
+            y: (point.y - origin.y) / scale,
+        }),
     };
 }
