@@ -110,6 +110,7 @@ hexer:
     offset:
       x: 0
       y: 0
+    zoom: 1
   size: 50
   hexes: {}
   rivers: []

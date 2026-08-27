@@ -1,4 +1,5 @@
 import { parseYaml, stringifyYaml } from "obsidian";
+import { normalizeCamera } from "../logic/camera";
 import { HexerData } from "../logic/HexerData";
 
 /** Matches the leading `---\n...\n---` YAML frontmatter block of a Hexer file. */
@@ -34,7 +35,11 @@ export function parseHexerDocument(data: string): HexerData {
     }
 
     const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
-    return fromFrontmatter(frontmatter);
+    const parsed = fromFrontmatter(frontmatter);
+    // Documents written before zoom existed carry a camera without it; fill the
+    // default in on read so the rest of the app can assume a complete camera.
+    parsed.camera = normalizeCamera(parsed.camera);
+    return parsed;
 }
 
 /**
