@@ -80,18 +80,12 @@ class CameraPage {
      * the dispatched events.
      */
     async middleDrag(dx: number, dy: number): Promise<void> {
-        const diagnostics = await browser.executeObsidian(({ app }, deltaX, deltaY) => {
+        await browser.executeObsidian(({ app }, deltaX, deltaY) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
-            const view = leaf?.view as unknown as {
-                containerEl?: HTMLElement;
-                hexerData?: { camera?: { offset?: { x: number; y: number } } };
-            } | undefined;
-            const canvas = view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
+            const canvas = leaf?.view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
             if (!canvas) {
-                return { canvasFound: false, before: null, after: null };
+                return;
             }
-            const readOffset = () => ({ ...(view?.hexerData?.camera?.offset ?? { x: 0, y: 0 }) });
-            const before = readOffset();
             const rect = canvas.getBoundingClientRect();
             const startX = rect.left + rect.width / 2;
             const startY = rect.top + rect.height / 2;
@@ -102,9 +96,7 @@ class CameraPage {
             canvas.dispatchEvent(mouse('mousemove', startX + deltaX, startY + deltaY, { buttons: 4 }));
             // The pan ends on a window-level mouseup, wherever the release lands.
             window.dispatchEvent(mouse('mouseup', startX + deltaX, startY + deltaY, { button: 1 }));
-            return { canvasFound: true, before, after: readOffset() };
         }, dx, dy);
-        console.debug('[hexer-e2e] middleDrag', JSON.stringify(diagnostics));
     }
 
     /**
@@ -114,18 +106,12 @@ class CameraPage {
      */
     async wheelOverHex(hex: AxialCoordinates, deltaY: number): Promise<void> {
         const offset = await this.hexScreenOffset(hex);
-        const diagnostics = await browser.executeObsidian(({ app }, offsetX, offsetY, delta) => {
+        await browser.executeObsidian(({ app }, offsetX, offsetY, delta) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
-            const view = leaf?.view as unknown as {
-                containerEl?: HTMLElement;
-                hexerData?: { camera?: { zoom?: number } };
-            } | undefined;
-            const canvas = view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
+            const canvas = leaf?.view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
             if (!canvas) {
-                return { canvasFound: false, before: null, after: null };
+                return;
             }
-            const readZoom = () => view?.hexerData?.camera?.zoom ?? null;
-            const before = readZoom();
             const rect = canvas.getBoundingClientRect();
             canvas.dispatchEvent(new WheelEvent('wheel', {
                 deltaY: delta,
@@ -134,9 +120,7 @@ class CameraPage {
                 bubbles: true,
                 cancelable: true,
             }));
-            return { canvasFound: true, before, after: readZoom() };
         }, offset.x, offset.y, deltaY);
-        console.debug('[hexer-e2e] wheelOverHex', JSON.stringify(diagnostics));
     }
 
     /** Clicks the zoom-to-fit button on the action bar. */
