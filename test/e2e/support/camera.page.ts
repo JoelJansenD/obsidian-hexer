@@ -74,16 +74,24 @@ class CameraPage {
 
     /**
      * Drags with the middle mouse button from the canvas centre by a pixel delta.
-     * Dispatches the DOM events directly: WebdriverIO's native middle-button input
-     * is not delivered reliably in the Obsidian/Electron harness, but the app's
-     * real listeners, camera commit, and save path still run.
+     * Dispatches the DOM events on the view's real canvas: WebdriverIO's native
+     * middle-button input is not delivered reliably in the Obsidian/Electron
+     * harness, but the app's own listeners, camera commit, and save path run on
+     * the dispatched events.
      */
     async middleDrag(dx: number, dy: number): Promise<void> {
-        await browser.execute((deltaX: number, deltaY: number) => {
-            const canvas = document.querySelector('.hexer-canvas');
+        const diagnostics = await browser.executeObsidian(({ app }, deltaX, deltaY) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                containerEl?: HTMLElement;
+                hexerData?: { camera?: { offset?: { x: number; y: number } } };
+            } | undefined;
+            const canvas = view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
             if (!canvas) {
-                return;
+                return { canvasFound: false, before: null, after: null };
             }
+            const readOffset = () => ({ ...(view?.hexerData?.camera?.offset ?? { x: 0, y: 0 }) });
+            const before = readOffset();
             const rect = canvas.getBoundingClientRect();
             const startX = rect.left + rect.width / 2;
             const startY = rect.top + rect.height / 2;
@@ -94,22 +102,30 @@ class CameraPage {
             canvas.dispatchEvent(mouse('mousemove', startX + deltaX, startY + deltaY, { buttons: 4 }));
             // The pan ends on a window-level mouseup, wherever the release lands.
             window.dispatchEvent(mouse('mouseup', startX + deltaX, startY + deltaY, { button: 1 }));
+            return { canvasFound: true, before, after: readOffset() };
         }, dx, dy);
+        console.debug('[hexer-e2e] middleDrag', JSON.stringify(diagnostics));
     }
 
     /**
      * Scrolls the wheel over a hex's centre. A negative delta scrolls up (zooms
-     * in). Dispatched directly for the same reason as {@link middleDrag}: the
-     * harness does not deliver a native wheel input, but the app's wheel handler
-     * runs on the dispatched event.
+     * in). Dispatched on the view's real canvas for the same reason as
+     * {@link middleDrag}.
      */
     async wheelOverHex(hex: AxialCoordinates, deltaY: number): Promise<void> {
         const offset = await this.hexScreenOffset(hex);
-        await browser.execute((offsetX: number, offsetY: number, delta: number) => {
-            const canvas = document.querySelector('.hexer-canvas');
+        const diagnostics = await browser.executeObsidian(({ app }, offsetX, offsetY, delta) => {
+            const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
+            const view = leaf?.view as unknown as {
+                containerEl?: HTMLElement;
+                hexerData?: { camera?: { zoom?: number } };
+            } | undefined;
+            const canvas = view?.containerEl?.querySelector('.hexer-canvas') as HTMLCanvasElement | null;
             if (!canvas) {
-                return;
+                return { canvasFound: false, before: null, after: null };
             }
+            const readZoom = () => view?.hexerData?.camera?.zoom ?? null;
+            const before = readZoom();
             const rect = canvas.getBoundingClientRect();
             canvas.dispatchEvent(new WheelEvent('wheel', {
                 deltaY: delta,
@@ -118,7 +134,9 @@ class CameraPage {
                 bubbles: true,
                 cancelable: true,
             }));
+            return { canvasFound: true, before, after: readZoom() };
         }, offset.x, offset.y, deltaY);
+        console.debug('[hexer-e2e] wheelOverHex', JSON.stringify(diagnostics));
     }
 
     /** Clicks the zoom-to-fit button on the action bar. */
