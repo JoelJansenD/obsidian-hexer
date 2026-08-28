@@ -20,6 +20,6 @@ Feature: Camera
   Scenario: Zoom to fit frames all content
     Given the map has hexes and a river spread across a wide area
     When I click the zoom to fit button on the action bar
-    Then every hex and every path node is visible within the viewport
+    Then every hex and every path node is visible within the viewport with padding
     And no undo entry is created
     But the document is marked dirty

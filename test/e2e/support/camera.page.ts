@@ -1,3 +1,4 @@
+import { mapToScreen } from "../../../src/logic/camera";
 import { AxialCoordinates, Point, axialCoordinatesToPoint } from "../../../src/logic/hexagon";
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
 import editorPage from "./editor.page";
@@ -97,6 +98,7 @@ class CameraPage {
             // The pan ends on a window-level mouseup, wherever the release lands.
             window.dispatchEvent(mouse('mouseup', startX + deltaX, startY + deltaY, { button: 1 }));
         }, dx, dy);
+        console.debug('[hexer-e2e] middleDrag', JSON.stringify({ dx, dy }));
     }
 
     /**
@@ -121,6 +123,7 @@ class CameraPage {
                 cancelable: true,
             }));
         }, offset.x, offset.y, deltaY);
+        console.debug('[hexer-e2e] wheelOverHex', JSON.stringify({ hex, deltaY, offset }));
     }
 
     /** Clicks the zoom-to-fit button on the action bar. */
@@ -128,6 +131,7 @@ class CameraPage {
         const button = browser.$('[aria-label="Zoom to fit"]');
         await button.waitForClickable();
         await button.click();
+        console.debug('[hexer-e2e] clickZoomToFit');
     }
 
     /**
@@ -172,10 +176,16 @@ class CameraPage {
     private toScreenOffset(coordinate: AxialCoordinates, camera: CameraState, size: number): Point {
         // The e2e fixtures use flat-top maps, so name that orientation explicitly.
         const point = axialCoordinatesToPoint(coordinate, size, 'flat-top');
-        return {
-            x: camera.zoom * (point.x - camera.offset.x),
-            y: camera.zoom * (point.y - camera.offset.y),
-        };
+        // Centre-relative screen offset: mapToScreen over a zero-sized viewport
+        // drops the viewport-centre term, leaving zoom * (point - offset). Reusing
+        // the renderer's own transform keeps hit positions in step with the model.
+        return mapToScreen(camera, 0, 0, point);
+    }
+
+    /** The one-hex fit padding in screen pixels at the current zoom. */
+    async fitPaddingScreenPx(): Promise<number> {
+        const { camera, size } = await this.readCameraAndSize();
+        return size * camera.zoom;
     }
 
     private async readCameraAndSize(): Promise<{ camera: CameraState; size: number }> {

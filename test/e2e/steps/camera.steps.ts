@@ -61,14 +61,18 @@ Then('that hex stays under the pointer', async function (this: CameraContext) {
     expect(Math.abs(after.y - this.referenceScreenPoint!.y)).toBeLessThanOrEqual(PIXEL_TOLERANCE);
 });
 
-Then('every hex and every path node is visible within the viewport', async function () {
+Then('every hex and every path node is visible within the viewport with padding', async function () {
     const { width, height } = await cameraPage.canvasSize();
     const offsets = await cameraPage.allContentScreenOffsets();
+    // Zoom-to-fit leaves about one hex of padding, so content centres sit at
+    // least that far in from the edges. Require half a hex of margin, which a
+    // padding-free fit (content reaching the edges) would fail.
+    const margin = (await cameraPage.fitPaddingScreenPx()) / 2;
 
     expect(offsets.length).toBeGreaterThan(0);
     for (const offset of offsets) {
-        expect(Math.abs(offset.x)).toBeLessThanOrEqual(width / 2);
-        expect(Math.abs(offset.y)).toBeLessThanOrEqual(height / 2);
+        expect(Math.abs(offset.x)).toBeLessThanOrEqual(width / 2 - margin);
+        expect(Math.abs(offset.y)).toBeLessThanOrEqual(height / 2 - margin);
     }
 });
 
