@@ -2,8 +2,6 @@ import { AxialCoordinates, Point, axialCoordinatesToPoint } from "../../../src/l
 import { buildHexerFileContent, SEEDED_RIVER_ID } from "./fixture";
 import editorPage from "./editor.page";
 
-const MIDDLE_MOUSE_BUTTON = 1;
-
 interface CameraState {
     offset: Point;
     zoom: number;
@@ -74,22 +72,53 @@ class CameraPage {
         }, content);
     }
 
-    /** Drags with the middle mouse button from the canvas centre by a pixel delta. */
+    /**
+     * Drags with the middle mouse button from the canvas centre by a pixel delta.
+     * Dispatches the DOM events directly: WebdriverIO's native middle-button input
+     * is not delivered reliably in the Obsidian/Electron harness, but the app's
+     * real listeners, camera commit, and save path still run.
+     */
     async middleDrag(dx: number, dy: number): Promise<void> {
-        await browser.action('pointer', { parameters: { pointerType: 'mouse' } })
-            .move({ origin: editorPage.canvas, x: 0, y: 0 })
-            .down({ button: MIDDLE_MOUSE_BUTTON })
-            .move({ origin: editorPage.canvas, x: Math.round(dx), y: Math.round(dy), duration: 50 })
-            .up({ button: MIDDLE_MOUSE_BUTTON })
-            .perform();
+        await browser.execute((deltaX: number, deltaY: number) => {
+            const canvas = document.querySelector('.hexer-canvas');
+            if (!canvas) {
+                return;
+            }
+            const rect = canvas.getBoundingClientRect();
+            const startX = rect.left + rect.width / 2;
+            const startY = rect.top + rect.height / 2;
+            const mouse = (type: string, x: number, y: number, init: MouseEventInit) =>
+                new MouseEvent(type, { clientX: x, clientY: y, bubbles: true, cancelable: true, ...init });
+            // Middle button = 1; buttons bitmask for middle held = 4.
+            canvas.dispatchEvent(mouse('mousedown', startX, startY, { button: 1, buttons: 4 }));
+            canvas.dispatchEvent(mouse('mousemove', startX + deltaX, startY + deltaY, { buttons: 4 }));
+            // The pan ends on a window-level mouseup, wherever the release lands.
+            window.dispatchEvent(mouse('mouseup', startX + deltaX, startY + deltaY, { button: 1 }));
+        }, dx, dy);
     }
 
-    /** Scrolls the wheel over a hex's centre. A negative delta scrolls up (zooms in). */
+    /**
+     * Scrolls the wheel over a hex's centre. A negative delta scrolls up (zooms
+     * in). Dispatched directly for the same reason as {@link middleDrag}: the
+     * harness does not deliver a native wheel input, but the app's wheel handler
+     * runs on the dispatched event.
+     */
     async wheelOverHex(hex: AxialCoordinates, deltaY: number): Promise<void> {
         const offset = await this.hexScreenOffset(hex);
-        await browser.action('wheel')
-            .scroll({ origin: editorPage.canvas, x: Math.round(offset.x), y: Math.round(offset.y), deltaX: 0, deltaY })
-            .perform();
+        await browser.execute((offsetX: number, offsetY: number, delta: number) => {
+            const canvas = document.querySelector('.hexer-canvas');
+            if (!canvas) {
+                return;
+            }
+            const rect = canvas.getBoundingClientRect();
+            canvas.dispatchEvent(new WheelEvent('wheel', {
+                deltaY: delta,
+                clientX: rect.left + rect.width / 2 + offsetX,
+                clientY: rect.top + rect.height / 2 + offsetY,
+                bubbles: true,
+                cancelable: true,
+            }));
+        }, offset.x, offset.y, deltaY);
     }
 
     /** Clicks the zoom-to-fit button on the action bar. */
