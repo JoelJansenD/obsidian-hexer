@@ -1,3 +1,4 @@
+import { mapToScreen } from "../../../src/logic/camera";
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
 import { Hexagon, Point, AxialCoordinates, pointToAxialCoordinates, axialCoordinatesToPoint } from "../../../src/logic/hexagon";
 
@@ -105,29 +106,30 @@ class EditorPage {
         console.debug(`[hexer-e2e] state (${label})`, JSON.stringify(state));
     }
 
-    // Returns a hex at the centre of the current camera view. Because the
-    // renderer centres hex 0,0 and pans by the camera offset, the hex under the
-    // canvas centre is the one whose layout point equals the negated pan, so it
-    // stays clickable no matter how the camera has moved.
+    // Returns the hex at the centre of the current camera view. The camera's
+    // offset is the map point drawn at the viewport centre, so the hex there is
+    // the one whose layout point rounds to that offset — clickable no matter how
+    // the camera has moved.
     async hexInView(): Promise<AxialCoordinates> {
         const size = await this.getHexSize();
-        const camera = await this.getCameraOffset();
+        const { offset } = await this.getCamera();
         // The e2e fixtures use flat-top maps, so name that orientation explicitly
         // rather than leaning on any implicit default.
-        return pointToAxialCoordinates(-camera.x, -camera.y, size, 'flat-top');
+        return pointToAxialCoordinates(offset.x, offset.y, size, 'flat-top');
     }
 
     // Converts a hex coordinate to a pointer offset relative to the canvas
-    // centre, the origin WebdriverIO pointer actions use. The renderer centres
-    // hex 0,0 in the canvas and pans the whole scene by the camera offset, so a
-    // hex sits at its layout point plus that pan, measured from the centre.
+    // centre, the origin WebdriverIO pointer actions use. The renderer draws a
+    // map point p at mapToScreen(p); over a zero-sized viewport that yields the
+    // centre-relative offset directly (zoom * (p - camera.offset)).
     private async hexPointerOffset(coordinates: AxialCoordinates): Promise<Point> {
         const size = await this.getHexSize();
-        const camera = await this.getCameraOffset();
+        const camera = await this.getCamera();
         // The e2e fixtures use flat-top maps, so name that orientation explicitly
         // rather than leaning on any implicit default.
-        const { x, y } = axialCoordinatesToPoint(coordinates, size, 'flat-top');
-        return { x: Math.round(x + camera.x), y: Math.round(y + camera.y) };
+        const point = axialCoordinatesToPoint(coordinates, size, 'flat-top');
+        const screen = mapToScreen(camera, { width: 0, height: 0 }, point);
+        return { x: Math.round(screen.x), y: Math.round(screen.y) };
     }
 
     private async getHexSize(): Promise<number> {
@@ -138,13 +140,17 @@ class EditorPage {
         });
     }
 
-    private async getCameraOffset(): Promise<Point> {
+    private async getCamera(): Promise<{ offset: Point; zoom: number }> {
         return browser.executeObsidian(({ app }) => {
             const leaf = app.workspace.getLeavesOfType('hexer-view')[0];
             const view = leaf?.view as unknown as {
-                hexerData?: { camera?: { offset?: { x: number; y: number } } };
+                hexerData?: { camera?: { offset?: { x: number; y: number }; zoom?: number } };
             } | undefined;
-            return view?.hexerData?.camera?.offset ?? { x: 0, y: 0 };
+            const camera = view?.hexerData?.camera;
+            return {
+                offset: camera?.offset ?? { x: 0, y: 0 },
+                zoom: camera?.zoom ?? 1,
+            };
         });
     }
 

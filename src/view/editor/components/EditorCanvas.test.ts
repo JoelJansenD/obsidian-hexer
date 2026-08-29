@@ -25,7 +25,7 @@ const createCanvas = () => {
     const componentOptions = createComponentOptions();
     const parent = document.createElement('div');
     const canvas = new EditorCanvas(parent, componentOptions);
-    return { canvas, canvasEl: parent.querySelector('canvas')! };
+    return { canvas, canvasEl: parent.querySelector('canvas')!, componentOptions };
 };
 
 const createStrategy = (events: RegisteredEvents): ToolStrategy => ({
@@ -90,6 +90,58 @@ describe('destroy', () => {
 
         // Assert
         expect(toolEventHandler).not.toHaveBeenCalled();
+    });
+});
+
+describe('camera gestures', () => {
+    const mouse = (type: string, init: MouseEventInit) =>
+        new MouseEvent(type, { bubbles: true, cancelable: true, ...init });
+
+    it('Space + left-drag pans the map without invoking the paint tool', () => {
+        // Arrange
+        const { canvas, canvasEl, componentOptions } = createCanvas();
+        stubClientSize(canvasEl, 800, 600);
+        const onLeftClick = vi.fn();
+        const onLeftDrag = vi.fn();
+        canvas.registerEvents(createStrategy({ onLeftClick, onLeftDrag }));
+
+        // Act - hold Space over the canvas, then left-drag across it.
+        canvasEl.dispatchEvent(mouse('mouseenter', {}));
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }));
+        expect(canvasEl.style.cursor).toBe('grab');
+
+        canvasEl.dispatchEvent(mouse('mousedown', { button: 0, clientX: 100, clientY: 100 }));
+        expect(canvasEl.style.cursor).toBe('grabbing');
+        canvasEl.dispatchEvent(mouse('mousemove', { button: 0, buttons: 1, clientX: 160, clientY: 130 }));
+
+        // Assert - the tool never painted...
+        expect(onLeftClick).not.toHaveBeenCalled();
+        expect(onLeftDrag).not.toHaveBeenCalled();
+        // ...and the pan committed a camera-only move (no undo entry).
+        expect(componentOptions.setData).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ commitHistory: false }));
+        const committed = vi.mocked(componentOptions.setData).mock.lastCall![0];
+        expect(committed.camera.offset).toEqual({ x: -60, y: -30 });
+
+        canvas.destroy();
+    });
+
+    it('pans with the middle mouse button and commits without recording history', () => {
+        // Arrange
+        const { canvas, canvasEl, componentOptions } = createCanvas();
+        stubClientSize(canvasEl, 800, 600);
+
+        // Act - middle-button drag.
+        canvasEl.dispatchEvent(mouse('mousedown', { button: 1, clientX: 200, clientY: 200 }));
+        canvasEl.dispatchEvent(mouse('mousemove', { buttons: 4, clientX: 300, clientY: 260 }));
+
+        // Assert
+        const committed = vi.mocked(componentOptions.setData).mock.lastCall!;
+        expect(committed[1]).toEqual({ commitHistory: false });
+        expect(committed[0].camera.offset).toEqual({ x: -100, y: -60 });
+
+        canvas.destroy();
     });
 });
 

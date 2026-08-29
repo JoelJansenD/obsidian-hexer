@@ -1,0 +1,31 @@
+.hexer-action-bar {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--background-modifier-border);
+    overflow: hidden;
+}
+
+.hexer-action-bar-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: var(--interactive-normal);
+    color: var(--text-muted);
+    width: 40px;
+    height: 40px;
+
+    &:not(:first-child) {
+        border-left: 1px solid var(--background-modifier-border);
+    }
+
+    &:hover {
+        background-color: var(--interactive-hover);
+        color: var(--text-normal);
+    }
+}

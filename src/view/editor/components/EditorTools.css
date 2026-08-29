@@ -20,6 +20,7 @@
     width: 40px;
     height: 48px;
     gap: 2px;
+    background-color: var(--interactive-normal);
 
     &.active {
         background-color: var(--interactive-accent);
@@ -28,7 +29,7 @@
     }
 
     &:not(.active):hover {
-        background-color: var(--background-modifier-hover);
+        background-color: var(--background-hover);
         color: var(--text-normal);
     }
 

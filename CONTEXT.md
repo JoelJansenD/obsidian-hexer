@@ -59,8 +59,18 @@ The two kinds of path. Rivers bend harder than roads; otherwise identical.
 ### Editing
 
 **Camera**:
-The viewport's pan offset over the map. Kept centre-relative so it survives resizes.
+How the map is currently framed in the viewport: the map point it is centred on (**offset**) plus a **zoom** magnification. Being a map point, the centre survives resizes. The camera lives in the map and rides undo snapshots; a camera-only move persists to the file but records no undo step.
 _Avoid_: Viewport, scroll, pan (as a noun)
+
+**Zoom**:
+The camera's view magnification: a scale factor applied on top of the pan when drawing and inverted when hit-testing (`1.0` is unscaled). Direct zoom is clamped to 0.2×–5×; zoom-to-fit may drop below 0.2× to frame an oversized map. Distinct from `size` — zoom scales the whole rendered scene, `size` is the map's intrinsic hex circumradius and is never repurposed for zoom.
+
+**Zoom to fit**:
+The camera-only move that frames every hex and every path node within the viewport with about one hex of padding, centred. On an empty map it resets the camera to its default (hex 0,0 centred, zoom 1.0).
+
+**Action bar**:
+The always-available horizontal bar across the top of the canvas area, holding global actions (currently only zoom-to-fit) independent of the active layer or tool. Distinct from the paint-tool cluster, which is layer/tool dependent.
+_Avoid_: Toolbar, tool bar
 
 **Tool**:
 The active editing mode: select, brush, bucket, eraser, or polygon.

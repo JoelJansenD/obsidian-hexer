@@ -12,6 +12,12 @@ export interface CommitOptions {
      * whole brush drag collapses to one undo step. Omit for discrete edits.
      */
     stroke?: symbol,
+    /**
+     * Whether the commit records an undo entry. Defaults to true; pass false for
+     * a camera-only move, which still persists and saves but must not become its
+     * own undo step (see ADR-0010).
+     */
+    commitHistory?: boolean,
 }
 
 export interface DataOptions {

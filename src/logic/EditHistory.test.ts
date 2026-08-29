@@ -128,6 +128,26 @@ describe('EditHistory', () => {
         expect(history.canRedo).toBe(false);
     });
 
+    it('restores the camera captured in each snapshot, so undo returns to the edit site', () => {
+        // Arrange - two edits committed at different camera positions.
+        const first = createHexerData({ camera: { offset: { x: 10, y: 20 }, zoom: 1 } });
+        setHex(first, hex(0, 0, '#111111'));
+        const history = new EditHistory(first);
+
+        const second = createHexerData({ camera: { offset: { x: -300, y: 40 }, zoom: 2 } });
+        setHex(second, hex(0, 0, '#111111'));
+        setHex(second, hex(5, 5, '#222222'));
+        history.record(second);
+
+        // Act & Assert - undo brings back the first edit's camera...
+        const undone = history.undo()!;
+        expect(undone.camera).toEqual({ offset: { x: 10, y: 20 }, zoom: 1 });
+
+        // ...and redo restores the second edit's camera.
+        const redone = history.redo()!;
+        expect(redone.camera).toEqual({ offset: { x: -300, y: 40 }, zoom: 2 });
+    });
+
     it('returns clones so external mutation cannot corrupt stored history', () => {
         // Arrange
         const history = new EditHistory(createHexerData());

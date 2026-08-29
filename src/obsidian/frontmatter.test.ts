@@ -123,3 +123,17 @@ describe('document seam', () => {
         expect(() => parseHexerDocument('no frontmatter here')).toThrow('Missing frontmatter');
     });
 });
+
+describe('camera serialization', () => {
+    it('round-trips a non-default zoom through serialize and parse', () => {
+        // Arrange
+        const data = createHexerData({ camera: { offset: { x: 5, y: 6 }, zoom: 2.5 } });
+
+        // Act
+        const document = serializeHexerDocument(data, '---\nhexer:\n  version: "1.0"\n---\n');
+        const restored = parseHexerDocument(document);
+
+        // Assert
+        expect(restored.camera).toEqual({ offset: { x: 5, y: 6 }, zoom: 2.5 });
+    });
+});
