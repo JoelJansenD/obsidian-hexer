@@ -109,7 +109,7 @@ describe('endPan', () => {
 });
 
 describe('cursor', () => {
-    it('is none when idle, grab when Space arms a pan, grabbing mid-pan', () => {
+    it('is none when idle, pan-armed when Space arms a pan, panning mid-pan', () => {
         // Arrange
         const strategy = new CameraStrategy();
 
@@ -118,11 +118,11 @@ describe('cursor', () => {
 
         // Act & Assert - Space arms a pan.
         strategy.setSpaceHeld(true);
-        expect(strategy.cursor).toBe('grab');
+        expect(strategy.cursor).toBe('pan-armed');
 
         // Act & Assert - pan in progress.
         strategy.beginPan(LEFT_BUTTON, { x: 0, y: 0 });
-        expect(strategy.cursor).toBe('grabbing');
+        expect(strategy.cursor).toBe('panning');
     });
 });
 
@@ -132,7 +132,7 @@ describe('zoom', () => {
         const strategy = new CameraStrategy();
 
         // Act
-        const zoomed = strategy.zoom(centredCamera, { x: 400, y: 300 }, -100, 800, 600);
+        const zoomed = strategy.zoom(centredCamera, { x: 400, y: 300 }, -100, { width: 800, height: 600 });
 
         // Assert
         expect(zoomed.zoom).toBeCloseTo(1.1, 9);
@@ -143,7 +143,7 @@ describe('zoom', () => {
         const strategy = new CameraStrategy();
 
         // Act
-        const zoomed = strategy.zoom(centredCamera, { x: 400, y: 300 }, 100, 800, 600);
+        const zoomed = strategy.zoom(centredCamera, { x: 400, y: 300 }, 100, { width: 800, height: 600 });
 
         // Assert
         expect(zoomed.zoom).toBeCloseTo(1 / 1.1, 9);

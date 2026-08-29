@@ -179,7 +179,7 @@ class CameraPage {
         // Centre-relative screen offset: mapToScreen over a zero-sized viewport
         // drops the viewport-centre term, leaving zoom * (point - offset). Reusing
         // the renderer's own transform keeps hit positions in step with the model.
-        return mapToScreen(camera, 0, 0, point);
+        return mapToScreen(camera, { width: 0, height: 0 }, point);
     }
 
     /** The one-hex fit padding in screen pixels at the current zoom. */

@@ -30,7 +30,7 @@ describe('mapToScreen', () => {
         const camera: Camera = { offset: { x: 200, y: -50 }, zoom: 1 };
 
         // Act
-        const screen = mapToScreen(camera, 800, 600, { x: 200, y: -50 });
+        const screen = mapToScreen(camera, { width: 800, height: 600 }, { x: 200, y: -50 });
 
         // Assert
         expect(screen).toEqual({ x: 400, y: 300 });
@@ -41,7 +41,7 @@ describe('mapToScreen', () => {
         const camera: Camera = { offset: { x: 0, y: 0 }, zoom: 2 };
 
         // Act
-        const screen = mapToScreen(camera, 800, 600, { x: 50, y: 0 });
+        const screen = mapToScreen(camera, { width: 800, height: 600 }, { x: 50, y: 0 });
 
         // Assert
         expect(screen).toEqual({ x: 500, y: 300 });
@@ -53,7 +53,7 @@ describe('mapToScreen', () => {
         const mapPoint = { x: 123, y: -456 };
 
         // Act
-        const roundTripped = screenToMap(camera, 1024, 768, mapToScreen(camera, 1024, 768, mapPoint));
+        const roundTripped = screenToMap(camera, { width: 1024, height: 768 }, mapToScreen(camera, { width: 1024, height: 768 }, mapPoint));
 
         // Assert
         expect(roundTripped.x).toBeCloseTo(mapPoint.x, 9);
@@ -67,7 +67,7 @@ describe('screenToMap', () => {
         const camera: Camera = { offset: { x: 200, y: -50 }, zoom: 1 };
 
         // Act
-        const mapPoint = screenToMap(camera, 800, 600, { x: 400, y: 300 });
+        const mapPoint = screenToMap(camera, { width: 800, height: 600 }, { x: 400, y: 300 });
 
         // Assert
         expect(mapPoint).toEqual({ x: 200, y: -50 });
@@ -78,7 +78,7 @@ describe('screenToMap', () => {
         const camera: Camera = { offset: { x: 0, y: 0 }, zoom: 2 };
 
         // Act
-        const mapPoint = screenToMap(camera, 800, 600, { x: 500, y: 300 });
+        const mapPoint = screenToMap(camera, { width: 800, height: 600 }, { x: 500, y: 300 });
 
         // Assert - 100px right of centre at 2x is 50 map units right.
         expect(mapPoint).toEqual({ x: 50, y: 0 });
@@ -115,7 +115,7 @@ describe('zoomCameraAt', () => {
         const camera = defaultCamera();
 
         // Act - one notch in, anchored at the viewport centre.
-        const zoomed = zoomCameraAt(camera, { x: 400, y: 300 }, 1, 800, 600);
+        const zoomed = zoomCameraAt(camera, { x: 400, y: 300 }, 1, { width: 800, height: 600 });
 
         // Assert
         expect(zoomed.zoom).toBeCloseTo(1.1, 9);
@@ -127,13 +127,13 @@ describe('zoomCameraAt', () => {
         // Arrange - default camera, pointer 200px right of the 800x600 centre.
         const camera = defaultCamera();
         const cursor = { x: 600, y: 300 };
-        const anchorBefore = screenToMap(camera, 800, 600, cursor);
+        const anchorBefore = screenToMap(camera, { width: 800, height: 600 }, cursor);
 
         // Act
-        const zoomed = zoomCameraAt(camera, cursor, 1, 800, 600);
+        const zoomed = zoomCameraAt(camera, cursor, 1, { width: 800, height: 600 });
 
         // Assert - the same map point is still under the cursor.
-        const anchorAfter = screenToMap(zoomed, 800, 600, cursor);
+        const anchorAfter = screenToMap(zoomed, { width: 800, height: 600 }, cursor);
         expect(anchorAfter.x).toBeCloseTo(anchorBefore.x, 9);
         expect(anchorAfter.y).toBeCloseTo(anchorBefore.y, 9);
     });
@@ -143,7 +143,7 @@ describe('zoomCameraAt', () => {
         const camera: Camera = { offset: { x: 0, y: 0 }, zoom: MAX_ZOOM };
 
         // Act
-        const zoomed = zoomCameraAt(camera, { x: 400, y: 300 }, 1, 800, 600);
+        const zoomed = zoomCameraAt(camera, { x: 400, y: 300 }, 1, { width: 800, height: 600 });
 
         // Assert
         expect(zoomed.zoom).toBe(MAX_ZOOM);
@@ -154,7 +154,7 @@ describe('zoomCameraAt', () => {
         const camera: Camera = { offset: { x: 0, y: 0 }, zoom: MIN_ZOOM };
 
         // Act
-        const zoomed = zoomCameraAt(camera, { x: 400, y: 300 }, -1, 800, 600);
+        const zoomed = zoomCameraAt(camera, { x: 400, y: 300 }, -1, { width: 800, height: 600 });
 
         // Assert
         expect(zoomed.zoom).toBe(MIN_ZOOM);
@@ -165,9 +165,9 @@ describe('zoomCameraAt', () => {
         const camera: Camera = { offset: { x: 0, y: 0 }, zoom: 0.1 };
 
         // Act & Assert - zooming out is blocked at the current level.
-        expect(zoomCameraAt(camera, { x: 400, y: 300 }, -1, 800, 600).zoom).toBe(0.1);
+        expect(zoomCameraAt(camera, { x: 400, y: 300 }, -1, { width: 800, height: 600 }).zoom).toBe(0.1);
         // Zooming in is allowed.
-        expect(zoomCameraAt(camera, { x: 400, y: 300 }, 1, 800, 600).zoom).toBeCloseTo(0.11, 9);
+        expect(zoomCameraAt(camera, { x: 400, y: 300 }, 1, { width: 800, height: 600 }).zoom).toBeCloseTo(0.11, 9);
     });
 });
 
@@ -177,7 +177,7 @@ describe('fitCamera', () => {
         const data = createHexerData({ camera: { offset: { x: 123, y: 456 }, zoom: 3 } });
 
         // Act
-        const fitted = fitCamera(data, 800, 600);
+        const fitted = fitCamera(data, { width: 800, height: 600 });
 
         // Assert
         expect(fitted).toEqual(defaultCamera());
@@ -189,7 +189,7 @@ describe('fitCamera', () => {
         setHex(data, { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
-        const fitted = fitCamera(data, 800, 600);
+        const fitted = fitCamera(data, { width: 800, height: 600 });
 
         // Assert - centred on the hex; content is 200x200 map px (±size + size pad),
         // so height binds: 600 / 200 = 3x.
@@ -203,7 +203,7 @@ describe('fitCamera', () => {
         setHex(data, { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
-        const fitted = fitCamera(data, 8000, 6000);
+        const fitted = fitCamera(data, { width: 8000, height: 6000 });
 
         // Assert
         expect(fitted.zoom).toBe(MAX_ZOOM);
@@ -215,7 +215,7 @@ describe('fitCamera', () => {
         setHex(data, { q: 0, r: 0, terrainColor: '#ff0000', icon: null, factionId: null });
 
         // Act
-        const fitted = fitCamera(data, 40, 30);
+        const fitted = fitCamera(data, { width: 40, height: 30 });
 
         // Assert - 30 / 200 = 0.15, below 0.2 and not clamped up.
         expect(fitted.zoom).toBeCloseTo(0.15, 9);
@@ -231,27 +231,22 @@ describe('fitCamera', () => {
         addNode(river, { q: -6, r: -5 });
         data.rivers.push(river);
 
-        const vw = 800;
-        const vh = 600;
+        const viewport = { width: 800, height: 600 };
 
         // Act
-        const fitted = fitCamera(data, vw, vh);
+        const fitted = fitCamera(data, viewport);
 
         // Assert - project each content point to screen; all land inside the viewport.
-        const toScreen = (p: { x: number, y: number }) => ({
-            x: vw / 2 + fitted.zoom * (p.x - fitted.offset.x),
-            y: vh / 2 + fitted.zoom * (p.y - fitted.offset.y),
-        });
         const contentPoints = [
             ...Object.values(data.hexes).map(hex => hexToPoint(data, hex)),
             ...data.rivers.flatMap(path => Object.values(path.nodes).map(node => hexToPoint(data, node))),
         ];
         for (const point of contentPoints) {
-            const screen = toScreen(point);
+            const screen = mapToScreen(fitted, viewport, point);
             expect(screen.x).toBeGreaterThanOrEqual(0);
-            expect(screen.x).toBeLessThanOrEqual(vw);
+            expect(screen.x).toBeLessThanOrEqual(viewport.width);
             expect(screen.y).toBeGreaterThanOrEqual(0);
-            expect(screen.y).toBeLessThanOrEqual(vh);
+            expect(screen.y).toBeLessThanOrEqual(viewport.height);
         }
     });
 });

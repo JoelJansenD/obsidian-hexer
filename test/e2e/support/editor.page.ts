@@ -128,7 +128,7 @@ class EditorPage {
         // The e2e fixtures use flat-top maps, so name that orientation explicitly
         // rather than leaning on any implicit default.
         const point = axialCoordinatesToPoint(coordinates, size, 'flat-top');
-        const screen = mapToScreen(camera, 0, 0, point);
+        const screen = mapToScreen(camera, { width: 0, height: 0 }, point);
         return { x: Math.round(screen.x), y: Math.round(screen.y) };
     }
 

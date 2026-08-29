@@ -29,7 +29,8 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     // scale by the zoom, so every map point `p` lands at `mapToScreen(p)`. Goes
     // through the shared transform so hit-testing (screenToMap) stays its exact
     // inverse. Stacks on top of the DPR transform set on resize.
-    const origin = mapToScreen(data.camera, context.canvas.clientWidth, context.canvas.clientHeight, { x: 0, y: 0 });
+    const viewport = { width: context.canvas.clientWidth, height: context.canvas.clientHeight };
+    const origin = mapToScreen(data.camera, viewport, { x: 0, y: 0 });
     context.save();
     context.translate(origin.x, origin.y);
     context.scale(data.camera.zoom, data.camera.zoom);

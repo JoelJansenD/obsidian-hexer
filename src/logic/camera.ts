@@ -1,5 +1,18 @@
 import { Point } from "./hexagon";
+// HexerData imports Camera as a type only, so this back-edge is erased at
+// runtime — the value graph stays one-directional (camera -> HexerData).
 import { HexerData, hexToPoint } from "./HexerData";
+
+/** The drawable canvas area, in CSS pixels. */
+export interface Viewport {
+    width: number;
+    height: number;
+}
+
+/** The centre of a viewport, where the camera's offset point is drawn. */
+function viewportCentre(viewport: Viewport): Point {
+    return { x: viewport.width / 2, y: viewport.height / 2 };
+}
 
 /** The map region currently framed in the viewport: what we're looking at. */
 export interface Camera {
@@ -41,10 +54,11 @@ export const ZOOM_STEP = 1.1;
  * distances are scaled by the zoom around it. The renderer positions the scene
  * through this; {@link screenToMap} is its inverse.
  */
-export function mapToScreen(camera: Camera, viewportWidth: number, viewportHeight: number, point: Point): Point {
+export function mapToScreen(camera: Camera, viewport: Viewport, point: Point): Point {
+    const centre = viewportCentre(viewport);
     return {
-        x: viewportWidth / 2 + camera.zoom * (point.x - camera.offset.x),
-        y: viewportHeight / 2 + camera.zoom * (point.y - camera.offset.y),
+        x: centre.x + camera.zoom * (point.x - camera.offset.x),
+        y: centre.y + camera.zoom * (point.y - camera.offset.y),
     };
 }
 
@@ -54,10 +68,11 @@ export function mapToScreen(camera: Camera, viewportWidth: number, viewportHeigh
  * reverse the viewport centring, undo the zoom, then re-add the camera centre.
  * Hit-testing runs this on the cursor, and {@link zoomCameraAt} on its anchor.
  */
-export function screenToMap(camera: Camera, viewportWidth: number, viewportHeight: number, point: Point): Point {
+export function screenToMap(camera: Camera, viewport: Viewport, point: Point): Point {
+    const centre = viewportCentre(viewport);
     return {
-        x: camera.offset.x + (point.x - viewportWidth / 2) / camera.zoom,
-        y: camera.offset.y + (point.y - viewportHeight / 2) / camera.zoom,
+        x: camera.offset.x + (point.x - centre.x) / camera.zoom,
+        y: camera.offset.y + (point.y - centre.y) / camera.zoom,
     };
 }
 
@@ -83,18 +98,19 @@ export function panCamera(camera: Camera, screenDelta: Point): Camera {
  * except the lower bound relaxes to the current zoom, so a camera already below
  * the minimum (from {@link fitCamera}) can zoom back in but not further out.
  */
-export function zoomCameraAt(camera: Camera, cursor: Point, notches: number, viewportWidth: number, viewportHeight: number): Camera {
+export function zoomCameraAt(camera: Camera, cursor: Point, notches: number, viewport: Viewport): Camera {
     const candidate = camera.zoom * ZOOM_STEP ** notches;
     const lowerBound = Math.min(camera.zoom, MIN_ZOOM);
     const zoom = Math.min(Math.max(candidate, lowerBound), MAX_ZOOM);
 
     // Keep the anchor fixed: the map point under the cursor must map back to the
     // same screen point at the new zoom.
-    const anchor = screenToMap(camera, viewportWidth, viewportHeight, cursor);
+    const anchor = screenToMap(camera, viewport, cursor);
+    const centre = viewportCentre(viewport);
     return {
         offset: {
-            x: anchor.x - (cursor.x - viewportWidth / 2) / zoom,
-            y: anchor.y - (cursor.y - viewportHeight / 2) / zoom,
+            x: anchor.x - (cursor.x - centre.x) / zoom,
+            y: anchor.y - (cursor.y - centre.y) / zoom,
         },
         zoom,
     };
@@ -106,7 +122,7 @@ export function zoomCameraAt(camera: Camera, cursor: Point, notches: number, vie
  * {@link MAX_ZOOM} but may drop below {@link MIN_ZOOM} so an oversized map fits
  * entirely rather than clipping. An empty map resets to {@link defaultCamera}.
  */
-export function fitCamera(data: HexerData, viewportWidth: number, viewportHeight: number): Camera {
+export function fitCamera(data: HexerData, viewport: Viewport): Camera {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
     // Hexes span their circumradius in every direction, so a hex at the edge is
@@ -136,7 +152,7 @@ export function fitCamera(data: HexerData, viewportWidth: number, viewportHeight
     const padding = data.size;
     const width = maxX - minX + padding * 2;
     const height = maxY - minY + padding * 2;
-    const rawFit = Math.min(viewportWidth / width, viewportHeight / height);
+    const rawFit = Math.min(viewport.width / width, viewport.height / height);
 
     return {
         offset: { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },

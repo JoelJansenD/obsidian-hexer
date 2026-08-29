@@ -1,5 +1,6 @@
+import { LEFT_MOUSE_BUTTON, LEFT_MOUSE_BUTTON_HELD, RIGHT_MOUSE_BUTTON } from "../../../constants/mouse";
 import { fitCamera, screenToMap } from "../../../logic/camera";
-import { CameraStrategy } from "../../../logic/CameraStrategy";
+import { CameraCursor, CameraStrategy } from "../../../logic/CameraStrategy";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
@@ -7,10 +8,11 @@ import { ComponentOptions } from "../Editor";
 import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
 
-const LEFT_MOUSE_BUTTON_CLICK = 0;
-const RIGHT_MOUSE_BUTTON_CLICK = 2;
-
-const LEFT_MOUSE_BUTTON_DRAG = 1;
+// Maps the strategy's intent-named cursor to the CSS cursor the canvas shows.
+const CAMERA_CURSOR_STYLE: Record<Exclude<CameraCursor, null>, string> = {
+    'pan-armed': 'grab',
+    'panning': 'grabbing',
+};
 
 export default class EditorCanvas {
 
@@ -47,11 +49,11 @@ export default class EditorCanvas {
                 e.preventDefault();
                 
                 const event = e as MouseEvent;
-                if(handlers.onLeftClick && event.button === LEFT_MOUSE_BUTTON_CLICK) {
-                    this.invokeMouseClickHandler(handlers.onLeftClick, event, LEFT_MOUSE_BUTTON_CLICK);
+                if(handlers.onLeftClick && event.button === LEFT_MOUSE_BUTTON) {
+                    this.invokeMouseClickHandler(handlers.onLeftClick, event, LEFT_MOUSE_BUTTON);
                 }
-                else if(handlers.onRightClick && event.button === RIGHT_MOUSE_BUTTON_CLICK) {
-                    this.invokeMouseClickHandler(handlers.onRightClick, event, RIGHT_MOUSE_BUTTON_CLICK);
+                else if(handlers.onRightClick && event.button === RIGHT_MOUSE_BUTTON) {
+                    this.invokeMouseClickHandler(handlers.onRightClick, event, RIGHT_MOUSE_BUTTON);
                 }
             };
             this._canvasEl.addEventListener('mousedown', listener);
@@ -59,13 +61,13 @@ export default class EditorCanvas {
         }
 
         if (handlers.onLeftDoubleClick) {
-            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftDoubleClick!, e as MouseEvent, LEFT_MOUSE_BUTTON_CLICK);
+            const listener: EventListener = (e) => this.invokeMouseClickHandler(handlers.onLeftDoubleClick!, e as MouseEvent, LEFT_MOUSE_BUTTON);
             this._canvasEl.addEventListener('dblclick', listener);
             this._listeners.set('dblclick', listener);
         }
 
         if(handlers.onLeftDrag) {
-            const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_DRAG);
+            const listener: EventListener = (e) => this.invokeMouseDragHandler(handlers.onLeftDrag!, e as MouseEvent, LEFT_MOUSE_BUTTON_HELD);
             this._canvasEl.addEventListener('mousemove', listener);
             this._listeners.set('mousemove', listener);
         }
@@ -217,8 +219,7 @@ export default class EditorCanvas {
                 data.camera,
                 { x: event.clientX - rect.left, y: event.clientY - rect.top },
                 event.deltaY,
-                this._canvasEl.clientWidth,
-                this._canvasEl.clientHeight);
+                this.viewport());
             this.commitCamera(data);
         }, { passive: false });
 
@@ -247,7 +248,7 @@ export default class EditorCanvas {
     /** Frames the whole map in the viewport. A camera-only move, like pan and zoom. */
     private zoomToFit() {
         const data = this._dataOptions.getDataClone();
-        data.camera = fitCamera(data, this._canvasEl.clientWidth, this._canvasEl.clientHeight);
+        data.camera = fitCamera(data, this.viewport());
         this.commitCamera(data);
     }
 
@@ -257,9 +258,15 @@ export default class EditorCanvas {
         this.requestRender();
     }
 
+    /** The canvas's current display size, the viewport the camera maths work over. */
+    private viewport() {
+        return { width: this._canvasEl.clientWidth, height: this._canvasEl.clientHeight };
+    }
+
     /** Reflects the gesture state on the canvas cursor: grab when armed, grabbing mid-pan. */
     private updateCursor() {
-        this._canvasEl.style.cursor = this._cameraStrategy.cursor ?? '';
+        const cursor = this._cameraStrategy.cursor;
+        this._canvasEl.style.cursor = cursor ? CAMERA_CURSOR_STYLE[cursor] : '';
     }
 
     private invokeHandler(handler: ToolEventHandler, e: MouseEvent) {
@@ -273,8 +280,7 @@ export default class EditorCanvas {
         // the same hex drawn under the cursor at any zoom.
         const mapPoint = screenToMap(
             data.camera,
-            this._canvasEl.clientWidth,
-            this._canvasEl.clientHeight,
+            this.viewport(),
             { x: e.clientX - rect.left, y: e.clientY - rect.top });
         const clickedHex = pointToHex(data, mapPoint.x, mapPoint.y);
         const editorState = this._dataOptions.getEditorState();

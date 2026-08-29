@@ -1,11 +1,13 @@
-import { Camera, panCamera, zoomCameraAt } from "./camera";
+import { LEFT_MOUSE_BUTTON, MIDDLE_MOUSE_BUTTON } from "../constants/mouse";
+import { Camera, Viewport, panCamera, zoomCameraAt } from "./camera";
 import { Point } from "./hexagon";
 
-const LEFT_MOUSE_BUTTON = 0;
-const MIDDLE_MOUSE_BUTTON = 1;
-
-/** The cursor feedback the canvas shows for the current camera gesture. */
-export type CameraCursor = 'grab' | 'grabbing' | null;
+/**
+ * The gesture the cursor should reflect, named by intent rather than by a CSS
+ * keyword: `pan-armed` when a pan is ready to start, `panning` during one. The
+ * view maps these to the actual cursor styles.
+ */
+export type CameraCursor = 'pan-armed' | 'panning' | null;
 
 /**
  * Owns the camera gesture state — whether a pan is underway, whether Space arms
@@ -23,12 +25,12 @@ export class CameraStrategy {
         return this.lastPanPointer !== null;
     }
 
-    /** Grabbing mid-pan, grab when Space arms a pan, otherwise the tool's own cursor. */
+    /** Panning mid-gesture, pan-armed when Space is held, otherwise no camera cursor. */
     get cursor(): CameraCursor {
         if (this.isPanning) {
-            return 'grabbing';
+            return 'panning';
         }
-        return this.spaceHeld ? 'grab' : null;
+        return this.spaceHeld ? 'pan-armed' : null;
     }
 
     /** Tracks the Space key, which arms left-drag panning and shows grab feedback. */
@@ -77,8 +79,8 @@ export class CameraStrategy {
      * Zooms one notch per wheel event, anchored under the cursor: scrolling up
      * (a negative wheel delta) zooms in, scrolling down zooms out.
      */
-    zoom(camera: Camera, cursor: Point, wheelDeltaY: number, viewportWidth: number, viewportHeight: number): Camera {
+    zoom(camera: Camera, cursor: Point, wheelDeltaY: number, viewport: Viewport): Camera {
         const notches = wheelDeltaY < 0 ? 1 : -1;
-        return zoomCameraAt(camera, cursor, notches, viewportWidth, viewportHeight);
+        return zoomCameraAt(camera, cursor, notches, viewport);
     }
 }
