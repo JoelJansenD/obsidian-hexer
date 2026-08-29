@@ -33,7 +33,7 @@ const SEEDED_FACTION_HEX_COUNT = 3;
 
 // The hexes every Hexer fixture file starts with. Terrain and icon scenarios act
 // on these (e.g. "a hex with coloured terrain"), so they stay constant.
-const STANDARD_HEXES: AxialCoordinates[] = [
+export const STANDARD_HEXES: AxialCoordinates[] = [
     { q: 1, r: 1 },
     { q: 2, r: 1 },
     { q: 2, r: 2 },
