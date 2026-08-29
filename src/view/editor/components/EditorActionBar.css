@@ -15,6 +15,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    background-color: var(--interactive-normal);
     color: var(--text-muted);
     width: 40px;
     height: 40px;
@@ -24,7 +25,7 @@
     }
 
     &:hover {
-        background-color: var(--background-modifier-hover);
+        background-color: var(--interactive-hover);
         color: var(--text-normal);
     }
 }
