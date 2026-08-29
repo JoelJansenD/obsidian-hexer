@@ -18,6 +18,9 @@ _Avoid_: Tile, cell
 A hex's address as a `(q, r)` pair. The map owns the orientation and size that turn a coordinate into a pixel point.
 _Avoid_: Radial coordinate, offset coordinate, x/y
 
+**Coordinate label**:
+The `q,r` text drawn on a hex to show its axial coordinate. A single map-wide display toggle governs all of them at once (kin to the crosshair, not a per-hex property); labels sit on non-empty hexes only and hide when zoomed too small to read.
+
 **Orientation**:
 Whether hexes are flat-top or pointy-top. A single map-wide setting.
 

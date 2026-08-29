@@ -53,6 +53,13 @@ export default class MapSettingsModal extends Modal {
                 .onChange(value => this._settings.displayCrosshair = value));
 
         new Setting(this.contentEl)
+            .setName('Display coordinates')
+            .setDesc('Display or hide the q,r coordinate label on each non-empty hex')
+            .addToggle(toggle => toggle
+                .setValue(this._settings.displayCoordinates)
+                .onChange(value => this._settings.displayCoordinates = value));
+
+        new Setting(this.contentEl)
             .addButton(button => button
                 .setButtonText('Cancel')
                 .onClick(() => {

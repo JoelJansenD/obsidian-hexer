@@ -11,6 +11,8 @@ export interface MapSettings {
     displayHexBorders: boolean;
     /** Whether the crosshair guiding the cursor is rendered. */
     displayCrosshair: boolean;
+    /** Whether each non-empty hex is labelled with its `q,r` coordinate. */
+    displayCoordinates: boolean;
 }
 
 /** The settings a freshly created map starts with. */
@@ -20,5 +22,6 @@ export function defaultMapSettings(): MapSettings {
         hexOrientation: 'flat-top',
         displayHexBorders: true,
         displayCrosshair: true,
+        displayCoordinates: true,
     };
 }
