@@ -112,9 +112,11 @@ export function planCoordinateLabels(data: HexerData): CoordinateLabel[] {
         }
 
         const center = hexToPoint(data, hex);
-        // Drop the label towards the bottom of the hex, past the icon (which
-        // reaches ~0.6 * size from the centre) but inside the lower edge.
-        const position = { x: center.x, y: center.y + data.size * 0.72 };
+        // Drop the label towards the bottom of the hex, sitting it about
+        // halfway between the centred icon (which reaches ~0.6 * size) and the
+        // faction border that hugs the lower edge (~0.86 * size), so it clears
+        // both.
+        const position = { x: center.x, y: center.y + data.size * 0.67 };
         labels.push({ text: `${hex.q},${hex.r}`, position });
     }
     return labels;
