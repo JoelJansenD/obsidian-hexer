@@ -106,6 +106,7 @@ hexer:
     hexOrientation: "flat-top"
     displayHexBorders: true
     displayCrosshair: true
+    displayCoordinates: true
   camera:
     offset:
       x: 0

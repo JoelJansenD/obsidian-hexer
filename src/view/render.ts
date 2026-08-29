@@ -1,6 +1,6 @@
 import { mapToScreen } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
-import { Hexagon, Point, AxialCoordinates } from "../logic/hexagon";
+import { Hexagon, Point, AxialCoordinates, hexagonIsEmpty } from "../logic/hexagon";
 import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
@@ -63,10 +63,85 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
         drawPath(context, path, data, editorState.activePath, 'road');
     }
 
+    drawCoordinates(context, data);
+
     if(data.mapSettings.displayCrosshair) {
         drawCrosshair(context, data);
     }
 
+    context.restore();
+}
+
+// Coordinate labels use a font this fraction of the hex size, in map units, so
+// they scale with the zoom like everything else drawn under the camera transform.
+const COORDINATE_LABEL_FONT_SCALE = 0.28;
+
+// Hard cutoff: skip coordinate labels once their on-screen height would fall
+// below this many pixels, where they read as unreadable clutter rather than a
+// guide. There is no fade — labels are drawn in full above the threshold and
+// not at all below it.
+const MIN_COORDINATE_LABEL_PX = 8;
+
+/** A coordinate label to draw: its `q,r` text and the map point to centre it on. */
+export interface CoordinateLabel {
+    text: string;
+    position: Point;
+}
+
+/**
+ * Decides which coordinate labels to draw and where. Pure so the visibility
+ * rule — the map setting plus the zoom cutoff — and the `q,r` text can be
+ * unit-tested without a canvas. Returns nothing when labels are toggled off or
+ * the zoom is too low for them to be legible; otherwise one label per non-empty
+ * hex, placed near the hex's bottom edge so it clears the centred icon.
+ */
+export function planCoordinateLabels(data: HexerData): CoordinateLabel[] {
+    if(!data.mapSettings.displayCoordinates) {
+        return [];
+    }
+
+    const fontSize = data.size * COORDINATE_LABEL_FONT_SCALE;
+    if(fontSize * data.camera.zoom < MIN_COORDINATE_LABEL_PX) {
+        return [];
+    }
+
+    const labels: CoordinateLabel[] = [];
+    for(const hex of Object.values(data.hexes)) {
+        if(hexagonIsEmpty(hex)) {
+            continue;
+        }
+
+        const center = hexToPoint(data, hex);
+        // Drop the label towards the bottom of the hex, past the icon (which
+        // reaches ~0.6 * size from the centre) but inside the lower edge.
+        const position = { x: center.x, y: center.y + data.size * 0.72 };
+        labels.push({ text: `${hex.q},${hex.r}`, position });
+    }
+    return labels;
+}
+
+// Draws the coordinate labels planned for the current map: subtitle-style white
+// text with a black outline, so they stay readable over any terrain colour.
+function drawCoordinates(context: CanvasRenderingContext2D, data: HexerData) {
+    const labels = planCoordinateLabels(data);
+    if(labels.length === 0) {
+        return;
+    }
+
+    const fontSize = data.size * COORDINATE_LABEL_FONT_SCALE;
+
+    context.save();
+    context.font = `${fontSize}px sans-serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.lineJoin = 'round';
+    context.lineWidth = fontSize * 0.25;
+    context.strokeStyle = '#000000';
+    context.fillStyle = '#ffffff';
+    for(const label of labels) {
+        context.strokeText(label.text, label.position.x, label.position.y);
+        context.fillText(label.text, label.position.x, label.position.y);
+    }
     context.restore();
 }
 
