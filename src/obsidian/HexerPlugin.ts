@@ -38,10 +38,11 @@ export class HexerPlugin extends Plugin {
             checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.toggleMode()),
         });
 
-        // Intercept Ctrl/Cmd+E ourselves while a Hexer view is focused. The core
-        // reading-view toggle is inert here (no markdown view), so it neither
-        // consumes the key nor does anything if it sees it — we just claim it.
-        this.registerDomEvent(document, 'keydown', (evt) => this.handleToggleModeHotkey(evt));
+        // Intercept Ctrl/Cmd+E ourselves while a Hexer view is focused. Registered
+        // in the capture phase so it runs before Obsidian's own keymap handler,
+        // which is bound to the same combo (the core reading-view toggle) and would
+        // otherwise consume the key before our bubble-phase listener saw it.
+        this.registerDomEvent(document, 'keydown', (evt) => this.handleToggleModeHotkey(evt), { capture: true });
 
         this.addCommand({
             id: 'hexer-undo',
@@ -143,7 +144,9 @@ export class HexerPlugin extends Plugin {
         if (!view) {
             return;
         }
+        // Claim the key: stop Obsidian's keymap (and the browser) from also acting.
         evt.preventDefault();
+        evt.stopPropagation();
         view.toggleMode();
     }
 
