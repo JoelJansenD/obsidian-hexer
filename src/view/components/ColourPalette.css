@@ -1,27 +1,16 @@
-input.hexer-colour-picker {
-    display: block;
+.hexer-palette {
+    display: grid;
+    /* Two rows of five. The swatch size is shared with the colour picker
+       beside it (see .hexer-colour-controls), falling back when standalone. */
+    grid-template-columns: repeat(5, var(--hexer-swatch-size, 1.5rem));
+    grid-template-rows: repeat(2, var(--hexer-swatch-size, 1.5rem));
+    gap: var(--hexer-swatch-gap, 4px);
+}
+
+.hexer-swatch {
     box-sizing: border-box;
-    width: 100%;
     aspect-ratio: 1 / 1;
-    padding: 0;
     border: 1px solid var(--background-modifier-border);
     border-radius: 0;
-    background: none;
     cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-
-    &::-webkit-color-swatch-wrapper {
-        padding: 0;
-    }
-
-    &::-webkit-color-swatch {
-        border: none;
-        border-radius: 0;
-    }
-
-    &::-moz-color-swatch {
-        border: none;
-        border-radius: 0;
-    }
 }

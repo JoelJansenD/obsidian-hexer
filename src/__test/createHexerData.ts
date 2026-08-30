@@ -1,5 +1,5 @@
 import { Path } from "../logic/path";
-import { CURRENT_VERSION, HexerData } from "../logic/HexerData";
+import { CURRENT_VERSION, DEFAULT_ICON_PALETTE, DEFAULT_TERRAIN_PALETTE, HexerData } from "../logic/HexerData";
 import { Faction } from "../logic/faction";
 import { Hexagon } from "../logic/hexagon";
 import { defaultMapSettings, MapSettings } from "../logic/mapSettings";
@@ -13,6 +13,8 @@ interface HexerDataOverrides {
     mapSettings?: MapSettings;
     camera?: Camera;
     size?: number;
+    terrainPalette?: string[];
+    iconPalette?: string[];
 }
 
 export default function createHexerData(overrides: HexerDataOverrides = {}): HexerData {
@@ -24,6 +26,8 @@ export default function createHexerData(overrides: HexerDataOverrides = {}): Hex
         factions: overrides.factions ?? [],
         mapSettings: overrides.mapSettings ?? defaultMapSettings(),
         camera: overrides.camera ?? defaultCamera(),
-        size: overrides.size ?? 50
+        size: overrides.size ?? 50,
+        terrainPalette: overrides.terrainPalette ?? [...DEFAULT_TERRAIN_PALETTE],
+        iconPalette: overrides.iconPalette ?? [...DEFAULT_ICON_PALETTE]
     };
 }

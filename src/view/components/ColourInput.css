@@ -1,0 +1,36 @@
+input.hexer-colour-picker {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+
+    /* Make the colour swatch fill the whole square. Chromium's wrapper carries
+       default padding and neither it nor the swatch stretch to the input's full
+       height on their own, leaving the colour as a rectangle inside the box. */
+    &::-webkit-color-swatch-wrapper {
+        padding: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    &::-webkit-color-swatch {
+        border: none;
+        border-radius: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    &::-moz-color-swatch {
+        border: none;
+        border-radius: 0;
+        width: 100%;
+        height: 100%;
+    }
+}

@@ -18,7 +18,29 @@ export interface HexerData {
     mapSettings: MapSettings;
     camera: Camera;
     size: number;
+    /** The terrain layer's ten quick-switch colours. See ADR-0011. */
+    terrainPalette: string[];
+    /** The icon layer's ten quick-switch colours. See ADR-0011. */
+    iconPalette: string[];
 }
+
+/**
+ * The colours a terrain palette seeds from when a map has none. A constant
+ * array, so it can change without a migration (ADR-0011).
+ */
+export const DEFAULT_TERRAIN_PALETTE: string[] = [
+    '#6aa84f', '#38761d', '#b6d7a8', '#e0c56e', '#a9743f',
+    '#999999', '#5a5a5a', '#3d85c6', '#9fc5e8', '#f3f6fb',
+];
+
+/**
+ * The colours an icon palette seeds from when a map has none. A constant array,
+ * so it can change without a migration (ADR-0011).
+ */
+export const DEFAULT_ICON_PALETTE: string[] = [
+    '#000000', '#ffffff', '#cc0000', '#3d85c6', '#38761d',
+    '#e69138', '#674ea7', '#f1c232', '#7b4a2d', '#999999',
+];
 
 export function hexKey(q: number, r: number): string {
     return `${q},${r}`;
@@ -117,5 +139,7 @@ hexer:
   rivers: []
   roads: []
   factions: []
+  terrainPalette: ${JSON.stringify(DEFAULT_TERRAIN_PALETTE)}
+  iconPalette: ${JSON.stringify(DEFAULT_ICON_PALETTE)}
 ---
 `;

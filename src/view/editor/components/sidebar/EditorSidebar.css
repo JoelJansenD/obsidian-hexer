@@ -25,6 +25,24 @@
     gap: 16px;
 }
 
+/* The colour picker and its palette sit side by side: a square picker on the
+   left, the 2x5 swatch grid to its right. The swatch size drives both, so the
+   picker's square lines up with the palette's two rows top and bottom. */
+.hexer-colour-controls {
+    --hexer-swatch-size: 1.5rem;
+    --hexer-swatch-gap: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.hexer-colour-controls input.hexer-colour-picker {
+    flex: 0 0 auto;
+    width: calc(2 * var(--hexer-swatch-size) + var(--hexer-swatch-gap));
+    height: calc(2 * var(--hexer-swatch-size) + var(--hexer-swatch-gap));
+    aspect-ratio: auto;
+}
+
 .hexer-sidebar-icon-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

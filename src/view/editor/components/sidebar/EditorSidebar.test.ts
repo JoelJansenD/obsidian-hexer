@@ -30,6 +30,12 @@ const pickColour = (parent: HTMLElement, field: string, colour: string) => {
     inputEl!.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
+const swatch = (parent: HTMLElement, target: string, index: number) =>
+    parent.querySelector<HTMLElement>(`[data-hexer-palette-target="${target}"] [data-hexer-swatch="${index}"]`);
+
+const colourInput = (parent: HTMLElement, field: string) =>
+    parent.querySelector<HTMLInputElement>(`[data-hexer-colour-field-target="${field}"]`);
+
 describe('Layers', () => {
     it('opens the terrain layer by default', () => {
         // Act
@@ -84,6 +90,33 @@ describe('Terrain', () => {
         expect(componentOptions.setEditorState).toHaveBeenCalled();
         expect(componentOptions.getEditorState().activeColour).toBe('#123456');
     });
+
+    it('quick-switches the active colour and reflects it in the input when a swatch is left-clicked', () => {
+        // Arrange
+        const { parent, componentOptions } = createSidebar();
+        const swatchColour = swatch(parent, 'terrain', 0)!.dataset.hexerSwatchColour!;
+
+        // Act
+        swatch(parent, 'terrain', 0)!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+        // Assert
+        expect(componentOptions.getEditorState().activeColour).toBe(swatchColour);
+        expect(colourInput(parent, 'terrain')!.value).toBe(swatchColour);
+    });
+
+    it('overrides a right-clicked swatch with the active colour without recording undo', () => {
+        // Arrange
+        const { parent, componentOptions } = createSidebar();
+        pickColour(parent, 'terrain', '#123456');
+
+        // Act
+        swatch(parent, 'terrain', 0)!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+
+        // Assert
+        expect(swatch(parent, 'terrain', 0)!.dataset.hexerSwatchColour).toBe('#123456');
+        expect(componentOptions.getDataClone().terrainPalette[0]).toBe('#123456');
+        expect(componentOptions.setData).toHaveBeenCalledWith(expect.anything(), { commitHistory: false });
+    });
 });
 
 describe('Icons', () => {
@@ -98,6 +131,19 @@ describe('Icons', () => {
         expect(componentOptions.setEditorState).toHaveBeenCalled();
         expect(componentOptions.getEditorState().activeIcon.color).toBe('#abcdef');
         expect(componentOptions.getEditorState().activeColour).not.toBe('#abcdef');
+    });
+
+    it('quick-switches the active icon colour and reflects it in the input when a swatch is left-clicked', () => {
+        // Arrange
+        const { parent, componentOptions } = createSidebar();
+        const swatchColour = swatch(parent, 'icon', 0)!.dataset.hexerSwatchColour!;
+
+        // Act
+        swatch(parent, 'icon', 0)!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+        // Assert
+        expect(componentOptions.getEditorState().activeIcon.color).toBe(swatchColour);
+        expect(colourInput(parent, 'icon')!.value).toBe(swatchColour);
     });
 
     it('switches the active icon when another icon is clicked', () => {
