@@ -1,6 +1,7 @@
 import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import editorPage from '../support/editor.page';
+import modePage from '../support/mode.page';
 import factionPage from '../support/faction.page';
 import itemSettingsPage from '../support/itemSettings.page';
 import { createNote } from '../support/obsidian.page';
@@ -8,6 +9,9 @@ import { FactionsContext } from '../support/contexts/factions.context';
 
 Given('I am editing the faction {string}', async function (this: FactionsContext, name: string) {
     await factionPage.seedFactions();
+    // Seeding reopens the map, which rebuilds the editor in view mode, so re-enter
+    // edit mode before reaching for the sidebar.
+    await modePage.switchTo('edit');
     await editorPage.selectLayer('faction');
     const factions = await factionPage.getFactions();
     const faction = factions.find(candidate => candidate.name === name);

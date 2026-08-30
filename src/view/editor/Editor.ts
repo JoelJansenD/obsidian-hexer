@@ -1,4 +1,4 @@
-import { EditorState } from "../../logic/EditorState";
+import { EditorState, ViewMode } from "../../logic/EditorState";
 import { HexerData } from "../../logic/HexerData";
 import { resolveToolStrategy } from "../../logic/toolStrategies/ToolStrategy";
 import { ObsidianInterop } from "../ObsidianInterop";
@@ -28,15 +28,19 @@ export interface DataOptions {
 export interface ComponentOptions extends DataOptions {
     getEditorState: () => EditorState,
     setEditorState: (state: EditorState) => void,
+    toggleMode: () => void,
     obsidian: ObsidianInterop,
 }
 
-export default class Editor {
-    
-    private _canvas!: EditorCanvas;
-    private _sidebar!: EditorSidebar;
-
-    private _editorState: EditorState = {
+/**
+ * The edit-related editor state as it stands on a fresh load. Switching modes
+ * re-applies these defaults, so returning to Edit always starts clean — select
+ * tool, terrain layer, nothing selected. The mode is supplied by the caller
+ * because it is the one field a mode switch deliberately changes, not resets.
+ */
+function createEditorState(mode: ViewMode): EditorState {
+    return {
+        mode,
         activeColour: '#FFFFFF',
         activeIcon: {
             color: '#FFFFFF',
@@ -47,6 +51,16 @@ export default class Editor {
         activePath: null,
         activeFactionId: null
     };
+}
+
+export default class Editor {
+
+    private _editorEl!: HTMLElement;
+    private _canvas!: EditorCanvas;
+    private _sidebar!: EditorSidebar;
+
+    // Every map opens read-only in view mode.
+    private _editorState: EditorState = createEditorState('view');
 
     constructor(
         private _parentEl: HTMLElement,
@@ -71,32 +85,71 @@ export default class Editor {
         this._sidebar.refresh();
     }
 
+    /** The current top-level mode. Read-only enforcement (undo/redo) gates on this. */
+    public getMode(): ViewMode {
+        return this._editorState.mode;
+    }
+
+    /**
+     * Flips between View and Edit. Switching resets the edit-related state to its
+     * load-time defaults, so returning to Edit starts fresh; the camera is
+     * untouched (it lives in the map). Session-only — never persisted or undone.
+     */
+    public toggleMode() {
+        const nextMode: ViewMode = this._editorState.mode === 'view' ? 'edit' : 'view';
+        const nextState = createEditorState(nextMode);
+        this.setEditorState(nextState);
+
+        // setEditorState re-wires events and visibility from the reset state; the
+        // sidebar's expanded layer and the tool cluster's highlight are UI-only, so
+        // point them back at the defaults too, keeping the reset fully visible.
+        this._sidebar.showLayer(nextState.activeLayer);
+        this._canvas.setActiveTool(nextState.activePaintTool);
+    }
+
     public setEditorState(state: EditorState) {
         this._editorState = state;
-        this._canvas.unregisterEvents();
+        const editing = state.mode === 'edit';
 
-        const strategy = resolveToolStrategy(state.activeLayer, state.activePaintTool);
-        if(strategy) {
-            this._canvas.registerEvents(strategy);
+        this._editorEl.dataset.hexerMode = state.mode;
+
+        // View mode is camera-only: unwire any paint interactions and don't wire
+        // new ones. Edit mode wires the active tool's strategy as before.
+        this._canvas.unregisterEvents();
+        if (editing) {
+            const strategy = resolveToolStrategy(state.activeLayer, state.activePaintTool);
+            if(strategy) {
+                this._canvas.registerEvents(strategy);
+            }
         }
+
+        // The action bar stays in both modes; the sidebar and paint-tool cluster
+        // show only in Edit.
+        this._sidebar.setVisible(editing);
+        this._canvas.setMode(state.mode);
         this._canvas.refreshTools();
         this._canvas.requestRender();
     }
 
     private build() {
-        const editorEl = this._parentEl.createEl('div', { cls: 'hexer-editor' });
+        this._editorEl = this._parentEl.createEl('div', { cls: 'hexer-editor' });
 
         const componentOptions: ComponentOptions = {
             ...this._dataOptions,
             obsidian: this._obsidian,
             getEditorState: () => this._editorState,
             setEditorState: state => this.setEditorState(state),
+            toggleMode: () => this.toggleMode(),
             setData: (data, commit) => {
                 this._dataOptions.setData(data, commit);
                 this._canvas.requestRender();
             }
         };
-        this._canvas = new EditorCanvas(editorEl, componentOptions);
-        this._sidebar = new EditorSidebar(editorEl, componentOptions);
+        this._canvas = new EditorCanvas(this._editorEl, componentOptions);
+        this._sidebar = new EditorSidebar(this._editorEl, componentOptions);
+
+        // Apply the initial (view) mode so the sidebar and tools start hidden and
+        // the action bar shows the enter-edit affordance.
+        this.setEditorState(this._editorState);
     }
 }

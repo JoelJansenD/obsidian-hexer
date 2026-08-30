@@ -28,6 +28,10 @@ export class HexerPlugin extends Plugin {
             },
         });
 
+        // Ctrl/Cmd+E toggling lives on the view itself as a plain keydown event
+        // (see HexerView), not an Obsidian command, so it stays independent of the
+        // core reading-view command that owns the same combo.
+
         this.addCommand({
             id: 'hexer-undo',
             name: 'Undo',

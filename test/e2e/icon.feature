@@ -4,6 +4,7 @@ Feature: Icon
 
   Background:
     Given I have opened a Hexer file
+    And I am in edit mode
     And I have selected the icon layer
     And I have selected the castle icon
     And I have selected a blue icon colour

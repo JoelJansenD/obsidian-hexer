@@ -1,3 +1,7 @@
+.hexer-sidebar.hexer-sidebar-hidden {
+    display: none;
+}
+
 .hexer-sidebar {
     flex: 0 0 20%;
     max-width: 20%;

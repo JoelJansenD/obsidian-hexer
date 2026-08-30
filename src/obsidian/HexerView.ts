@@ -14,6 +14,37 @@ export class HexerView extends TextFileView {
     private hexerData!: HexerData;
     private history!: EditHistory;
 
+    onload(): void {
+        super.onload();
+
+        // A self-contained Ctrl/Cmd+E toggle, registered as a plain keyboard event
+        // rather than an Obsidian command — so it's independent of the core
+        // reading-view command that shares the combo. Bound on the window in the
+        // capture phase so it runs before Obsidian's own keymap consumes the key
+        // (a document-phase listener was too late). It targets the window because
+        // the canvas isn't focusable, so keys land on the body, not the view
+        // element. registerDomEvent tears it down with the view.
+        this.registerDomEvent(window, 'keydown', (evt) => this.onKeyDown(evt), { capture: true });
+    }
+
+    private onKeyDown(evt: KeyboardEvent): void {
+        const ctrlHeld = evt.ctrlKey || evt.metaKey;
+        const ePressed = evt.key.toLowerCase() === 'e';
+        const noOtherModifiers = !evt.shiftKey && !evt.altKey;
+        const isToggleMode = ctrlHeld && ePressed && noOtherModifiers;
+        if (!isToggleMode) {
+            return;
+        }
+        // Only the active Hexer view responds; leaves Ctrl/Cmd+E untouched in
+        // markdown views and other leaves.
+        if (this.app.workspace.getActiveViewOfType(HexerView) !== this) {
+            return;
+        }
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.toggleMode();
+    }
+
     getViewType(): string {
         return VIEW_TYPE_HEXER;
     }
@@ -42,16 +73,30 @@ export class HexerView extends TextFileView {
         this.renderEditor();
     }
 
-    /** Restores the previous map state, if any. Wired to a plugin command. */
+    /** Toggles the editor between View and Edit mode. Driven by the Ctrl/Cmd+E keydown. */
+    toggleMode(): void {
+        this.editor?.toggleMode();
+    }
+
+    /**
+     * Restores the previous map state, if any. Wired to a plugin command.
+     * A no-op in View mode, where the map is read-only.
+     */
     undo(): void {
+        if (this.editor?.getMode() !== 'edit') {
+            return;
+        }
         const restored = this.history.undo();
         if (restored) {
             this.applyRestoredData(restored);
         }
     }
 
-    /** Reapplies the most recently undone map state, if any. */
+    /** Reapplies the most recently undone map state, if any. A no-op in View mode. */
     redo(): void {
+        if (this.editor?.getMode() !== 'edit') {
+            return;
+        }
         const restored = this.history.redo();
         if (restored) {
             this.applyRestoredData(restored);

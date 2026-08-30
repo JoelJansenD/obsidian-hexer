@@ -3,6 +3,7 @@ Feature: Map Configuration
 
     Background:
         Given I have opened a Hexer file
+        And I am in edit mode
 
     Scenario: Changing the map name and hex orientation
         When I change the map name to "The Shattered Realms"

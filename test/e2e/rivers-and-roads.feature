@@ -3,6 +3,7 @@ Feature: Rivers and Roads
 
     Background:
         Given I have opened a Hexer file
+        And I am in edit mode
         And I have selected the river layer
         And I have selected the polygon tool
 

@@ -1,6 +1,7 @@
 import { Given, Then, When } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
 import editorPage from '../support/editor.page';
+import modePage from '../support/mode.page';
 import pathPage from '../support/path.page';
 import itemSettingsPage from '../support/itemSettings.page';
 import { createNote } from '../support/obsidian.page';
@@ -18,11 +19,13 @@ function nodesFromTable(table: NodeTable): AxialCoordinates[] {
     return table.hashes().map(row => ({ q: Number(row.q), r: Number(row.r) }));
 }
 
-// Seeds the river, then re-selects the river layer and polygon tool: seeding
-// rebuilds the editor with default state, so the selections from the background
-// have to be re-applied before hexes can be clicked.
+// Seeds the river, then re-enters edit mode and re-selects the river layer and
+// polygon tool: seeding rebuilds the editor with default state — back in view
+// mode — so mode and the selections from the background have to be re-applied
+// before hexes can be clicked.
 async function seedRiverAndSelectTool(nodes: AxialCoordinates[]): Promise<string> {
     const id = await pathPage.seedRiver(nodes);
+    await modePage.switchTo('edit');
     await editorPage.selectLayer('river');
     await editorPage.selectPaintTool('polygon');
     return id;

@@ -2,6 +2,7 @@ import { Given, When } from "@wdio/cucumber-framework";
 import { obsidianPage } from 'wdio-obsidian-service';
 import { fileExplorer } from '../support/obsidian.page';
 import editorPage from "../support/editor.page";
+import modePage from "../support/mode.page";
 import { Layer, PaintTool } from "../../../src/logic/EditorState";
 import { GlobalContext } from "../support/contexts/global.context";
 import { buildHexerFileContent } from "../support/fixture";
@@ -38,6 +39,13 @@ Given('I have opened a Hexer file', async function () {
             : null;
     });
     console.debug('[hexer-e2e] opened Hexer file', JSON.stringify({ canvasSize, fileContent }));
+});
+
+// A map opens in View mode, so every editing scenario enters Edit first to reveal
+// the sidebar and paint tools its later steps select. Named to keep the Gherkin
+// unambiguous against support/editMode.ts, which toggles a sidebar row's rename.
+Given('I am in edit mode', async function () {
+    await modePage.switchTo('edit');
 });
 
 Given('I have selected the {word} layer', async function (layer: Layer) {

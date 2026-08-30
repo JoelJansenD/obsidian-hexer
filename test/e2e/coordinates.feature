@@ -5,6 +5,7 @@ Feature: Coordinate labels
 
   Background:
     Given I have opened a Hexer file
+    And I am in edit mode
 
   Scenario: Labels are drawn on the non-empty hexes when enabled
     Given coordinate labels are enabled
