@@ -28,21 +28,9 @@ export class HexerPlugin extends Plugin {
             },
         });
 
-        // Palette-visible and rebindable. We deliberately omit a default hotkey:
-        // Ctrl/Cmd+E is already claimed by the core "Toggle reading view" command,
-        // and Obsidian silently drops a plugin's default hotkey on such a conflict.
-        // Ctrl/Cmd+E is instead driven by the keydown handler below.
-        this.addCommand({
-            id: 'hexer-toggle-mode',
-            name: 'Toggle edit mode',
-            checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.toggleMode()),
-        });
-
-        // Intercept Ctrl/Cmd+E ourselves while a Hexer view is focused. Registered
-        // in the capture phase so it runs before Obsidian's own keymap handler,
-        // which is bound to the same combo (the core reading-view toggle) and would
-        // otherwise consume the key before our bubble-phase listener saw it.
-        this.registerDomEvent(document, 'keydown', (evt) => this.handleToggleModeHotkey(evt), { capture: true });
+        // Ctrl/Cmd+E toggling lives on the view itself as a plain keydown event
+        // (see HexerView), not an Obsidian command, so it stays independent of the
+        // core reading-view command that owns the same combo.
 
         this.addCommand({
             id: 'hexer-undo',
@@ -127,27 +115,6 @@ export class HexerPlugin extends Plugin {
         this.register(() => {
             WorkspaceLeaf.prototype.setViewState = original;
         });
-    }
-
-    /**
-     * Toggles the mode on Ctrl/Cmd+E when a Hexer view is focused. Bound at the
-     * DOM level rather than as a command hotkey because the combo is already taken
-     * by the core reading-view toggle (see the command registration in onload).
-     */
-    private handleToggleModeHotkey(evt: KeyboardEvent): void {
-        const isModE = (evt.ctrlKey || evt.metaKey) && !evt.shiftKey && !evt.altKey
-            && evt.key.toLowerCase() === 'e';
-        if (!isModE) {
-            return;
-        }
-        const view = this.app.workspace.getActiveViewOfType(HexerView);
-        if (!view) {
-            return;
-        }
-        // Claim the key: stop Obsidian's keymap (and the browser) from also acting.
-        evt.preventDefault();
-        evt.stopPropagation();
-        view.toggleMode();
     }
 
     /**

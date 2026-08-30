@@ -14,6 +14,35 @@ export class HexerView extends TextFileView {
     private hexerData!: HexerData;
     private history!: EditHistory;
 
+    onload(): void {
+        super.onload();
+
+        // A self-contained Ctrl/Cmd+E toggle, registered as a plain keyboard event
+        // rather than an Obsidian command — so it's independent of the core
+        // reading-view command that shares the combo. Bound on the document (the
+        // canvas isn't focusable, so keys land on the body, not the view element)
+        // in the capture phase, and gated to when this view is the active one so it
+        // never hijacks Ctrl/Cmd+E elsewhere. registerDomEvent tears it down with
+        // the view.
+        this.registerDomEvent(document, 'keydown', (evt) => this.onKeyDown(evt), { capture: true });
+    }
+
+    private onKeyDown(evt: KeyboardEvent): void {
+        const isToggleMode = (evt.ctrlKey || evt.metaKey) && !evt.shiftKey && !evt.altKey
+            && evt.key.toLowerCase() === 'e';
+        if (!isToggleMode) {
+            return;
+        }
+        // Only the active Hexer view responds; leaves Ctrl/Cmd+E untouched in
+        // markdown views and other leaves.
+        if (this.app.workspace.getActiveViewOfType(HexerView) !== this) {
+            return;
+        }
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.toggleMode();
+    }
+
     getViewType(): string {
         return VIEW_TYPE_HEXER;
     }
@@ -42,7 +71,7 @@ export class HexerView extends TextFileView {
         this.renderEditor();
     }
 
-    /** Toggles the editor between View and Edit mode. Wired to a plugin command. */
+    /** Toggles the editor between View and Edit mode. Driven by the Ctrl/Cmd+E keydown. */
     toggleMode(): void {
         this.editor?.toggleMode();
     }
