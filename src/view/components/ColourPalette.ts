@@ -56,6 +56,11 @@ export default class ColourPalette {
             this._options.onSelect(swatchEl.dataset.hexerSwatchColour!);
         });
 
+        // Opening the picker via overrideEl.click() dispatches a click that would
+        // bubble up to the swatch's own handler and spuriously quick-switch the
+        // active colour; keep the override click to itself.
+        overrideEl.addEventListener('click', (evt) => evt.stopPropagation());
+
         swatchEl.addEventListener('contextmenu', (evt) => {
             evt.preventDefault();
             // Seed the picker with the colour the swatch currently holds.
