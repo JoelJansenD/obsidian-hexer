@@ -114,8 +114,9 @@ export default class EditorSidebar {
         const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon hexer-sidebar-section-padded' });
         
         const editorState = this._componentOptions.getEditorState();
+        const iconControls = iconSectionContent.createDiv({ cls: 'hexer-colour-controls' });
         const iconColourInput = new ColourInput(
-            iconSectionContent,
+            iconControls,
             {
                 dataField: 'icon',
                 value: editorState.activeIcon.color,
@@ -127,7 +128,7 @@ export default class EditorSidebar {
                 }
             });
         new ColourPalette(
-            iconSectionContent,
+            iconControls,
             {
                 target: 'icon',
                 colours: this._componentOptions.getDataClone().iconPalette,
@@ -202,8 +203,9 @@ export default class EditorSidebar {
         
         const editorState = this._componentOptions.getEditorState();
         const terrainContent = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        const terrainControls = terrainContent.createDiv({ cls: 'hexer-colour-controls' });
         const terrainColourInput = new ColourInput(
-            terrainContent,
+            terrainControls,
             {
                 dataField: 'terrain',
                 value: editorState.activeColour,
@@ -214,7 +216,7 @@ export default class EditorSidebar {
                 }
             });
         new ColourPalette(
-            terrainContent,
+            terrainControls,
             {
                 target: 'terrain',
                 colours: this._componentOptions.getDataClone().terrainPalette,

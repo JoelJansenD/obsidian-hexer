@@ -1,7 +1,10 @@
 .hexer-palette {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
+    /* Two rows of five. The swatch size is shared with the colour picker
+       beside it (see .hexer-colour-controls), falling back when standalone. */
+    grid-template-columns: repeat(5, var(--hexer-swatch-size, 1.5rem));
+    grid-template-rows: repeat(2, var(--hexer-swatch-size, 1.5rem));
+    gap: var(--hexer-swatch-gap, 4px);
 }
 
 .hexer-swatch {
