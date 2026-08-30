@@ -139,9 +139,7 @@ hexer:
   rivers: []
   roads: []
   factions: []
-  terrainPalette:
-${DEFAULT_TERRAIN_PALETTE.map(colour => `    - "${colour}"`).join('\n')}
-  iconPalette:
-${DEFAULT_ICON_PALETTE.map(colour => `    - "${colour}"`).join('\n')}
+  terrainPalette: ${JSON.stringify(DEFAULT_TERRAIN_PALETTE)}
+  iconPalette: ${JSON.stringify(DEFAULT_ICON_PALETTE)}
 ---
 `;
