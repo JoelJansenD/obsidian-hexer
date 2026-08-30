@@ -28,8 +28,10 @@ export class HexerView extends TextFileView {
     }
 
     private onKeyDown(evt: KeyboardEvent): void {
-        const isToggleMode = (evt.ctrlKey || evt.metaKey) && !evt.shiftKey && !evt.altKey
-            && evt.key.toLowerCase() === 'e';
+        const ctrlHeld = evt.ctrlKey || evt.metaKey;
+        const ePressed = evt.key.toLowerCase() === 'e';
+        const noOtherModifiers = !evt.shiftKey && !evt.altKey;
+        const isToggleMode = ctrlHeld && ePressed && noOtherModifiers;
         if (!isToggleMode) {
             return;
         }
