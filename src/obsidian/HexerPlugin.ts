@@ -28,14 +28,20 @@ export class HexerPlugin extends Plugin {
             },
         });
 
-        // Ctrl/Cmd+E mirrors Obsidian's native reading/editing toggle. HexerView is
-        // an alternative editor, so the native command is inert here and ours wins.
+        // Palette-visible and rebindable. We deliberately omit a default hotkey:
+        // Ctrl/Cmd+E is already claimed by the core "Toggle reading view" command,
+        // and Obsidian silently drops a plugin's default hotkey on such a conflict.
+        // Ctrl/Cmd+E is instead driven by the keydown handler below.
         this.addCommand({
             id: 'hexer-toggle-mode',
             name: 'Toggle edit mode',
-            hotkeys: [{ modifiers: ['Mod'], key: 'e' }],
             checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.toggleMode()),
         });
+
+        // Intercept Ctrl/Cmd+E ourselves while a Hexer view is focused. The core
+        // reading-view toggle is inert here (no markdown view), so it neither
+        // consumes the key nor does anything if it sees it — we just claim it.
+        this.registerDomEvent(document, 'keydown', (evt) => this.handleToggleModeHotkey(evt));
 
         this.addCommand({
             id: 'hexer-undo',
@@ -120,6 +126,25 @@ export class HexerPlugin extends Plugin {
         this.register(() => {
             WorkspaceLeaf.prototype.setViewState = original;
         });
+    }
+
+    /**
+     * Toggles the mode on Ctrl/Cmd+E when a Hexer view is focused. Bound at the
+     * DOM level rather than as a command hotkey because the combo is already taken
+     * by the core reading-view toggle (see the command registration in onload).
+     */
+    private handleToggleModeHotkey(evt: KeyboardEvent): void {
+        const isModE = (evt.ctrlKey || evt.metaKey) && !evt.shiftKey && !evt.altKey
+            && evt.key.toLowerCase() === 'e';
+        if (!isModE) {
+            return;
+        }
+        const view = this.app.workspace.getActiveViewOfType(HexerView);
+        if (!view) {
+            return;
+        }
+        evt.preventDefault();
+        view.toggleMode();
     }
 
     /**
