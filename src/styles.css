@@ -1,3 +1,4 @@
+@import "./view/components/ColourInput.css";
 @import "./view/components/ColourPalette.css";
 @import "./view/editor/Editor.css";
 @import "./view/editor/components/EditorCanvas.css";

@@ -104,6 +104,11 @@ export class HexerView extends TextFileView {
     }
 
     private applyRestoredData(data: HexerData): void {
+        // Palettes are the sole HexerData carve-out from undo (ADR-0011): a
+        // snapshot restores every other field, but the live palettes ride across
+        // rather than being resurrected from the snapshot.
+        data.terrainPalette = this.hexerData.terrainPalette;
+        data.iconPalette = this.hexerData.iconPalette;
         this.persist(data);
         this.editor?.refresh();
     }

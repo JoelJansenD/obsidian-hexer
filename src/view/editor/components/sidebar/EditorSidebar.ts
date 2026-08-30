@@ -1,5 +1,6 @@
 import { Mountain, Droplets, Shapes, Route, Shield, Settings, createElement } from "lucide";
 import EditorSidebarSection from "./EditorSidebarSection";
+import ColourInput from "../../../components/ColourInput";
 import ColourPalette from "../../../components/ColourPalette";
 import { Layer } from "../../../../logic/EditorState";
 import { ComponentOptions } from "../../Editor";
@@ -112,8 +113,8 @@ export default class EditorSidebar {
 
         const iconSectionContent = iconSection.contentEl.createEl('div', { cls: 'hexer-sidebar-icon hexer-sidebar-section-padded' });
         
-        const editorState = this._componentOptions.getEditorState();        
-        new ColourPalette(
+        const editorState = this._componentOptions.getEditorState();
+        new ColourInput(
             iconSectionContent,
             {
                 dataField: 'icon',
@@ -123,6 +124,23 @@ export default class EditorSidebar {
                     state.activeIcon.color = newColour;
                     this._componentOptions.setEditorState(state);
                     this.updateIconElements();
+                }
+            });
+        new ColourPalette(
+            iconSectionContent,
+            {
+                target: 'icon',
+                colours: this._componentOptions.getDataClone().iconPalette,
+                onSelect: (colour: string) => {
+                    const state = this._componentOptions.getEditorState();
+                    state.activeIcon.color = colour;
+                    this._componentOptions.setEditorState(state);
+                    this.updateIconElements();
+                },
+                onOverride: (index: number, colour: string) => {
+                    const data = this._componentOptions.getDataClone();
+                    data.iconPalette[index] = colour;
+                    this._componentOptions.setData(data, { commitHistory: false });
                 }
             });
 
@@ -181,9 +199,9 @@ export default class EditorSidebar {
         });
         
         const editorState = this._componentOptions.getEditorState();
-        const paletteEl = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
-        new ColourPalette(
-            paletteEl,
+        const terrainContent = terrainSection.contentEl.createDiv({ cls: 'hexer-sidebar-section-padded' });
+        new ColourInput(
+            terrainContent,
             {
                 dataField: 'terrain',
                 value: editorState.activeColour,
@@ -191,6 +209,22 @@ export default class EditorSidebar {
                     const state = this._componentOptions.getEditorState();
                     state.activeColour = newColour;
                     this._componentOptions.setEditorState(state);
+                }
+            });
+        new ColourPalette(
+            terrainContent,
+            {
+                target: 'terrain',
+                colours: this._componentOptions.getDataClone().terrainPalette,
+                onSelect: (colour: string) => {
+                    const state = this._componentOptions.getEditorState();
+                    state.activeColour = colour;
+                    this._componentOptions.setEditorState(state);
+                },
+                onOverride: (index: number, colour: string) => {
+                    const data = this._componentOptions.getDataClone();
+                    data.terrainPalette[index] = colour;
+                    this._componentOptions.setData(data, { commitHistory: false });
                 }
             });
         return terrainSection;
