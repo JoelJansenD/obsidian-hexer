@@ -85,3 +85,16 @@ The active editing tool: select, brush, bucket, eraser, or polygon. Selectable o
 **Stroke**:
 A single pointer gesture (press to release). All the edits it produces coalesce into one undo step.
 _Avoid_: Gesture, drag
+
+### Colour
+
+**Active colour**:
+The colour the next paint will use for a layer. Terrain and icon each have their own active colour; it is session-only UI state, not saved to the map. Set it with the layer's colour input or by clicking a palette swatch.
+
+**Palette**:
+A per-map set of ten quick-switch colours for one layer, laid out in two rows of five. Terrain and icon each own a separate palette. Every position always holds a colour: a palette begins seeded from fixed defaults and each colour can be overridden from then on — colours are never added or removed, only changed. A palette lives in the map and is saved with it, but its edits stand outside undo.
+_Avoid_: Recents, swatch set
+
+**Swatch**:
+One of the ten colours in a palette, drawn as a coloured square. Left-clicking a swatch makes its colour the layer's active colour (quick-switch); right-clicking overrides the swatch with the current active colour.
+_Avoid_: Slot (the position, not the colour), sample

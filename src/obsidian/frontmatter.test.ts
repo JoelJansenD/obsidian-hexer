@@ -1,6 +1,6 @@
 import { defaultCamera } from "../logic/camera";
 import { Faction } from "../logic/faction";
-import { getHex, setHex } from "../logic/HexerData";
+import { DEFAULT_ICON_PALETTE, DEFAULT_TERRAIN_PALETTE, getHex, initialFileContent, setHex } from "../logic/HexerData";
 import { defaultMapSettings } from "../logic/mapSettings";
 import { addEdge, addNode, createPath } from "../logic/path";
 import createHexerData from "../__test/createHexerData";
@@ -25,6 +25,8 @@ describe('toFrontmatter', () => {
             rivers: [],
             roads: [],
             factions: [],
+            terrainPalette: DEFAULT_TERRAIN_PALETTE,
+            iconPalette: DEFAULT_ICON_PALETTE,
         });
     });
 });
@@ -121,6 +123,42 @@ describe('document seam', () => {
 
     it('throws when the document has no frontmatter block', () => {
         expect(() => parseHexerDocument('no frontmatter here')).toThrow('Missing frontmatter');
+    });
+});
+
+describe('palette backfill', () => {
+    it('seeds both palettes from defaults when the document omits them', () => {
+        // Arrange - a map written before palettes existed carries neither.
+        const document = '---\nhexer:\n  version: "1.0"\n  hexes: {}\n  rivers: []\n  roads: []\n  factions: []\n---\n';
+
+        // Act
+        const restored = parseHexerDocument(document);
+
+        // Assert
+        expect(restored.terrainPalette).toEqual(DEFAULT_TERRAIN_PALETTE);
+        expect(restored.iconPalette).toEqual(DEFAULT_ICON_PALETTE);
+    });
+
+    it('parses the initial file template with both palettes seeded', () => {
+        // Act - the template must be valid YAML carrying the default palettes.
+        const restored = parseHexerDocument(initialFileContent);
+
+        // Assert
+        expect(restored.terrainPalette).toEqual(DEFAULT_TERRAIN_PALETTE);
+        expect(restored.iconPalette).toEqual(DEFAULT_ICON_PALETTE);
+    });
+
+    it('keeps a stored palette rather than overwriting it with defaults', () => {
+        // Arrange
+        const stored = ['#111111', '#222222', '#333333', '#444444', '#555555', '#666666', '#777777', '#888888', '#999999', '#aaaaaa'];
+        const data = createHexerData({ terrainPalette: stored });
+        const document = serializeHexerDocument(data, '---\nhexer:\n  version: "1.0"\n---\n');
+
+        // Act
+        const restored = parseHexerDocument(document);
+
+        // Assert
+        expect(restored.terrainPalette).toEqual(stored);
     });
 });
 

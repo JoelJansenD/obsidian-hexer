@@ -1,0 +1,27 @@
+input.hexer-colour-picker {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+
+    &::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+        border: none;
+        border-radius: 0;
+    }
+
+    &::-moz-color-swatch {
+        border: none;
+        border-radius: 0;
+    }
+}
