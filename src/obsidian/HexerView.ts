@@ -19,12 +19,12 @@ export class HexerView extends TextFileView {
 
         // A self-contained Ctrl/Cmd+E toggle, registered as a plain keyboard event
         // rather than an Obsidian command — so it's independent of the core
-        // reading-view command that shares the combo. Bound on the document (the
-        // canvas isn't focusable, so keys land on the body, not the view element)
-        // in the capture phase, and gated to when this view is the active one so it
-        // never hijacks Ctrl/Cmd+E elsewhere. registerDomEvent tears it down with
-        // the view.
-        this.registerDomEvent(document, 'keydown', (evt) => this.onKeyDown(evt), { capture: true });
+        // reading-view command that shares the combo. Bound on the window in the
+        // capture phase so it runs before Obsidian's own keymap consumes the key
+        // (a document-phase listener was too late). It targets the window because
+        // the canvas isn't focusable, so keys land on the body, not the view
+        // element. registerDomEvent tears it down with the view.
+        this.registerDomEvent(window, 'keydown', (evt) => this.onKeyDown(evt), { capture: true });
     }
 
     private onKeyDown(evt: KeyboardEvent): void {
