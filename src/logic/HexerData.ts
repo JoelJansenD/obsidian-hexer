@@ -42,22 +42,6 @@ export const DEFAULT_ICON_PALETTE: string[] = [
     '#e69138', '#674ea7', '#f1c232', '#7b4a2d', '#999999',
 ];
 
-/**
- * Fills in palettes a parsed map is missing, seeding each absent one from its
- * defaults. A map written before palettes existed (or a hand-authored file)
- * loads with both palettes present rather than undefined. Mutates and returns
- * the same object.
- */
-export function backfillPalettes(data: HexerData): HexerData {
-    if (!data.terrainPalette) {
-        data.terrainPalette = [...DEFAULT_TERRAIN_PALETTE];
-    }
-    if (!data.iconPalette) {
-        data.iconPalette = [...DEFAULT_ICON_PALETTE];
-    }
-    return data;
-}
-
 export function hexKey(q: number, r: number): string {
     return `${q},${r}`;
 }

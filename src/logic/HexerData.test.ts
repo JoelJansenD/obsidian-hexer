@@ -1,9 +1,6 @@
 import { Hexagon } from "./hexagon";
 import {
     HexerData,
-    DEFAULT_ICON_PALETTE,
-    DEFAULT_TERRAIN_PALETTE,
-    backfillPalettes,
     eraseIfEmpty,
     getHex,
     getOrCreateHex,
@@ -183,34 +180,6 @@ describe('HexerData', () => {
             // Assert
             expect(point.x).toBeCloseTo(0);
             expect(point.y).toBeCloseTo(86.60254);
-        });
-    });
-
-    describe('backfillPalettes', () => {
-        it('seeds both palettes from defaults when absent', () => {
-            // Arrange - a map parsed from a pre-palette file has neither palette.
-            const data = { terrainPalette: undefined, iconPalette: undefined } as unknown as HexerData;
-
-            // Act
-            backfillPalettes(data);
-
-            // Assert
-            expect(data.terrainPalette).toEqual(DEFAULT_TERRAIN_PALETTE);
-            expect(data.iconPalette).toEqual(DEFAULT_ICON_PALETTE);
-        });
-
-        it('leaves stored palettes untouched', () => {
-            // Arrange
-            const terrainPalette = ['#111111'];
-            const iconPalette = ['#222222'];
-            const data = { terrainPalette, iconPalette } as unknown as HexerData;
-
-            // Act
-            backfillPalettes(data);
-
-            // Assert
-            expect(data.terrainPalette).toBe(terrainPalette);
-            expect(data.iconPalette).toBe(iconPalette);
         });
     });
 });

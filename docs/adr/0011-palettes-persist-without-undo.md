@@ -8,4 +8,4 @@ Unlike the camera, palettes are also **excluded from undo snapshots** ([ADR-0005
 
 - The snapshot restore path treats palettes as an exception: it carries the live palettes across a snapshot apply rather than adopting the snapshot's. Every other `HexerData` field is fully snapshotted; palettes are the sole carve-out.
 - A swatch override marks the document dirty and saves, like a camera-only move.
-- A map with no stored palette seeds from the terrain and icon default constants; the defaults are constant arrays, cheap to change without migration.
+- New maps seed both palettes from the terrain and icon default constants in the file template; the defaults are constant arrays, cheap to change. Every map is assumed to carry both palettes.

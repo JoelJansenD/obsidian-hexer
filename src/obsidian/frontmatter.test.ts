@@ -126,19 +126,7 @@ describe('document seam', () => {
     });
 });
 
-describe('palette backfill', () => {
-    it('seeds both palettes from defaults when the document omits them', () => {
-        // Arrange - a map written before palettes existed carries neither.
-        const document = '---\nhexer:\n  version: "1.0"\n  hexes: {}\n  rivers: []\n  roads: []\n  factions: []\n---\n';
-
-        // Act
-        const restored = parseHexerDocument(document);
-
-        // Assert
-        expect(restored.terrainPalette).toEqual(DEFAULT_TERRAIN_PALETTE);
-        expect(restored.iconPalette).toEqual(DEFAULT_ICON_PALETTE);
-    });
-
+describe('palette serialization', () => {
     it('parses the initial file template with both palettes seeded', () => {
         // Act - the template must be valid YAML carrying the default palettes.
         const restored = parseHexerDocument(initialFileContent);
@@ -148,7 +136,7 @@ describe('palette backfill', () => {
         expect(restored.iconPalette).toEqual(DEFAULT_ICON_PALETTE);
     });
 
-    it('keeps a stored palette rather than overwriting it with defaults', () => {
+    it('round-trips a stored palette through serialize and parse', () => {
         // Arrange
         const stored = ['#111111', '#222222', '#333333', '#444444', '#555555', '#666666', '#777777', '#888888', '#999999', '#aaaaaa'];
         const data = createHexerData({ terrainPalette: stored });

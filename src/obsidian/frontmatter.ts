@@ -1,5 +1,5 @@
 import { parseYaml, stringifyYaml } from "obsidian";
-import { backfillPalettes, HexerData } from "../logic/HexerData";
+import { HexerData } from "../logic/HexerData";
 
 /** Matches the leading `---\n...\n---` YAML frontmatter block of a Hexer file. */
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
@@ -34,9 +34,7 @@ export function parseHexerDocument(data: string): HexerData {
     }
 
     const frontmatter = parseYaml(match[1]) as HexerFrontmatter;
-    // Seed palettes for maps written before they existed, so the rest of the app
-    // never sees a map without them (ADR-0011).
-    return backfillPalettes(fromFrontmatter(frontmatter));
+    return fromFrontmatter(frontmatter);
 }
 
 /**
