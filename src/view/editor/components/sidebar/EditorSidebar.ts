@@ -16,6 +16,22 @@ export default class EditorSidebar {
         this.build();
     }
 
+    /** Shows or hides the whole sidebar; hidden in View mode. */
+    public setVisible(visible: boolean): void {
+        this._sidebarEl.toggleClass('hexer-sidebar-hidden', !visible);
+    }
+
+    /**
+     * Expands the given layer's section and collapses the rest, without touching
+     * the editor state. Used to reflect a mode-switch reset back to the default
+     * layer; ordinary layer changes go through the section headers' own clicks.
+     */
+    public showLayer(layer: Layer): void {
+        for (const [sectionLayer, section] of this._sections) {
+            section.setExpanded(sectionLayer === layer);
+        }
+    }
+
     /** Re-renders the data-driven list sections so they reflect the current map. */
     public refresh(): void {
         for (const section of this._sections.values()) {

@@ -1,6 +1,7 @@
 import { LEFT_MOUSE_BUTTON, LEFT_MOUSE_BUTTON_HELD, RIGHT_MOUSE_BUTTON } from "../../../constants/mouse";
 import { fitCamera, screenToMap } from "../../../logic/camera";
 import { CameraCursor, CameraStrategy } from "../../../logic/CameraStrategy";
+import { Mode, PaintTool } from "../../../logic/EditorState";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
@@ -100,6 +101,21 @@ export default class EditorCanvas {
         this._tools.refresh();
     }
 
+    /**
+     * Reflects the top-level mode on the canvas area: the paint-tool cluster shows
+     * only in Edit, while the action bar (which stays in both modes) updates its
+     * toggle affordance.
+     */
+    public setMode(mode: Mode) {
+        this._tools.setVisible(mode === 'edit');
+        this._actionBar.setMode(mode);
+    }
+
+    /** Highlights the given paint tool in the cluster. */
+    public setActiveTool(tool: PaintTool) {
+        this._tools.setActiveTool(tool);
+    }
+
     public requestRender() {
         if(this._renderRequested) {
             return;
@@ -118,7 +134,10 @@ export default class EditorCanvas {
         this._context = this._canvasEl.getContext('2d')!;
         
         this._tools = new EditorTools(canvasAreaEl, this._dataOptions);
-        this._actionBar = new EditorActionBar(canvasAreaEl, { onZoomToFit: () => this.zoomToFit() });
+        this._actionBar = new EditorActionBar(canvasAreaEl, {
+            onZoomToFit: () => this.zoomToFit(),
+            onToggleMode: () => this._dataOptions.toggleMode(),
+        });
 
         // Track pointer gestures independently of the active tool so that
         // strokes keep coalescing across tool changes. A press opens a stroke;

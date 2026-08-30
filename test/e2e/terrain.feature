@@ -3,6 +3,7 @@ Feature: Terrain
 
   Background:
     Given I have opened a Hexer file
+    And I am in edit mode
     And I have selected the terrain layer
     And my selected colour is blue
 

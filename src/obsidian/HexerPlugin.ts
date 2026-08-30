@@ -28,6 +28,15 @@ export class HexerPlugin extends Plugin {
             },
         });
 
+        // Ctrl/Cmd+E mirrors Obsidian's native reading/editing toggle. HexerView is
+        // an alternative editor, so the native command is inert here and ours wins.
+        this.addCommand({
+            id: 'hexer-toggle-mode',
+            name: 'Toggle edit mode',
+            hotkeys: [{ modifiers: ['Mod'], key: 'e' }],
+            checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.toggleMode()),
+        });
+
         this.addCommand({
             id: 'hexer-undo',
             name: 'Undo',

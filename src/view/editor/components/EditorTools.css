@@ -1,3 +1,7 @@
+.hexer-tools.hexer-tools-hidden {
+    display: none;
+}
+
 .hexer-tools {
     display: flex;
     flex-direction: column;

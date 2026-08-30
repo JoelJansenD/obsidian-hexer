@@ -3,6 +3,7 @@ Feature: Factions
 
     Background:
         Given I have opened a Hexer file
+        And I am in edit mode
         And I have selected the faction layer
 
     Scenario: Creating a new faction

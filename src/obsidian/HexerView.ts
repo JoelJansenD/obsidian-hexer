@@ -42,16 +42,30 @@ export class HexerView extends TextFileView {
         this.renderEditor();
     }
 
-    /** Restores the previous map state, if any. Wired to a plugin command. */
+    /** Toggles the editor between View and Edit mode. Wired to a plugin command. */
+    toggleMode(): void {
+        this.editor?.toggleMode();
+    }
+
+    /**
+     * Restores the previous map state, if any. Wired to a plugin command.
+     * A no-op in View mode, where the map is read-only.
+     */
     undo(): void {
+        if (this.editor?.getMode() !== 'edit') {
+            return;
+        }
         const restored = this.history.undo();
         if (restored) {
             this.applyRestoredData(restored);
         }
     }
 
-    /** Reapplies the most recently undone map state, if any. */
+    /** Reapplies the most recently undone map state, if any. A no-op in View mode. */
     redo(): void {
+        if (this.editor?.getMode() !== 'edit') {
+            return;
+        }
         const restored = this.history.redo();
         if (restored) {
             this.applyRestoredData(restored);

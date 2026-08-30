@@ -4,6 +4,8 @@ import { ComponentOptions } from "../view/editor/Editor"
 import createHexerData from "./createHexerData";
 
 const defaultEditorState: EditorState = {
+    // Component tests exercise the editing UI, so default to edit mode.
+    mode: 'edit',
     activeColour: '#000000',
     activeIcon: {
         color: '#000000',
@@ -36,6 +38,7 @@ export const createComponentOptions = (overrides: Partial<EditorState> = {}, ini
         setData: vi.fn(next => data = next),
         getEditorState: () => state,
         setEditorState: vi.fn((next: EditorState) => { state = cloneEditorState(next); }),
+        toggleMode: vi.fn(),
         obsidian: {} as ComponentOptions['obsidian'],
     };
 };
