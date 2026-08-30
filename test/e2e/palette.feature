@@ -1,4 +1,4 @@
-Feature: Terrain palette
+Feature: Palette
   A palette of ten quick-switch colours accompanies the terrain colour picker.
   Left-clicking a swatch makes its colour the active colour; right-clicking
   overrides the swatch with the current active colour.
