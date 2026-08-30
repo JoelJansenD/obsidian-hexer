@@ -1,4 +1,4 @@
-import { CURRENT_VERSION } from "../../../src/logic/HexerData";
+import { CURRENT_VERSION, DEFAULT_ICON_PALETTE, DEFAULT_TERRAIN_PALETTE } from "../../../src/logic/HexerData";
 import { AxialCoordinates } from "../../../src/logic/hexagon";
 
 /**
@@ -137,6 +137,14 @@ export function buildHexerFileContent(rivers: SeedRiver[] = [], factions: SeedFa
             );
         }
     }
+
+    // Every map the app writes carries both palettes (see initialFileContent);
+    // fromFrontmatter is the identity, so a fixture that omitted them would load
+    // them as undefined and building the colour palette would throw.
+    lines.push(
+        `  terrainPalette: ${JSON.stringify(DEFAULT_TERRAIN_PALETTE)}`,
+        `  iconPalette: ${JSON.stringify(DEFAULT_ICON_PALETTE)}`,
+    );
 
     lines.push('---', '');
     return lines.join('\n');
