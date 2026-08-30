@@ -1,4 +1,4 @@
-import { Mode } from "../../../src/logic/EditorState";
+import { ViewMode } from "../../../src/logic/EditorState";
 
 /**
  * Drives the top-level View/Edit mode: the action-bar toggle and the assertions
@@ -13,7 +13,7 @@ class ModePage {
     }
 
     /** The live editor mode, read off the editor root. */
-    async currentMode(): Promise<Mode | null> {
+    async currentMode(): Promise<ViewMode | null> {
         const value = await browser.$('.hexer-editor').getAttribute('data-hexer-mode');
         return value === 'view' || value === 'edit' ? value : null;
     }
@@ -25,12 +25,12 @@ class ModePage {
     }
 
     /** Clicks the toggle and waits until the editor reports the target mode. */
-    async switchTo(mode: Mode): Promise<void> {
+    async switchTo(mode: ViewMode): Promise<void> {
         await this.clickModeToggle();
         await this.waitForMode(mode);
     }
 
-    async waitForMode(mode: Mode): Promise<void> {
+    async waitForMode(mode: ViewMode): Promise<void> {
         await browser.waitUntil(async () => (await this.currentMode()) === mode, {
             timeoutMsg: `Editor never reached ${mode} mode`,
         });

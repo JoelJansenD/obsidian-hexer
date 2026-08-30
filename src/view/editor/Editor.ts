@@ -1,4 +1,4 @@
-import { EditorState, Mode } from "../../logic/EditorState";
+import { EditorState, ViewMode } from "../../logic/EditorState";
 import { HexerData } from "../../logic/HexerData";
 import { resolveToolStrategy } from "../../logic/toolStrategies/ToolStrategy";
 import { ObsidianInterop } from "../ObsidianInterop";
@@ -35,10 +35,10 @@ export interface ComponentOptions extends DataOptions {
 /**
  * The edit-related editor state as it stands on a fresh load. Switching modes
  * re-applies these defaults, so returning to Edit always starts clean — select
- * tool, terrain layer, nothing selected. Mode is supplied by the caller because
- * it is the one field a mode switch is deliberately changing, not resetting.
+ * tool, terrain layer, nothing selected. The mode is supplied by the caller
+ * because it is the one field a mode switch deliberately changes, not resets.
  */
-function createEditorState(mode: Mode): EditorState {
+function createEditorState(mode: ViewMode): EditorState {
     return {
         mode,
         activeColour: '#FFFFFF',
@@ -86,7 +86,7 @@ export default class Editor {
     }
 
     /** The current top-level mode. Read-only enforcement (undo/redo) gates on this. */
-    public getMode(): Mode {
+    public getMode(): ViewMode {
         return this._editorState.mode;
     }
 
@@ -96,7 +96,7 @@ export default class Editor {
      * untouched (it lives in the map). Session-only — never persisted or undone.
      */
     public toggleMode() {
-        const nextMode: Mode = this._editorState.mode === 'view' ? 'edit' : 'view';
+        const nextMode: ViewMode = this._editorState.mode === 'view' ? 'edit' : 'view';
         const nextState = createEditorState(nextMode);
         this.setEditorState(nextState);
 

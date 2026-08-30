@@ -17,13 +17,12 @@ export default class EditorTools {
     }
 
     private build() {
-        const toolsEl = this._parentEl.createEl('div', { cls: 'hexer-tools' });
-        this._toolsEl = toolsEl;
-        this.createButton(toolsEl, MousePointer2, 'select');
-        this.createButton(toolsEl, Brush, 'brush');
-        this.createButton(toolsEl, PaintBucket, 'bucket');
-        this.createButton(toolsEl, Eraser, 'eraser');
-        this.createButton(toolsEl, Pentagon, 'polygon');
+        this._toolsEl = this._parentEl.createEl('div', { cls: 'hexer-tools' });
+        this.createButton(this._toolsEl, MousePointer2, 'select');
+        this.createButton(this._toolsEl, Brush, 'brush');
+        this.createButton(this._toolsEl, PaintBucket, 'bucket');
+        this.createButton(this._toolsEl, Eraser, 'eraser');
+        this.createButton(this._toolsEl, Pentagon, 'polygon');
 
         this.setActiveTool('select');
         this.refresh();

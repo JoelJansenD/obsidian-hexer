@@ -1,5 +1,5 @@
 import { createElement, Eye, IconNode, Pencil, Scan } from "lucide";
-import { Mode } from "../../../logic/EditorState";
+import { ViewMode } from "../../../logic/EditorState";
 
 /** Callbacks for the global actions the bar exposes. */
 export interface ActionBarOptions {
@@ -9,11 +9,11 @@ export interface ActionBarOptions {
 
 // The mode-toggle button advertises the mode it switches *to*: a pencil to enter
 // Edit while in View, an eye to return to View while in Edit.
-const TOGGLE_ICON: Record<Mode, IconNode> = {
+const TOGGLE_ICON: Record<ViewMode, IconNode> = {
     view: Pencil,
     edit: Eye,
 };
-const TOGGLE_LABEL: Record<Mode, string> = {
+const TOGGLE_LABEL: Record<ViewMode, string> = {
     view: 'Edit',
     edit: 'View',
 };
@@ -31,7 +31,7 @@ export default class EditorActionBar {
     }
 
     /** Reflects the current mode on the toggle button's icon and tooltip. */
-    public setMode(mode: Mode) {
+    public setMode(mode: ViewMode) {
         this._toggleButton.empty();
         this._toggleButton.appendChild(createElement(TOGGLE_ICON[mode], { width: 18, height: 18 }));
         this._toggleButton.setAttribute('aria-label', TOGGLE_LABEL[mode]);

@@ -1,7 +1,7 @@
 import { LEFT_MOUSE_BUTTON, LEFT_MOUSE_BUTTON_HELD, RIGHT_MOUSE_BUTTON } from "../../../constants/mouse";
 import { fitCamera, screenToMap } from "../../../logic/camera";
 import { CameraCursor, CameraStrategy } from "../../../logic/CameraStrategy";
-import { Mode, PaintTool } from "../../../logic/EditorState";
+import { ViewMode, PaintTool } from "../../../logic/EditorState";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
@@ -106,7 +106,7 @@ export default class EditorCanvas {
      * only in Edit, while the action bar (which stays in both modes) updates its
      * toggle affordance.
      */
-    public setMode(mode: Mode) {
+    public setMode(mode: ViewMode) {
         this._tools.setVisible(mode === 'edit');
         this._actionBar.setMode(mode);
     }

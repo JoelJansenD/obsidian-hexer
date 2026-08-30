@@ -1,13 +1,13 @@
 import { When, Then } from '@wdio/cucumber-framework';
 import { expect } from '@wdio/globals';
-import { Mode } from '../../../src/logic/EditorState';
+import { ViewMode } from '../../../src/logic/EditorState';
 import modePage from '../support/mode.page';
 
 When('I click the mode toggle on the action bar', async function () {
     await modePage.clickModeToggle();
 });
 
-Then('the editor is in {word} mode', async function (mode: Mode) {
+Then('the editor is in {word} mode', async function (mode: ViewMode) {
     await modePage.waitForMode(mode);
     expect(await modePage.currentMode()).toBe(mode);
 });
