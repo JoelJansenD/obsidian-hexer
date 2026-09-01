@@ -14,6 +14,7 @@ const noopObsidian = {
     showFilePreview: vi.fn(),
     openFile: vi.fn(),
     openMapSettings: vi.fn(),
+    print: vi.fn().mockResolvedValue(undefined),
 } as ObsidianInterop;
 
 const createEditor = () => {

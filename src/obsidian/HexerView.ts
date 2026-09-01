@@ -1,4 +1,4 @@
-import { Keymap, TextFileView } from 'obsidian';
+import { Keymap, Notice, Platform, TextFileView } from 'obsidian';
 import Editor, { CommitOptions } from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
 import { EditHistory } from '../logic/EditHistory';
@@ -8,6 +8,14 @@ import { FilePreviewOptions } from '../view/ObsidianInterop';
 import MapSettingsModal, { MapSettingsOptions } from './modals/MapSettingsModal';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
+
+/** The slice of Electron's webContents the print flow uses. */
+interface PrintableWebContents {
+    print(
+        options: { printBackground?: boolean; landscape?: boolean; margins?: { marginType?: string } },
+        callback?: (success: boolean, failureReason: string) => void,
+    ): void;
+}
 
 export class HexerView extends TextFileView {
     private editor?: Editor;
@@ -137,7 +145,8 @@ export class HexerView extends TextFileView {
                     openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
                     showFilePreview: options => this.showFilePreview(options),
                     openFile: (filePath, event) => this.openFile(filePath, event),
-                    openMapSettings: options => this.openMapSettings(options)
+                    openMapSettings: options => this.openMapSettings(options),
+                    print: options => this.printDocument(options)
                 });
         }
     }
@@ -165,6 +174,43 @@ export class HexerView extends TextFileView {
     private openMapSettings(options: MapSettingsOptions = {}): void {
         const modal = new MapSettingsModal(this.app, this.hexerData.mapSettings, options);
         modal.open();
+    }
+
+    /**
+     * Prints the current view through Electron's webContents, which opens the
+     * system print dialog directly. `window.print()` can't be used: Obsidian's
+     * Electron routes it through a print-preview shell it doesn't support ("this
+     * app doesn't support print preview"). The view layer has already injected a
+     * print-only stylesheet that reduces the printed page to just the map, so
+     * printing the whole webContents still yields only the map.
+     */
+    private async printDocument({ landscape }: { landscape: boolean }): Promise<void> {
+        if (!Platform.isDesktopApp) {
+            new Notice('Printing a Hexer map is only available in the desktop app.');
+            return;
+        }
+
+        let webContents: PrintableWebContents;
+        try {
+            // @electron/remote bridges the renderer to its own webContents, whose
+            // print() opens the system dialog. Loaded lazily and gated on desktop,
+            // per Obsidian's guidance on Node/Electron modules.
+            const remote = require('@electron/remote') as {
+                getCurrentWebContents: () => PrintableWebContents;
+            };
+            webContents = remote.getCurrentWebContents();
+        } catch (error) {
+            new Notice('Could not reach the system print dialog.');
+            console.error('Hexer: failed to load @electron/remote for printing', error);
+            return;
+        }
+
+        await new Promise<void>((resolve) => {
+            webContents.print(
+                { printBackground: true, landscape, margins: { marginType: 'none' } },
+                () => resolve(),
+            );
+        });
     }
 
     private showFilePreview({ filePath, event, targetEl }: FilePreviewOptions): void {

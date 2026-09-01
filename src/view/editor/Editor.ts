@@ -92,7 +92,7 @@ export default class Editor {
 
     /** Renders the whole map to the OS print dialog. Available in both modes. */
     public print() {
-        this._canvas.print();
+        void this._canvas.print();
     }
 
     /**
