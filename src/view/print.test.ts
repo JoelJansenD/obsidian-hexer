@@ -144,8 +144,8 @@ describe('planPrintRender', () => {
 describe('buildPrintData', () => {
     const printCamera = { offset: { x: 5, y: 7 }, zoom: 1 };
 
-    it('forces the editing guides off while leaving grid borders alone', () => {
-        // Arrange - borders on, guides on (the on-screen defaults).
+    it('forces the crosshair off while letting coordinate labels and grid borders follow their toggle', () => {
+        // Arrange - borders, crosshair, and coordinates all on (the on-screen defaults).
         const data = createHexerData({
             mapSettings: { ...defaultMapSettings(), displayHexBorders: true, displayCrosshair: true, displayCoordinates: true },
         });
@@ -153,18 +153,20 @@ describe('buildPrintData', () => {
         // Act
         const printData = buildPrintData(data, printCamera);
 
-        // Assert
+        // Assert - only the crosshair is dropped; labels and borders are left alone.
         expect(printData.mapSettings.displayCrosshair).toBe(false);
-        expect(printData.mapSettings.displayCoordinates).toBe(false);
+        expect(printData.mapSettings.displayCoordinates).toBe(true);
         expect(printData.mapSettings.displayHexBorders).toBe(true);
     });
 
-    it('keeps grid borders off when the map has them toggled off', () => {
+    it('keeps coordinate labels and grid borders off when the map has them toggled off', () => {
         const data = createHexerData({
-            mapSettings: { ...defaultMapSettings(), displayHexBorders: false },
+            mapSettings: { ...defaultMapSettings(), displayHexBorders: false, displayCoordinates: false },
         });
 
-        expect(buildPrintData(data, printCamera).mapSettings.displayHexBorders).toBe(false);
+        const printData = buildPrintData(data, printCamera);
+        expect(printData.mapSettings.displayHexBorders).toBe(false);
+        expect(printData.mapSettings.displayCoordinates).toBe(false);
     });
 
     it('adopts the print camera', () => {

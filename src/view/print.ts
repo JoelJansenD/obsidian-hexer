@@ -137,15 +137,15 @@ export function planPrintRender(data: HexerData): PrintPlan | null {
 }
 
 /**
- * The map as it should render for print: the editing guides (crosshair and
- * coordinate labels) forced off while grid borders keep following their toggle,
- * framed by the print camera. A deep clone, so the live map is untouched.
+ * The map as it should render for print: the crosshair — a pure cursor/origin
+ * guide — forced off, while coordinate labels and grid borders both keep
+ * following their own display toggle, framed by the print camera. A deep clone,
+ * so the live map is untouched.
  */
 export function buildPrintData(data: HexerData, camera: Camera): HexerData {
     const clone = structuredClone(data);
     clone.camera = camera;
     clone.mapSettings.displayCrosshair = false;
-    clone.mapSettings.displayCoordinates = false;
     return clone;
 }
 
@@ -192,73 +192,96 @@ function paintWhiteBehind(context: CanvasRenderingContext2D, canvas: HTMLCanvasE
     context.restore();
 }
 
+// Marks the elements the print flow injects into the host document, so cleanup
+// can find and remove exactly what it added.
+const PRINT_ROOT_CLASS = 'hexer-print-root';
+
+// Print-only stylesheet: hide the whole Obsidian window and show just the map
+// image, centred and fit-to-page on white with no chrome (Q6-Q9). Everything is
+// scoped to `@media print`, and the root is display:none off-screen, so injecting
+// it never disturbs the live editor. The image is the sole printed content, which
+// is the same outcome as a dedicated print document — reached this way because
+// Electron can't show a print preview for an iframe's own window, only the top
+// window's (see printMap).
+function printStyles(orientation: 'landscape' | 'portrait'): string {
+    return `
+.${PRINT_ROOT_CLASS} { display: none; }
+@media print {
+    @page { size: ${orientation}; margin: 0; }
+    html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
+    body > *:not(.${PRINT_ROOT_CLASS}) { display: none !important; }
+    .${PRINT_ROOT_CLASS} {
+        display: flex !important;
+        position: fixed;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+    }
+    .${PRINT_ROOT_CLASS} img { max-width: 100%; max-height: 100%; object-fit: contain; }
+}`;
+}
+
 /**
  * Renders the whole map and hands it to the operating system's print dialog
- * (which doubles as Save-as-PDF). Prints a hidden document holding only the map
- * image on a white page — never the Obsidian window — with the page orientation
- * hinted from the map's shape; the user can override it in the dialog.
+ * (which doubles as Save-as-PDF). Prints only the map image — never the Obsidian
+ * window — by injecting it into the host document behind a print-only stylesheet
+ * that hides everything else, then invoking the top window's print (Electron
+ * won't preview an iframe's own print). Page orientation is hinted from the map's
+ * shape; the user can override it in the dialog.
  */
 export function printMap(data: HexerData, doc: Document): void {
+    const view = doc.defaultView;
+    if (!view) {
+        return;
+    }
+
     const canvas = renderPrintCanvas(data, doc);
     const imageUrl = canvas.toDataURL('image/png');
     const orientation = canvas.width >= canvas.height ? 'landscape' : 'portrait';
 
-    const iframe = doc.createElement('iframe');
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.style.position = 'fixed';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.style.visibility = 'hidden';
-    doc.body.appendChild(iframe);
+    const style = doc.createElement('style');
+    style.textContent = printStyles(orientation);
+    doc.head.appendChild(style);
 
-    const frameDoc = iframe.contentDocument;
-    const frameWindow = iframe.contentWindow;
-    if (!frameDoc || !frameWindow) {
-        iframe.remove();
-        return;
-    }
+    const root = doc.createElement('div');
+    root.className = PRINT_ROOT_CLASS;
+    root.setAttribute('aria-hidden', 'true');
+    const image = doc.createElement('img');
+    image.alt = 'Map';
+    root.appendChild(image);
+    doc.body.appendChild(root);
 
-    // Fit-to-page, single page, aspect ratio preserved: the image is centred and
-    // scaled to the largest size that fits, on a white page with no chrome (Q6-Q9).
-    frameDoc.open();
-    frameDoc.write(`<!DOCTYPE html>
-<html>
-<head>
-<style>
-@page { size: ${orientation}; margin: 0; }
-html, body { margin: 0; padding: 0; height: 100%; background: #ffffff; }
-.page { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; background: #ffffff; }
-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-</style>
-</head>
-<body><div class="page"><img alt="Map" src="${imageUrl}"></div></body>
-</html>`);
-    frameDoc.close();
-
-    // Tear the hidden frame down once the dialog closes; a fallback timer covers
-    // browsers that never fire afterprint (e.g. a cancelled Save-as-PDF).
-    let removed = false;
+    // Tear the injected elements down once the dialog closes; a fallback timer
+    // covers the case where afterprint never fires (e.g. a cancelled Save-as-PDF).
+    let cleaned = false;
     const cleanup = () => {
-        if (removed) {
+        if (cleaned) {
             return;
         }
-        removed = true;
-        iframe.remove();
+        cleaned = true;
+        view.removeEventListener('afterprint', cleanup);
+        root.remove();
+        style.remove();
     };
-    frameWindow.addEventListener('afterprint', cleanup);
-    doc.defaultView?.setTimeout(cleanup, 60_000);
+    view.addEventListener('afterprint', cleanup);
+    view.setTimeout(cleanup, 60_000);
 
-    // Print only once the image has decoded, or the page prints blank.
-    const image = frameDoc.querySelector('img');
+    // Print only once the image has decoded, or the page prints blank. Guarded so
+    // the load listener and the already-complete check can't both fire it.
+    let printed = false;
     const print = () => {
-        frameWindow.focus();
-        frameWindow.print();
+        if (printed) {
+            return;
+        }
+        printed = true;
+        view.focus();
+        view.print();
     };
-    if (!image || image.complete) {
+    image.addEventListener('load', print, { once: true });
+    image.addEventListener('error', print, { once: true });
+    image.src = imageUrl;
+    if (image.complete) {
         print();
-    } else {
-        image.addEventListener('load', print);
-        image.addEventListener('error', print);
     }
 }
