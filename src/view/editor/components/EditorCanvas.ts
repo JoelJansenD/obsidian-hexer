@@ -5,6 +5,7 @@ import { ViewMode, PaintTool } from "../../../logic/EditorState";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
+import { printMap } from "../../print";
 import { ComponentOptions } from "../Editor";
 import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
@@ -137,6 +138,7 @@ export default class EditorCanvas {
         this._actionBar = new EditorActionBar(canvasAreaEl, {
             onZoomToFit: () => this.zoomToFit(),
             onToggleMode: () => this._dataOptions.toggleMode(),
+            onPrint: () => this.print(),
         });
 
         // Track pointer gestures independently of the active tool so that
@@ -262,6 +264,15 @@ export default class EditorCanvas {
             this._cameraStrategy.setSpaceHeld(false);
             this.updateCursor();
         });
+    }
+
+    /**
+     * Renders the whole map and opens the OS print dialog. Read-only and
+     * camera-independent — available in both View and Edit mode. Drives the
+     * offscreen render through the canvas's own document.
+     */
+    public print() {
+        printMap(this._dataOptions.getDataClone(), this._canvasEl.ownerDocument);
     }
 
     /** Frames the whole map in the viewport. A camera-only move, like pan and zoom. */

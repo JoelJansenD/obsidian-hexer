@@ -90,6 +90,11 @@ export default class Editor {
         return this._editorState.mode;
     }
 
+    /** Renders the whole map to the OS print dialog. Available in both modes. */
+    public print() {
+        this._canvas.print();
+    }
+
     /**
      * Flips between View and Edit. Switching resets the edit-related state to its
      * load-time defaults, so returning to Edit starts fresh; the camera is

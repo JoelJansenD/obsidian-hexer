@@ -78,6 +78,11 @@ export class HexerView extends TextFileView {
         this.editor?.toggleMode();
     }
 
+    /** Renders the whole map to the OS print dialog. Wired to a plugin command. */
+    print(): void {
+        this.editor?.print();
+    }
+
     /**
      * Restores the previous map state, if any. Wired to a plugin command.
      * A no-op in View mode, where the map is read-only.

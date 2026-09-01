@@ -1,5 +1,5 @@
 ---
-Status: proposed
+Status: accepted
 ---
 
 # Printing is a rasterised whole-map render through the OS dialog

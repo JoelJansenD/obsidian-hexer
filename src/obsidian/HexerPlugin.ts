@@ -49,6 +49,12 @@ export class HexerPlugin extends Plugin {
             checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.redo()),
         });
 
+        this.addCommand({
+            id: 'hexer-print',
+            name: 'Print map',
+            checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.print()),
+        });
+
         this.registerEvent(
             this.app.workspace.on('file-menu', (menu, file) => {
                 if (file instanceof TFolder) {
