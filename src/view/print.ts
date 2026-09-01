@@ -192,80 +192,79 @@ function paintWhiteBehind(context: CanvasRenderingContext2D, canvas: HTMLCanvasE
     context.restore();
 }
 
-// Marks the elements the print flow injects into the host document, so cleanup
-// can find and remove exactly what it added.
-const PRINT_ROOT_CLASS = 'hexer-print-root';
-
-// Print-only stylesheet: hide the whole Obsidian window and show just the map
-// image, centred and fit-to-page on white with no chrome (Q6-Q9). Everything is
-// scoped to `@media print`, and the root is display:none off-screen, so injecting
-// it never disturbs the live editor. The image is the sole printed content, which
-// is the same outcome as a dedicated print document — reached this way because
-// Electron can't show a print preview for an iframe's own window, only the top
-// window's (see printMap).
+// The self-contained print document's stylesheet: a white, no-chrome page with
+// the map image centred and scaled to fit (Q6-Q9), orientation hinted from the
+// map's shape.
 function printStyles(orientation: 'landscape' | 'portrait'): string {
     return `
-.${PRINT_ROOT_CLASS} { display: none; }
-@media print {
-    @page { size: ${orientation}; margin: 0; }
-    html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
-    body > *:not(.${PRINT_ROOT_CLASS}) { display: none !important; }
-    .${PRINT_ROOT_CLASS} {
-        display: flex !important;
-        position: fixed;
-        inset: 0;
-        align-items: center;
-        justify-content: center;
-        background: #ffffff;
-    }
-    .${PRINT_ROOT_CLASS} img { max-width: 100%; max-height: 100%; object-fit: contain; }
-}`;
+@page { size: ${orientation}; margin: 0; }
+html, body { margin: 0; padding: 0; height: 100%; background: #ffffff; }
+.page { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; background: #ffffff; }
+img { max-width: 100%; max-height: 100%; object-fit: contain; }`;
 }
 
 /**
  * Renders the whole map and hands it to the operating system's print dialog
- * (which doubles as Save-as-PDF). Prints only the map image — never the Obsidian
- * window — by injecting it into the host document behind a print-only stylesheet
- * that hides everything else, then invoking the top window's print (Electron
- * won't preview an iframe's own print). Page orientation is hinted from the map's
- * shape; the user can override it in the dialog.
+ * (which doubles as Save-as-PDF). Prints a hidden iframe holding only the map
+ * image on a white page — never the Obsidian window — with the orientation
+ * hinted from the map's shape; the user can override it in the dialog.
+ *
+ * The frame's document is built by DOM manipulation of its existing about:blank
+ * document, never via `document.write`: an Electron webview refuses to show a
+ * print preview for a written-into frame ("this app doesn't support print
+ * preview"), but prints a DOM-built one fine.
  */
 export function printMap(data: HexerData, doc: Document): void {
-    const view = doc.defaultView;
-    if (!view) {
-        return;
-    }
-
     const canvas = renderPrintCanvas(data, doc);
     const imageUrl = canvas.toDataURL('image/png');
     const orientation = canvas.width >= canvas.height ? 'landscape' : 'portrait';
 
-    const style = doc.createElement('style');
+    const iframe = doc.createElement('iframe');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.setAttribute('title', 'Print map');
+    iframe.tabIndex = -1;
+    // Keep the frame out of the layout, but not via display:none, which can stop
+    // a browser from wiring up the frame's print document at all.
+    iframe.style.position = 'fixed';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    doc.body.appendChild(iframe);
+
+    const frameDoc = iframe.contentDocument;
+    const frameWindow = iframe.contentWindow;
+    if (!frameDoc || !frameWindow) {
+        iframe.remove();
+        return;
+    }
+
+    frameDoc.head.replaceChildren();
+    frameDoc.body.replaceChildren();
+
+    const style = frameDoc.createElement('style');
     style.textContent = printStyles(orientation);
-    doc.head.appendChild(style);
+    frameDoc.head.appendChild(style);
 
-    const root = doc.createElement('div');
-    root.className = PRINT_ROOT_CLASS;
-    root.setAttribute('aria-hidden', 'true');
-    const image = doc.createElement('img');
+    const page = frameDoc.createElement('div');
+    page.className = 'page';
+    const image = frameDoc.createElement('img');
     image.alt = 'Map';
-    root.appendChild(image);
-    doc.body.appendChild(root);
+    page.appendChild(image);
+    frameDoc.body.appendChild(page);
 
-    // Tear the injected elements down once the dialog closes; a fallback timer
-    // covers the case where afterprint never fires (e.g. a cancelled Save-as-PDF).
+    // Tear the frame down once the dialog closes; a fallback timer covers the case
+    // where afterprint never fires (e.g. a cancelled Save-as-PDF).
     let cleaned = false;
     const cleanup = () => {
         if (cleaned) {
             return;
         }
         cleaned = true;
-        view.removeEventListener('afterprint', cleanup);
-        root.remove();
-        style.remove();
+        frameWindow.removeEventListener('afterprint', cleanup);
+        iframe.remove();
     };
-    view.addEventListener('afterprint', cleanup);
-    view.setTimeout(cleanup, 60_000);
+    frameWindow.addEventListener('afterprint', cleanup, { once: true });
+    (doc.defaultView ?? window).setTimeout(cleanup, 60_000);
 
     // Print only once the image has decoded, or the page prints blank. Guarded so
     // the load listener and the already-complete check can't both fire it.
@@ -275,8 +274,8 @@ export function printMap(data: HexerData, doc: Document): void {
             return;
         }
         printed = true;
-        view.focus();
-        view.print();
+        frameWindow.focus();
+        frameWindow.print();
     };
     image.addEventListener('load', print, { once: true });
     image.addEventListener('error', print, { once: true });

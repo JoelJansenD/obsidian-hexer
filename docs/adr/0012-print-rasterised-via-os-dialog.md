@@ -6,7 +6,7 @@ Status: accepted
 
 Printing a map ([#82](https://github.com/JoelJansenD/obsidian-hexer/issues/82)) reuses the existing immediate-mode Canvas 2D renderer ([ADR-0009](./0009-immediate-mode-rendering.md)): `render` runs against an offscreen canvas sized to a tight crop of the map's geometry, and the resulting raster is printed as the sole content of the page. That dialog's *Save as PDF* covers the "export to PDF" need, so we ship **no** PDF or SVG library and add **no** vector render path.
 
-Only the map image reaches the paper: the raster is injected into the host document behind a print-only stylesheet that hides the entire Obsidian window and shows just the centred, fit-to-page image on white, then the top window's print is invoked. Printing the top window (rather than a self-contained hidden `<iframe>`, the first design) is forced by Electron, which won't show a print preview for an iframe's own window — only the top window's.
+Only the map image reaches the paper: the raster is placed as the sole content of a hidden `<iframe>` — a white, no-chrome, fit-to-page document — whose own window is then printed, never the Obsidian window. The frame's document is built by DOM manipulation of its existing `about:blank` document, never `document.write`: an Electron webview refuses to show a print preview for a written-into frame ("this app doesn't support print preview") but prints a DOM-built one fine.
 
 ## Considered options
 
