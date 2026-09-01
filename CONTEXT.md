@@ -86,6 +86,12 @@ The active editing tool: select, brush, bucket, eraser, or polygon. Selectable o
 A single pointer gesture (press to release). All the edits it produces coalesce into one undo step.
 _Avoid_: Gesture, drag
 
+### Output
+
+**Print**:
+Producing a clean, whole-map image for physical printing or PDF, handed to the operating system's print dialog (which doubles as Save-as-PDF). The render always covers the entire map regardless of the camera, and always drops the editing guides — the crosshair and coordinate labels — while keeping map content (terrain, icons, factions, paths). Grid borders follow their current display toggle. A read-only action available in both View and Edit mode.
+_Avoid_: Export, Screenshot, Download
+
 ### Colour
 
 **Active colour**:
