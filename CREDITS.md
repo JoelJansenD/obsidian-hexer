@@ -86,6 +86,12 @@ use in Obsidian Hexer.
 | --- | --- |
 | Castle | [Delapouite](https://delapouite.com/) |
 | Dungeon gate | [Delapouite](https://delapouite.com/) |
+| Village | [Delapouite](https://delapouite.com/) |
+| Medieval village 01 | [Caro Asercion](https://github.com/caro-asercion) |
+| Peaks | [Lorc](https://lorcblog.blogspot.com/) |
+| Hills | [Delapouite](https://delapouite.com/) |
+| Cave entrance | [Delapouite](https://delapouite.com/) |
+| Church | [Delapouite](https://delapouite.com/) |
 
 You are free to share and adapt these icons for any purpose, including
 commercially, provided you give appropriate credit, link to the license, and
