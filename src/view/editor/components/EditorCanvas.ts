@@ -5,7 +5,7 @@ import { ViewMode, PaintTool } from "../../../logic/EditorState";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
-import { injectPrintDocument, renderPrintCanvas } from "../../print";
+import { renderPrintDocument } from "../../print";
 import { ComponentOptions } from "../Editor";
 import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
@@ -274,15 +274,12 @@ export default class EditorCanvas {
      * injected document back down.
      */
     public async print() {
-        const doc = this._canvasEl.ownerDocument;
-        const canvas = renderPrintCanvas(this._dataOptions.getDataClone(), doc);
-        const landscape = canvas.width >= canvas.height;
-        const handle = injectPrintDocument(doc, canvas.toDataURL('image/png'));
+        const job = renderPrintDocument(this._dataOptions.getDataClone(), this._canvasEl.ownerDocument);
         try {
-            await handle.imageReady;
-            await this._dataOptions.obsidian.print({ landscape });
+            await job.imageReady;
+            await this._dataOptions.obsidian.print({ landscape: job.landscape });
         } finally {
-            handle.cleanup();
+            job.cleanup();
         }
     }
 

@@ -52,7 +52,7 @@ export interface ObsidianInterop {
     openFile: (filePath: string, event: MouseEvent) => void;
     openMapSettings: (options?: MapSettingsOptions) => void;
     /**
-     * Sends the currently-injected print document (see `injectPrintDocument`) to
+     * Sends the currently-prepared print document (see `renderPrintDocument`) to
      * the OS print dialog via Electron, hinting the given orientation. Resolves
      * once the dialog closes. Lives here because printing needs Electron, which the
      * view layer must not import directly.

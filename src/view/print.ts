@@ -25,7 +25,8 @@ export const MAX_PRINT_AREA = 33_554_432;
 // edge of the geometry doesn't clip (issue #82 framing detail).
 export const PRINT_STROKE_MARGIN_SCALE = 0.06;
 
-// The blank page an empty map prints to (Q10: no empty-map guard, just white).
+// The size of the transparent canvas an empty map renders to: the white print
+// page shows through it as a blank page (Q10: no empty-map guard, just white).
 const EMPTY_PRINT_DIMENSION = 512;
 
 /** The tight crop, in map-space pixels, that a print render frames. */
@@ -151,17 +152,16 @@ export function buildPrintData(data: HexerData, camera: Camera): HexerData {
 
 /**
  * Renders the whole map to an offscreen canvas as a print-ready raster: a tight
- * crop, no editing guides, on a white background. An empty map yields a blank
- * white page (Q10). The canvas is detached; the caller turns it into an image.
+ * crop, no editing guides. Transparent where nothing is drawn; the white print
+ * page behind it (see PRINT_STYLES) supplies the background, so an empty map
+ * renders to a blank white page (Q7, Q10). The caller turns it into an image.
  */
-export function renderPrintCanvas(data: HexerData, doc: Document): HTMLCanvasElement {
+function renderPrintCanvas(data: HexerData, doc: Document): HTMLCanvasElement {
     const canvas = doc.createElement('canvas');
     const plan = planPrintRender(data);
 
     if (!plan) {
-        canvas.width = EMPTY_PRINT_DIMENSION;
-        canvas.height = EMPTY_PRINT_DIMENSION;
-        paintWhiteBehind(canvas.getContext('2d')!, canvas);
+        canvas.width = canvas.height = EMPTY_PRINT_DIMENSION;
         return canvas;
     }
 
@@ -174,22 +174,7 @@ export function renderPrintCanvas(data: HexerData, doc: Document): HTMLCanvasEle
     // transform on top of this base, exactly as the DPR transform on-screen.
     context.setTransform(plan.scale, 0, 0, plan.scale, 0, 0);
     render(context, buildPrintData(data, plan.camera), PRINT_EDITOR_STATE, plan.viewport);
-
-    paintWhiteBehind(context, canvas);
     return canvas;
-}
-
-// Fills every pixel the render left transparent with white, so the raster carries
-// its own white background rather than relying on the page behind it. Drawn behind
-// the existing content via destination-over, at the identity transform so the fill
-// covers the whole backing store regardless of the supersample scale in force.
-function paintWhiteBehind(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-    context.save();
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    context.globalCompositeOperation = 'destination-over';
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.restore();
 }
 
 // Marks the elements the print flow injects into the host document, so cleanup
@@ -220,8 +205,10 @@ const PRINT_STYLES = `
     .${PRINT_ROOT_CLASS} img { max-width: 100%; max-height: 100%; object-fit: contain; }
 }`;
 
-/** The injected print document, and the means to await its image and tear it down. */
-export interface PrintDocumentHandle {
+/** A prepared print page: how to orient it, when its image is ready, and how to remove it. */
+export interface PrintJob {
+    /** Whether the page should hint landscape orientation, from the map's shape. */
+    landscape: boolean;
     /** Resolves once the map image has decoded, so printing never captures a blank page. */
     imageReady: Promise<void>;
     /** Removes the injected elements. Idempotent; call once printing has returned. */
@@ -229,14 +216,16 @@ export interface PrintDocumentHandle {
 }
 
 /**
- * Injects the print page into the host document: the map image behind a
- * print-only stylesheet that hides everything else. The caller renders it with
- * {@link renderPrintCanvas}, awaits {@link PrintDocumentHandle.imageReady}, hands
- * the page to the OS via the Obsidian layer's `print`, then calls
- * {@link PrintDocumentHandle.cleanup}. Split from the actual print call because
- * that needs Electron, which only the Obsidian layer may reach.
+ * Prepares the whole-map print page in `doc`: renders the map to a raster and
+ * injects it behind the print-only stylesheet that hides everything else. The
+ * caller awaits `imageReady`, hands the page to the OS via the Obsidian layer's
+ * `print`, then calls `cleanup`. The actual print call is separate because it
+ * needs Electron, which only the Obsidian layer may reach.
  */
-export function injectPrintDocument(doc: Document, imageUrl: string): PrintDocumentHandle {
+export function renderPrintDocument(data: HexerData, doc: Document): PrintJob {
+    const canvas = renderPrintCanvas(data, doc);
+    const landscape = canvas.width >= canvas.height;
+
     const style = doc.createElement('style');
     style.textContent = PRINT_STYLES;
     doc.head.appendChild(style);
@@ -252,7 +241,7 @@ export function injectPrintDocument(doc: Document, imageUrl: string): PrintDocum
     const imageReady = new Promise<void>((resolve) => {
         image.addEventListener('load', () => resolve(), { once: true });
         image.addEventListener('error', () => resolve(), { once: true });
-        image.src = imageUrl;
+        image.src = canvas.toDataURL('image/png');
         if (image.complete) {
             resolve();
         }
@@ -268,5 +257,5 @@ export function injectPrintDocument(doc: Document, imageUrl: string): PrintDocum
         style.remove();
     };
 
-    return { imageReady, cleanup };
+    return { landscape, imageReady, cleanup };
 }
