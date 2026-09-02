@@ -193,85 +193,21 @@ function paintWhiteBehind(context: CanvasRenderingContext2D, canvas: HTMLCanvasE
     context.restore();
 }
 
-// Marks the elements the print flow injects into the host document, so cleanup
-// removes exactly what it added and the print stylesheet can target them.
-const PRINT_ROOT_CLASS = 'hexer-print-root';
-
-// A print-only stylesheet that turns the live Obsidian document into the print
-// page: hide the whole window and show just the map image, centred and scaled to
-// fit on white with no chrome (Q6-Q9). Scoped to `@media print` and display:none
-// off-screen, so injecting it never disturbs the editor. Paired with
-// webContents.print (see ObsidianInterop.print), which renders the current page
-// in print mode — window.print itself routes through a print-preview shell
-// Obsidian's Electron doesn't support ("this app doesn't support print preview").
-const PRINT_STYLES = `
-.${PRINT_ROOT_CLASS} { display: none; }
-@media print {
-    @page { margin: 0; }
-    html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
-    body > *:not(.${PRINT_ROOT_CLASS}) { display: none !important; }
-    .${PRINT_ROOT_CLASS} {
-        display: flex !important;
-        position: fixed;
-        inset: 0;
-        align-items: center;
-        justify-content: center;
-        background: #ffffff;
-    }
-    .${PRINT_ROOT_CLASS} img { max-width: 100%; max-height: 100%; object-fit: contain; }
-}`;
-
-/** A prepared print page: how to orient it, when its image is ready, and how to remove it. */
-export interface PrintJob {
+/** The print-ready map raster plus the page orientation its shape suggests. */
+export interface PrintImage {
+    /** The whole-map raster as a PNG data URL, white-backed and tightly cropped. */
+    dataUrl: string;
     /** Whether the page should hint landscape orientation, from the map's shape. */
     landscape: boolean;
-    /** Resolves once the map image has decoded, so printing never captures a blank page. */
-    imageReady: Promise<void>;
-    /** Removes the injected elements. Idempotent; call once printing has returned. */
-    cleanup: () => void;
 }
 
 /**
- * Prepares the whole-map print page in `doc`: renders the map to a raster and
- * injects it behind the print-only stylesheet that hides everything else. The
- * caller awaits `imageReady`, hands the page to the OS via the Obsidian layer's
- * `print`, then calls `cleanup`. The actual print call is separate because it
- * needs Electron, which only the Obsidian layer may reach.
+ * Renders the whole map to a print-ready PNG data URL. The Obsidian layer loads
+ * it into an isolated window and prints that — printing the live Obsidian
+ * document instead comes back blank, because its own styles suppress the injected
+ * page. Pure view work: no Electron, no live-document mutation.
  */
-export function renderPrintDocument(data: HexerData, doc: Document): PrintJob {
+export function buildPrintImage(data: HexerData, doc: Document): PrintImage {
     const canvas = renderPrintCanvas(data, doc);
-    const landscape = canvas.width >= canvas.height;
-
-    const style = doc.createElement('style');
-    style.textContent = PRINT_STYLES;
-    doc.head.appendChild(style);
-
-    const root = doc.createElement('div');
-    root.className = PRINT_ROOT_CLASS;
-    root.setAttribute('aria-hidden', 'true');
-    const image = doc.createElement('img');
-    image.alt = 'Map';
-    root.appendChild(image);
-    doc.body.appendChild(root);
-
-    const imageReady = new Promise<void>((resolve) => {
-        image.addEventListener('load', () => resolve(), { once: true });
-        image.addEventListener('error', () => resolve(), { once: true });
-        image.src = canvas.toDataURL('image/png');
-        if (image.complete) {
-            resolve();
-        }
-    });
-
-    let cleaned = false;
-    const cleanup = () => {
-        if (cleaned) {
-            return;
-        }
-        cleaned = true;
-        root.remove();
-        style.remove();
-    };
-
-    return { landscape, imageReady, cleanup };
+    return { dataUrl: canvas.toDataURL('image/png'), landscape: canvas.width >= canvas.height };
 }

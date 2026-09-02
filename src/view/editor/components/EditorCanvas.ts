@@ -5,7 +5,7 @@ import { ViewMode, PaintTool } from "../../../logic/EditorState";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
-import { renderPrintDocument } from "../../print";
+import { buildPrintImage } from "../../print";
 import { ComponentOptions } from "../Editor";
 import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
@@ -26,6 +26,10 @@ export default class EditorCanvas {
     private _listeners = new Map<string, EventListener>();
 
     private _renderRequested = false;
+
+    // True while a print dialog is open, so a second click is ignored rather than
+    // stacking another print window on top.
+    private _printing = false;
 
     // Identifies the in-progress pointer gesture. Every commit between a
     // press and its release shares this key so a whole drag becomes one undo
@@ -268,18 +272,22 @@ export default class EditorCanvas {
 
     /**
      * Renders the whole map and opens the OS print dialog. Read-only and
-     * camera-independent — available in both View and Edit mode. Renders the map
-     * to an offscreen raster, injects it into the document behind the print-only
-     * stylesheet, hands it to the OS via the Obsidian layer, then tears the
-     * injected document back down.
+     * camera-independent — available in both View and Edit mode. Produces the
+     * print raster, then hands it to the Obsidian layer, which prints it from an
+     * isolated window (Electron is off-limits to the view).
      */
     public async print() {
-        const job = renderPrintDocument(this._dataOptions.getDataClone(), this._canvasEl.ownerDocument);
+        // A print holds an OS dialog open; ignore further clicks until it returns,
+        // so rapid clicks can't stack up multiple print windows.
+        if (this._printing) {
+            return;
+        }
+        this._printing = true;
         try {
-            await job.imageReady;
-            await this._dataOptions.obsidian.print({ landscape: job.landscape });
+            const image = buildPrintImage(this._dataOptions.getDataClone(), this._canvasEl.ownerDocument);
+            await this._dataOptions.obsidian.print(image);
         } finally {
-            job.cleanup();
+            this._printing = false;
         }
     }
 

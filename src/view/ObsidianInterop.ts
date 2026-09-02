@@ -52,10 +52,10 @@ export interface ObsidianInterop {
     openFile: (filePath: string, event: MouseEvent) => void;
     openMapSettings: (options?: MapSettingsOptions) => void;
     /**
-     * Sends the currently-prepared print document (see `renderPrintDocument`) to
-     * the OS print dialog via Electron, hinting the given orientation. Resolves
-     * once the dialog closes. Lives here because printing needs Electron, which the
-     * view layer must not import directly.
+     * Prints the whole-map raster (see `buildPrintImage`) by loading it into an
+     * isolated window and invoking the OS print dialog on that, hinting the given
+     * orientation. Resolves once the dialog closes. Lives here because printing
+     * needs Electron, which the view layer must not import directly.
      */
-    print: (options: { landscape: boolean }) => Promise<void>;
+    print: (image: { dataUrl: string; landscape: boolean }) => Promise<void>;
 }
