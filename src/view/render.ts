@@ -18,14 +18,18 @@ const EDGE_NEIGHBOURS: AxialCoordinates[] = [
     { q: 1, r: -1 },  // corner 5 -> 0
 ];
 
+/**
+ * Draws the whole map onto `context`, framed by the camera in `data`.
+ *
+ * @param viewport The drawable area the camera frames, in CSS pixels. Defaults
+ * to the canvas's own display size, which is what the on-screen editor wants.
+ * The print path passes an explicit viewport so it can frame a tight crop
+ * against an offscreen canvas that has no layout size to read.
+ */
 export default function render(
     context: CanvasRenderingContext2D,
     data: HexerData,
     editorState: EditorState,
-    // The drawable area the camera frames, in CSS pixels. Defaults to the canvas's
-    // own display size, which is what the on-screen editor wants. The print path
-    // passes an explicit viewport so it can frame a tight crop against an offscreen
-    // canvas that has no layout size to read.
     viewport: Viewport = { width: context.canvas.clientWidth, height: context.canvas.clientHeight },
 ) {
     // Clear the full backing store regardless of the current DPR transform.
