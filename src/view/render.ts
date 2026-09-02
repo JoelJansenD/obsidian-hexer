@@ -21,6 +21,12 @@ const EDGE_NEIGHBOURS: AxialCoordinates[] = [
 /**
  * Draws the whole map onto `context`, framed by the camera in `data`.
  *
+ * @param context The 2D canvas context to draw into. Its current transform is
+ * treated as the DPR base; render stacks the camera pan/zoom on top of it.
+ * @param data The map to draw — hexes, paths, factions, and the camera that
+ * frames them.
+ * @param editorState The live editing state, so the render can surface the
+ * active selection (e.g. a path's glow and node dots).
  * @param viewport The drawable area the camera frames, in CSS pixels. Defaults
  * to the canvas's own display size, which is what the on-screen editor wants.
  * The print path passes an explicit viewport so it can frame a tight crop
