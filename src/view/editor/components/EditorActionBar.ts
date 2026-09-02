@@ -1,10 +1,11 @@
-import { createElement, Eye, IconNode, Pencil, Scan } from "lucide";
+import { createElement, Eye, IconNode, Pencil, Printer, Scan } from "lucide";
 import { ViewMode } from "../../../logic/EditorState";
 
 /** Callbacks for the global actions the bar exposes. */
 export interface ActionBarOptions {
     onZoomToFit: () => void;
     onToggleMode: () => void;
+    onPrint: () => void;
 }
 
 // The mode-toggle button advertises the mode it switches *to*: a pencil to enter
@@ -55,5 +56,14 @@ export default class EditorActionBar {
         });
         fitButton.appendChild(createElement(Scan, { width: 18, height: 18 }));
         fitButton.addEventListener('click', () => this._options.onZoomToFit());
+
+        // Printing is read-only, so it sits alongside the other global actions and
+        // shows in both View and Edit mode.
+        const printButton = barEl.createEl('div', {
+            cls: 'hexer-action-bar-button',
+            attr: { 'aria-label': 'Print' },
+        });
+        printButton.appendChild(createElement(Printer, { width: 18, height: 18 }));
+        printButton.addEventListener('click', () => this._options.onPrint());
     }
 }

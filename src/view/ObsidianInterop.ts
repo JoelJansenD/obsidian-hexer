@@ -1,4 +1,5 @@
 import { MapSettingsOptions } from "../obsidian/modals/MapSettingsModal";
+import { PrintImage } from "./print";
 
 /**
  * The part of a sidebar item the settings dialog edits, shared by every item
@@ -51,4 +52,11 @@ export interface ObsidianInterop {
     /** Opens the linked note; a mod-click opens it in a new tab. */
     openFile: (filePath: string, event: MouseEvent) => void;
     openMapSettings: (options?: MapSettingsOptions) => void;
+    /**
+     * Prints the whole-map raster (see {@link buildPrintImage}) by loading it into
+     * an isolated window and invoking the OS print dialog on that, hinting the
+     * image's orientation. Resolves once the dialog closes. Lives here because
+     * printing needs Electron, which the view layer must not import directly.
+     */
+    print: (image: PrintImage) => Promise<void>;
 }

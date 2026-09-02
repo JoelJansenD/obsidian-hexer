@@ -1,4 +1,4 @@
-import { mapToScreen } from "../logic/camera";
+import { mapToScreen, Viewport } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
 import { Hexagon, Point, AxialCoordinates, hexagonIsEmpty } from "../logic/hexagon";
 import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
@@ -18,7 +18,16 @@ const EDGE_NEIGHBOURS: AxialCoordinates[] = [
     { q: 1, r: -1 },  // corner 5 -> 0
 ];
 
-export default function render(context: CanvasRenderingContext2D, data: HexerData, editorState: EditorState) {
+export default function render(
+    context: CanvasRenderingContext2D,
+    data: HexerData,
+    editorState: EditorState,
+    // The drawable area the camera frames, in CSS pixels. Defaults to the canvas's
+    // own display size, which is what the on-screen editor wants. The print path
+    // passes an explicit viewport so it can frame a tight crop against an offscreen
+    // canvas that has no layout size to read.
+    viewport: Viewport = { width: context.canvas.clientWidth, height: context.canvas.clientHeight },
+) {
     // Clear the full backing store regardless of the current DPR transform.
     context.save();
     context.setTransform(1, 0, 0, 1, 0, 0);
@@ -29,7 +38,6 @@ export default function render(context: CanvasRenderingContext2D, data: HexerDat
     // scale by the zoom, so every map point `p` lands at `mapToScreen(p)`. Goes
     // through the shared transform so hit-testing (screenToMap) stays its exact
     // inverse. Stacks on top of the DPR transform set on resize.
-    const viewport = { width: context.canvas.clientWidth, height: context.canvas.clientHeight };
     const origin = mapToScreen(data.camera, viewport, { x: 0, y: 0 });
     context.save();
     context.translate(origin.x, origin.y);
@@ -167,7 +175,10 @@ function drawCrosshair(context: CanvasRenderingContext2D, data: HexerData) {
     context.restore();
 }
 
-function hexCorners(center: Point, size: number, orientation: HexOrientation): Point[] {
+// Exported so the print crop can be measured from the same corner geometry the
+// renderer draws, rather than a looser centre-plus-circumradius box that would
+// pad the crop unevenly.
+export function hexCorners(center: Point, size: number, orientation: HexOrientation): Point[] {
     // Flat-top hexes have a corner pointing along +x (angle 0); pointy-top hexes
     // are the same ring rotated so a corner points up instead, which is a -30°
     // shift. The shift is chosen so corner `i` -> `i + 1` still faces the same
