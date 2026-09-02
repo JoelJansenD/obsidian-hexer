@@ -25,8 +25,7 @@ export const MAX_PRINT_AREA = 33_554_432;
 // edge of the geometry doesn't clip (issue #82 framing detail).
 export const PRINT_STROKE_MARGIN_SCALE = 0.06;
 
-// The size of the transparent canvas an empty map renders to: the white print
-// page shows through it as a blank page (Q10: no empty-map guard, just white).
+// The blank page an empty map prints to (Q10: no empty-map guard, just white).
 const EMPTY_PRINT_DIMENSION = 512;
 
 /** The tight crop, in map-space pixels, that a print render frames. */
@@ -152,9 +151,9 @@ export function buildPrintData(data: HexerData, camera: Camera): HexerData {
 
 /**
  * Renders the whole map to an offscreen canvas as a print-ready raster: a tight
- * crop, no editing guides. Transparent where nothing is drawn; the white print
- * page behind it (see PRINT_STYLES) supplies the background, so an empty map
- * renders to a blank white page (Q7, Q10). The caller turns it into an image.
+ * crop, no editing guides, on its own white background so the image never depends
+ * on the print renderer honouring the page's CSS background. An empty map yields a
+ * blank white page (Q7, Q10). The caller turns it into an image.
  */
 function renderPrintCanvas(data: HexerData, doc: Document): HTMLCanvasElement {
     const canvas = doc.createElement('canvas');
@@ -162,6 +161,7 @@ function renderPrintCanvas(data: HexerData, doc: Document): HTMLCanvasElement {
 
     if (!plan) {
         canvas.width = canvas.height = EMPTY_PRINT_DIMENSION;
+        paintWhiteBehind(canvas.getContext('2d')!, canvas);
         return canvas;
     }
 
@@ -174,7 +174,23 @@ function renderPrintCanvas(data: HexerData, doc: Document): HTMLCanvasElement {
     // transform on top of this base, exactly as the DPR transform on-screen.
     context.setTransform(plan.scale, 0, 0, plan.scale, 0, 0);
     render(context, buildPrintData(data, plan.camera), PRINT_EDITOR_STATE, plan.viewport);
+
+    paintWhiteBehind(context, canvas);
     return canvas;
+}
+
+// Fills every pixel the render left transparent with white, so the raster carries
+// its own white background instead of relying on the print page behind it (which
+// not every print/PDF renderer paints). Drawn behind the existing content via
+// destination-over, at the identity transform so the fill covers the whole backing
+// store regardless of the supersample scale in force.
+function paintWhiteBehind(context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+    context.save();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.globalCompositeOperation = 'destination-over';
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.restore();
 }
 
 // Marks the elements the print flow injects into the host document, so cleanup
