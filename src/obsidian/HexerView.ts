@@ -1,12 +1,14 @@
-import { Keymap, TextFileView } from 'obsidian';
+import { Keymap, TextFileView, TFile } from 'obsidian';
 import Editor, { CommitOptions } from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
 import { EditHistory } from '../logic/EditHistory';
 import { parseHexerDocument, serializeHexerDocument } from './frontmatter';
 import ItemSettingsModal from './modals/ItemSettingsModal';
-import { FilePreviewOptions } from '../view/ObsidianInterop';
+import { FilePreviewOptions, HexNoteOptions } from '../view/ObsidianInterop';
 import { printMapImage } from './print';
 import MapSettingsModal, { MapSettingsOptions } from './modals/MapSettingsModal';
+import { applyNoteTemplate, resolveHexNotePath } from '../logic/hexNote';
+import { labelCoordinates, LabelCoordinates } from '../logic/hexagon';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
@@ -138,6 +140,7 @@ export class HexerView extends TextFileView {
                     openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
                     showFilePreview: options => this.showFilePreview(options),
                     openFile: (filePath, event) => this.openFile(filePath, event),
+                    openHexNote: options => this.openHexNote(options),
                     openMapSettings: options => this.openMapSettings(options),
                     print: image => printMapImage(image),
                 });
@@ -163,9 +166,59 @@ export class HexerView extends TextFileView {
     private openFile(filePath: string, event: MouseEvent): void {
         void this.app.workspace.openLinkText(filePath, this.file?.path ?? '', Keymap.isModEvent(event));
     }
+
+    /**
+     * Opens the note the double-clicked hex maps to under the map's note
+     * convention, creating it (seeded from the note template) when it does not
+     * yet exist. A no-op when the map has no convention set. See ADR 0013.
+     */
+    private openHexNote({ coordinate, event }: HexNoteOptions): void {
+        const { noteConvention, noteTemplate, hexOrientation } = this.hexerData.mapSettings;
+        const tokens = labelCoordinates(coordinate, hexOrientation);
+        const notePath = resolveHexNotePath(noteConvention, tokens, this.file?.path ?? '');
+        if (!notePath) {
+            return;
+        }
+        void this.openOrCreateHexNote(notePath, noteTemplate, tokens, event);
+    }
+
+    private async openOrCreateHexNote(notePath: string, templatePath: string, tokens: LabelCoordinates, event: MouseEvent): Promise<void> {
+        if (!this.app.vault.getAbstractFileByPath(notePath)) {
+            const content = await this.readHexNoteTemplate(templatePath, tokens);
+            await this.createHexNote(notePath, content);
+        }
+        void this.app.workspace.openLinkText(notePath, this.file?.path ?? '', Keymap.isModEvent(event));
+    }
+
+    // Seeds a new hex note from the map's note template with the coordinate
+    // tokens substituted, or an empty note when no template is set or it can't
+    // be read as a file.
+    private async readHexNoteTemplate(templatePath: string, tokens: LabelCoordinates): Promise<string> {
+        const trimmed = (templatePath ?? '').trim();
+        if (!trimmed) {
+            return '';
+        }
+        const template = this.app.vault.getAbstractFileByPath(trimmed);
+        if (!(template instanceof TFile)) {
+            return '';
+        }
+        return applyNoteTemplate(await this.app.vault.read(template), tokens);
+    }
+
+    // Creates the note, first materialising any missing parent folder so
+    // vault.create doesn't reject a path into a folder that isn't there yet.
+    private async createHexNote(notePath: string, content: string): Promise<void> {
+        const slash = notePath.lastIndexOf('/');
+        const folder = slash === -1 ? '' : notePath.slice(0, slash);
+        if (folder && !this.app.vault.getAbstractFileByPath(folder)) {
+            // Swallow the race where a concurrent create already made the folder.
+            await this.app.vault.createFolder(folder).catch(() => undefined);
+        }
+        await this.app.vault.create(notePath, content);
+    }
     
     private openMapSettings(options: MapSettingsOptions = {}): void {
-        const modal = new MapSettingsModal(this.app, this.hexerData.mapSettings, options);
+        const modal = new MapSettingsModal(this.app, this.hexerData.mapSettings, this.file?.path ?? '', options);
         modal.open();
     }
 

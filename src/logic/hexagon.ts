@@ -56,6 +56,36 @@ export function getNeighbours(coordinates: AxialCoordinates): AxialCoordinates[]
     return modifiers.map(mod => add(coordinates, mod));
 }
 
+/** A hex's grid-friendly `col,row` reading, produced by {@link labelCoordinates}. */
+export interface LabelCoordinates {
+    col: number;
+    row: number;
+}
+
+/**
+ * The `col,row` pair a hex reads as in a grid-friendly view of its axial
+ * coordinate. Axial `q,r` is the map's internal model (ADR 0002), but on
+ * flat-top maps stepping `q` walks a band of hexes diagonally downhill, so the
+ * raw axial pair doesn't read like a grid. Converting to odd-q offset
+ * coordinates re-indexes each visual (zigzag) row to a single `row` value while
+ * `col` increments straight across it. Pointy-top rows are already true
+ * horizontals, so their axial pair passes through unchanged.
+ *
+ * Drives both the coordinate label (see render.ts) and the note convention (see
+ * hexNote.ts); it lives here in the logic layer rather than beside the label
+ * drawing because a hex's note path now depends on it too (ADR 0013), a
+ * deliberate exception to keeping display-only transforms private to render.ts.
+ */
+export function labelCoordinates(hex: AxialCoordinates, orientation: HexOrientation): LabelCoordinates {
+    if(orientation === 'pointy-top') {
+        return { col: hex.q, row: hex.r };
+    }
+
+    // odd-q offset: `q & 1` is 1 on odd columns (including negative ones), so
+    // odd columns drop half a row and each zigzag row collapses to one `row`.
+    return { col: hex.q, row: hex.r + (hex.q - (hex.q & 1)) / 2 };
+}
+
 export function hexagonIsEmpty(hexagon: Hexagon) {
     return hexagon.terrainColor === null
         && hexagon.icon === null

@@ -1,6 +1,6 @@
 import { mapToScreen, Viewport } from "../logic/camera";
 import { EditorPathState, EditorState } from "../logic/EditorState";
-import { Hexagon, Point, AxialCoordinates, hexagonIsEmpty } from "../logic/hexagon";
+import { Hexagon, Point, AxialCoordinates, hexagonIsEmpty, labelCoordinates } from "../logic/hexagon";
 import { getHex, HexerData, hexToPoint } from "../logic/HexerData";
 import { HexOrientation } from "../logic/mapSettings";
 import { HEXER_ICONS } from "../logic/icon";
@@ -104,26 +104,6 @@ const MIN_COORDINATE_LABEL_PX = 8;
 export interface CoordinateLabel {
     text: string;
     position: Point;
-}
-
-/**
- * The `col,row` pair a hex's coordinate label shows. Axial `q,r` is the map's
- * internal model (ADR 0002), but on flat-top maps stepping `q` walks a band of
- * hexes diagonally downhill, so the raw axial pair doesn't read like a grid.
- * Converting to odd-q offset coordinates re-indexes each visual (zigzag) row to
- * a single `row` value while `col` increments straight across it. Pointy-top
- * rows are already true horizontals, so their axial pair passes through
- * unchanged. Presentation only — a display concern the rest of the app never
- * sees, so it lives here rather than beside the coordinate maths in hexagon.ts.
- */
-function labelCoordinates(hex: AxialCoordinates, orientation: HexOrientation): { col: number, row: number } {
-    if(orientation === 'pointy-top') {
-        return { col: hex.q, row: hex.r };
-    }
-
-    // odd-q offset: `q & 1` is 1 on odd columns (including negative ones), so
-    // odd columns drop half a row and each zigzag row collapses to one `row`.
-    return { col: hex.q, row: hex.r + (hex.q - (hex.q & 1)) / 2 };
 }
 
 /**

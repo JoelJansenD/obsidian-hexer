@@ -13,6 +13,7 @@ const noopObsidian = {
     openItemSettings: vi.fn(),
     showFilePreview: vi.fn(),
     openFile: vi.fn(),
+    openHexNote: vi.fn(),
     openMapSettings: vi.fn(),
     print: vi.fn().mockResolvedValue(undefined),
 } as ObsidianInterop;

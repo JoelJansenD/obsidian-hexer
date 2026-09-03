@@ -2,7 +2,8 @@ import { LEFT_MOUSE_BUTTON, LEFT_MOUSE_BUTTON_HELD, RIGHT_MOUSE_BUTTON } from ".
 import { fitCamera, screenToMap } from "../../../logic/camera";
 import { CameraCursor, CameraStrategy } from "../../../logic/CameraStrategy";
 import { ViewMode, PaintTool } from "../../../logic/EditorState";
-import { HexerData, pointToHex } from "../../../logic/HexerData";
+import { getHex, HexerData, pointToHex } from "../../../logic/HexerData";
+import { hexagonIsEmpty } from "../../../logic/hexagon";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
 import { buildPrintImage } from "../../print";
@@ -42,6 +43,11 @@ export default class EditorCanvas {
     private _cameraStrategy = new CameraStrategy();
     private _pointerOverCanvas = false;
     private _cameraCleanups: (() => void)[] = [];
+
+    // View mode's canvas gesture: a double-click on a non-empty hex opens its
+    // note. Held separately from the tool-strategy listeners so it survives the
+    // unregister/register churn a tool switch triggers, and is toggled by mode.
+    private _viewNoteListener: EventListener | null = null;
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
@@ -92,6 +98,7 @@ export default class EditorCanvas {
      */
     public destroy() {
         this.unregisterEvents();
+        this.setViewNoteNavigation(false);
         this._canvasEl.removeEventListener('mousedown', this._beginStroke);
         this._canvasEl.removeEventListener('mouseup', this._endStroke);
         for (const cleanup of this._cameraCleanups) {
@@ -114,6 +121,46 @@ export default class EditorCanvas {
     public setMode(mode: ViewMode) {
         this._tools.setVisible(mode === 'edit');
         this._actionBar.setMode(mode);
+        this.setViewNoteNavigation(mode === 'view');
+    }
+
+    /**
+     * Wires (or unwires) View mode's double-click-to-open-note gesture. Edit
+     * mode leaves double-click to the active tool (e.g. polygon connect), so the
+     * two never contend for the gesture.
+     */
+    private setViewNoteNavigation(enabled: boolean) {
+        if (enabled === (this._viewNoteListener !== null)) {
+            return;
+        }
+        if (enabled) {
+            this._viewNoteListener = (e) => this.openHexNoteAt(e as MouseEvent);
+            this._canvasEl.addEventListener('dblclick', this._viewNoteListener);
+        } else {
+            this._canvasEl.removeEventListener('dblclick', this._viewNoteListener!);
+            this._viewNoteListener = null;
+        }
+    }
+
+    // Hit-tests the double-clicked point and, when it lands on a non-empty hex,
+    // asks the host to open that hex's note. Blank cells are a no-op, and a pan
+    // that happens to end on a double-click is ignored.
+    private openHexNoteAt(e: MouseEvent) {
+        if (this._cameraStrategy.isPanning) {
+            return;
+        }
+        const data = this._dataOptions.getDataClone();
+        const rect = this._canvasEl.getBoundingClientRect();
+        const mapPoint = screenToMap(
+            data.camera,
+            this.viewport(),
+            { x: e.clientX - rect.left, y: e.clientY - rect.top });
+        const coordinate = pointToHex(data, mapPoint.x, mapPoint.y);
+        const hex = getHex(data, coordinate);
+        if (!hex || hexagonIsEmpty(hex)) {
+            return;
+        }
+        this._dataOptions.obsidian.openHexNote({ coordinate, event: e });
     }
 
     /** Highlights the given paint tool in the cluster. */

@@ -13,6 +13,17 @@ export interface MapSettings {
     displayCrosshair: boolean;
     /** Whether each non-empty hex is labelled with its `q,r` coordinate. */
     displayCoordinates: boolean;
+    /**
+     * The map-wide convention that computes each hex's note path from its
+     * coordinate label, with `{{col}}`/`{{row}}` tokens. Empty disables hex-note
+     * navigation. See {@link resolveHexNotePath} and ADR 0013.
+     */
+    noteConvention: string;
+    /**
+     * Vault path of a note whose contents seed a freshly created hex note (with
+     * the coordinate tokens substituted). Empty means new hex notes start blank.
+     */
+    noteTemplate: string;
 }
 
 /** The settings a freshly created map starts with. */
@@ -23,5 +34,7 @@ export function defaultMapSettings(): MapSettings {
         displayHexBorders: true,
         displayCrosshair: true,
         displayCoordinates: true,
+        noteConvention: '',
+        noteTemplate: '',
     };
 }

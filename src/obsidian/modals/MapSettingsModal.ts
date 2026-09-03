@@ -1,15 +1,20 @@
 import { App, Modal, Setting } from "obsidian";
 import { MapSettings } from "../../logic/mapSettings";
-import HexerPlugin from "../main";
+import { resolveHexNotePath } from "../../logic/hexNote";
 
 export interface MapSettingsOptions {
     onSave?: (settings: MapSettings) => void;
 }
 
+// The coordinate the note-convention preview resolves, so the user sees a
+// concrete path (and its zero-padding) as they type.
+const EXAMPLE_TOKENS = { col: 3, row: 5 };
+
 export default class MapSettingsModal extends Modal {
     private readonly _settings: MapSettings;
+    private _conventionExampleEl!: HTMLElement;
 
-    constructor(app: App, _initialSettings: MapSettings, private _options: MapSettingsOptions = {}) {
+    constructor(app: App, _initialSettings: MapSettings, private _mapFilePath: string, private _options: MapSettingsOptions = {}) {
         super(app);
         this._settings = { ..._initialSettings };
         this.build();
@@ -60,6 +65,31 @@ export default class MapSettingsModal extends Modal {
                 .onChange(value => this._settings.displayCoordinates = value));
 
         new Setting(this.contentEl)
+            .setName('Hex note convention')
+            .setDesc('Path a hex opens on double-click in View mode. Use {{col}} and {{row}}; a leading / anchors at the vault root, otherwise it is relative to this map. Leave empty to disable.')
+            .addText(text => text
+                .setPlaceholder('notes/{{col}}-{{row}}')
+                .setValue(this._settings.noteConvention)
+                .onChange(value => {
+                    this._settings.noteConvention = value;
+                    this.updateConventionExample();
+                }));
+
+        this._conventionExampleEl = this.contentEl.createEl('div', {
+            cls: 'hexer-note-convention-example',
+            attr: { 'data-hexer-role': 'note-convention-example' },
+        });
+        this.updateConventionExample();
+
+        new Setting(this.contentEl)
+            .setName('Hex note template')
+            .setDesc('Optional note whose contents seed a newly created hex note, with {{col}}/{{row}} substituted. Leave empty for blank notes.')
+            .addText(text => text
+                .setPlaceholder('templates/Hex.md')
+                .setValue(this._settings.noteTemplate)
+                .onChange(value => this._settings.noteTemplate = value));
+
+        new Setting(this.contentEl)
             .addButton(button => button
                 .setButtonText('Cancel')
                 .onClick(() => {
@@ -74,5 +104,14 @@ export default class MapSettingsModal extends Modal {
                     }
                     this.close();
                 }));
+    }
+
+    // Reflects the typed convention as a concrete resolved path, so the user can
+    // see the vault-root/relative rule and the coordinate zero-padding at a glance.
+    private updateConventionExample() {
+        const path = resolveHexNotePath(this._settings.noteConvention, EXAMPLE_TOKENS, this._mapFilePath);
+        this._conventionExampleEl.setText(path
+            ? `Example — hex col 3, row 5 opens: ${path}`
+            : 'Hex-note navigation is off until a convention is set.');
     }
 }
