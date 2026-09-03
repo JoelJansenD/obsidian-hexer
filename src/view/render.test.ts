@@ -15,17 +15,18 @@ const filledHex = (q: number, r: number): Hexagon => ({
 
 describe('planCoordinateLabels', () => {
     it('labels each non-empty hex with its coordinate text when coordinates are on', () => {
-        // Arrange - the default orientation is flat-top, so 2,-1 reads as offset 2,0.
+        // Arrange - pointy-top so the label is the raw axial pair; this test is
+        // about which hexes get a label, not how flat-top re-indexes the text.
         const data = createHexerData({
             hexes: { '0,0': filledHex(0, 0), '2,-1': filledHex(2, -1) },
-            mapSettings: { ...defaultMapSettings(), displayCoordinates: true },
+            mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top', displayCoordinates: true },
         });
 
         // Act
         const labels = planCoordinateLabels(data);
 
         // Assert
-        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,0']);
+        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,-1']);
     });
 
     it('labels flat-top hexes with odd-q offset coordinates so rows read horizontally', () => {
@@ -41,20 +42,6 @@ describe('planCoordinateLabels', () => {
 
         // Assert
         expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,0', '3,1']);
-    });
-
-    it('labels pointy-top hexes with their raw axial coordinates', () => {
-        // Arrange - pointy-top rows are already horizontal, so the axial pair passes through.
-        const data = createHexerData({
-            hexes: { '0,0': filledHex(0, 0), '2,-1': filledHex(2, -1), '3,0': filledHex(3, 0) },
-            mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top', displayCoordinates: true },
-        });
-
-        // Act
-        const labels = planCoordinateLabels(data);
-
-        // Assert
-        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,-1', '3,0']);
     });
 
     it('places each label below the centre of its hex, clear of the icon', () => {
