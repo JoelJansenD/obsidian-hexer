@@ -15,8 +15,9 @@ export interface MapSettings {
     displayCoordinates: boolean;
     /**
      * The map-wide convention that computes each hex's note path from its
-     * coordinate label, with `{{col}}`/`{{row}}` tokens. Empty disables hex-note
-     * navigation. See {@link resolveHexNotePath} and ADR 0013.
+     * coordinate label, with `{{col}}`/`{{row}}` tokens. Empty falls back to the
+     * default convention — navigation is always active. See
+     * {@link resolveHexNotePath} and ADR 0013.
      */
     noteConvention: string;
     /**

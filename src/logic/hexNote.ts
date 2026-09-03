@@ -1,5 +1,13 @@
 import { LabelCoordinates } from "./hexagon";
 
+/**
+ * The convention a map falls back to when none is configured. Hex-note
+ * navigation is always active (ADR 0013), so an unset convention resolves
+ * against this default rather than switching the feature off: a note named for
+ * the hex's zero-padded `col`/`row`, sitting next to the map file.
+ */
+export const DEFAULT_NOTE_CONVENTION = '{{col}}{{row}}';
+
 // Formats a coordinate component for a token substitution. Note paths pad to a
 // minimum of two digits (sign kept outside the padding, so `-3` reads as `-03`)
 // to keep filenames fixed-width and sortable; a template body wants the natural
@@ -26,8 +34,9 @@ export function applyNoteTemplate(content: string, tokens: LabelCoordinates): st
 }
 
 /**
- * Resolves the vault-absolute path of the note a hex opens under `convention`,
- * or `null` when no convention is set (hex-note navigation is off).
+ * Resolves the vault-absolute path of the note a hex opens. Hex-note navigation
+ * is always active, so an empty or unset `convention` falls back to
+ * {@link DEFAULT_NOTE_CONVENTION} rather than turning the feature off.
  *
  * The convention is a template with `{{col}}`/`{{row}}` tokens (the hex's
  * coordinate label, zero-padded to a minimum of two digits, sign preserved);
@@ -35,11 +44,8 @@ export function applyNoteTemplate(content: string, tokens: LabelCoordinates): st
  * root, otherwise it is resolved relative to the folder holding the map file
  * (`mapFilePath`), collapsing any `.`/`..` segments. See ADR 0013.
  */
-export function resolveHexNotePath(convention: string, tokens: LabelCoordinates, mapFilePath: string): string | null {
-    const trimmed = (convention ?? '').trim();
-    if (!trimmed) {
-        return null;
-    }
+export function resolveHexNotePath(convention: string, tokens: LabelCoordinates, mapFilePath: string): string {
+    const trimmed = (convention ?? '').trim() || DEFAULT_NOTE_CONVENTION;
 
     let path = substituteTokens(trimmed, tokens, true);
     if (!path.toLowerCase().endsWith('.md')) {

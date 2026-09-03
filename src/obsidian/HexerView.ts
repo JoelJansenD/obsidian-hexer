@@ -169,16 +169,13 @@ export class HexerView extends TextFileView {
 
     /**
      * Opens the note the double-clicked hex maps to under the map's note
-     * convention, creating it (seeded from the note template) when it does not
-     * yet exist. A no-op when the map has no convention set. See ADR 0013.
+     * convention (or the default when none is set), creating it — seeded from
+     * the note template — when it does not yet exist. See ADR 0013.
      */
     private openHexNote({ coordinate, event }: HexNoteOptions): void {
         const { noteConvention, noteTemplate, hexOrientation } = this.hexerData.mapSettings;
         const tokens = labelCoordinates(coordinate, hexOrientation);
         const notePath = resolveHexNotePath(noteConvention, tokens, this.file?.path ?? '');
-        if (!notePath) {
-            return;
-        }
         void this.openOrCreateHexNote(notePath, noteTemplate, tokens, event);
     }
 

@@ -13,3 +13,4 @@ Factions and paths each store their linked note as a `filePath`, but hexes are a
 - The axial→offset transform (`labelCoordinates`) moves out of `render.ts` into the shared logic layer, since it now drives note paths as well as coordinate labels — a deliberate exception to keeping display-only transforms private to `render.ts`.
 - No dependency on the core Templates plugin or Templater: template application is a self-contained content copy via `vault.create`. Third-party template processing (e.g. Templater) is out of scope for now.
 - Only non-empty hexes are navigable; double-clicking a blank cell is a no-op, upholding the "only non-empty hexes exist" invariant.
+- Navigation is always active: a map with no convention set resolves against a default convention (`{{col}}{{row}}` next to the map file) rather than disabling the feature, so a double-click always opens or creates a note.

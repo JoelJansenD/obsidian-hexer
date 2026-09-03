@@ -1,6 +1,6 @@
 import { App, Modal, Setting } from "obsidian";
 import { MapSettings } from "../../logic/mapSettings";
-import { resolveHexNotePath } from "../../logic/hexNote";
+import { DEFAULT_NOTE_CONVENTION, resolveHexNotePath } from "../../logic/hexNote";
 
 export interface MapSettingsOptions {
     onSave?: (settings: MapSettings) => void;
@@ -66,9 +66,9 @@ export default class MapSettingsModal extends Modal {
 
         new Setting(this.contentEl)
             .setName('Hex note convention')
-            .setDesc('Path a hex opens on double-click in View mode. Use {{col}} and {{row}}; a leading / anchors at the vault root, otherwise it is relative to this map. Leave empty to disable.')
+            .setDesc(`Path a hex opens on double-click in View mode. Use {{col}} and {{row}}; a leading / anchors at the vault root, otherwise it is relative to this map. Leave empty for the default (${DEFAULT_NOTE_CONVENTION}).`)
             .addText(text => text
-                .setPlaceholder('notes/{{col}}-{{row}}')
+                .setPlaceholder(DEFAULT_NOTE_CONVENTION)
                 .setValue(this._settings.noteConvention)
                 .onChange(value => {
                     this._settings.noteConvention = value;
@@ -110,8 +110,6 @@ export default class MapSettingsModal extends Modal {
     // see the vault-root/relative rule and the coordinate zero-padding at a glance.
     private updateConventionExample() {
         const path = resolveHexNotePath(this._settings.noteConvention, EXAMPLE_TOKENS, this._mapFilePath);
-        this._conventionExampleEl.setText(path
-            ? `Example — hex col 3, row 5 opens: ${path}`
-            : 'Hex-note navigation is off until a convention is set.');
+        this._conventionExampleEl.setText(`Example — hex col 3, row 5 opens: ${path}`);
     }
 }

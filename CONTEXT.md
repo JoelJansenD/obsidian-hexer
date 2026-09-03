@@ -93,7 +93,7 @@ The Markdown note a hex opens. Double-clicking a non-empty hex in View mode open
 _Avoid_: Linked note (reserved for the note a faction or path stores directly), page
 
 **Note convention**:
-The map-wide template that computes each hex's note path from its **coordinate label** (`{{col}}`, `{{row}}`). A single convention serves every hex; whether a path resolves from the vault root or relative to the map file, and how coordinates are formatted, are fixed rules of the convention.
+The map-wide template that computes each hex's note path from its **coordinate label** (`{{col}}`, `{{row}}`). A single convention serves every hex; whether a path resolves from the vault root or relative to the map file, and how coordinates are formatted, are fixed rules of the convention. Hex-note navigation is always on: a map with no convention set falls back to a default (`{{col}}{{row}}` next to the map file), never off.
 _Avoid_: Naming pattern, filename template
 
 **Note template**:

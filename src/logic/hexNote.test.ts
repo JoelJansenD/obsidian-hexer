@@ -1,11 +1,13 @@
-import { applyNoteTemplate, resolveHexNotePath } from "./hexNote";
+import { applyNoteTemplate, DEFAULT_NOTE_CONVENTION, resolveHexNotePath } from "./hexNote";
 
 describe('resolveHexNotePath', () => {
     const tokens = { col: 3, row: 5 };
 
-    it('returns null when the convention is empty or whitespace', () => {
-        expect(resolveHexNotePath('', tokens, 'maps/World.hexer.md')).toBeNull();
-        expect(resolveHexNotePath('   ', tokens, 'maps/World.hexer.md')).toBeNull();
+    it('falls back to the default convention when none is set', () => {
+        // {{col}}{{row}} padded, next to the map file: 03 + 05 -> maps/0305.md.
+        expect(resolveHexNotePath('', tokens, 'maps/World.hexer.md')).toBe('maps/0305.md');
+        expect(resolveHexNotePath('   ', tokens, 'maps/World.hexer.md')).toBe('maps/0305.md');
+        expect(DEFAULT_NOTE_CONVENTION).toBe('{{col}}{{row}}');
     });
 
     it('substitutes zero-padded tokens, appends .md, and resolves relative to the map folder', () => {
