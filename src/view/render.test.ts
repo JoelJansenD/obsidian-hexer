@@ -14,8 +14,8 @@ const filledHex = (q: number, r: number): Hexagon => ({
 // 8 / (50 * 0.28) ≈ 0.571, so zoom 1 clears it comfortably and zoom 0.4 does not.
 
 describe('planCoordinateLabels', () => {
-    it('labels each non-empty hex with its q,r text when coordinates are on', () => {
-        // Arrange
+    it('labels each non-empty hex with its coordinate text when coordinates are on', () => {
+        // Arrange - the default orientation is flat-top, so 2,-1 reads as offset 2,0.
         const data = createHexerData({
             hexes: { '0,0': filledHex(0, 0), '2,-1': filledHex(2, -1) },
             mapSettings: { ...defaultMapSettings(), displayCoordinates: true },
@@ -25,7 +25,36 @@ describe('planCoordinateLabels', () => {
         const labels = planCoordinateLabels(data);
 
         // Assert
-        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,-1']);
+        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,0']);
+    });
+
+    it('labels flat-top hexes with odd-q offset coordinates so rows read horizontally', () => {
+        // Arrange - flat-top axial q,r walks a row diagonally; the label re-indexes
+        // it to odd-q offset. 3,0 -> row 0 + (3 - 1) / 2 = 1; 2,-1 -> row -1 + 1 = 0.
+        const data = createHexerData({
+            hexes: { '0,0': filledHex(0, 0), '2,-1': filledHex(2, -1), '3,0': filledHex(3, 0) },
+            mapSettings: { ...defaultMapSettings(), hexOrientation: 'flat-top', displayCoordinates: true },
+        });
+
+        // Act
+        const labels = planCoordinateLabels(data);
+
+        // Assert
+        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,0', '3,1']);
+    });
+
+    it('labels pointy-top hexes with their raw axial coordinates', () => {
+        // Arrange - pointy-top rows are already horizontal, so the axial pair passes through.
+        const data = createHexerData({
+            hexes: { '0,0': filledHex(0, 0), '2,-1': filledHex(2, -1), '3,0': filledHex(3, 0) },
+            mapSettings: { ...defaultMapSettings(), hexOrientation: 'pointy-top', displayCoordinates: true },
+        });
+
+        // Act
+        const labels = planCoordinateLabels(data);
+
+        // Assert
+        expect(labels.map(label => label.text).sort()).toEqual(['0,0', '2,-1', '3,0']);
     });
 
     it('places each label below the centre of its hex, clear of the icon', () => {
