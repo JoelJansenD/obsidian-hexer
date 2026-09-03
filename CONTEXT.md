@@ -19,7 +19,7 @@ A hex's address as a `(q, r)` pair. The map owns the orientation and size that t
 _Avoid_: Radial coordinate, offset coordinate, x/y
 
 **Coordinate label**:
-The `q,r` text drawn on a hex to show its axial coordinate. A single map-wide display toggle governs all of them at once (kin to the crosshair, not a per-hex property); labels sit on non-empty hexes only and hide when zoomed too small to read.
+The `col,row` text drawn on a hex to show its position in a grid-friendly reading of the axial coordinate. Pointy-top rows are already horizontal, so the label is the raw axial `q,r`; flat-top labels convert to odd-q offset so a visual row shares one `row` value and `col` increments straight across it. This is presentation only — axial stays the internal address (see the ADR on axial coordinates). A single map-wide display toggle governs all of them at once (kin to the crosshair, not a per-hex property); labels sit on non-empty hexes only and hide when zoomed too small to read.
 
 **Orientation**:
 Whether hexes are flat-top or pointy-top. A single map-wide setting.

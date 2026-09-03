@@ -100,18 +100,39 @@ const COORDINATE_LABEL_FONT_SCALE = 0.28;
 // not at all below it.
 const MIN_COORDINATE_LABEL_PX = 8;
 
-/** A coordinate label to draw: its `q,r` text and the map point to centre it on. */
+/** A coordinate label to draw: its `col,row` text and the map point to centre it on. */
 export interface CoordinateLabel {
     text: string;
     position: Point;
 }
 
 /**
+ * The `col,row` pair a hex's coordinate label shows. Axial `q,r` is the map's
+ * internal model (ADR 0002), but on flat-top maps stepping `q` walks a band of
+ * hexes diagonally downhill, so the raw axial pair doesn't read like a grid.
+ * Converting to odd-q offset coordinates re-indexes each visual (zigzag) row to
+ * a single `row` value while `col` increments straight across it. Pointy-top
+ * rows are already true horizontals, so their axial pair passes through
+ * unchanged. Presentation only — a display concern the rest of the app never
+ * sees, so it lives here rather than beside the coordinate maths in hexagon.ts.
+ */
+function labelCoordinates(hex: AxialCoordinates, orientation: HexOrientation): { col: number, row: number } {
+    if(orientation === 'pointy-top') {
+        return { col: hex.q, row: hex.r };
+    }
+
+    // odd-q offset: `q & 1` is 1 on odd columns (including negative ones), so
+    // odd columns drop half a row and each zigzag row collapses to one `row`.
+    return { col: hex.q, row: hex.r + (hex.q - (hex.q & 1)) / 2 };
+}
+
+/**
  * Decides which coordinate labels to draw and where. Pure so the visibility
- * rule — the map setting plus the zoom cutoff — and the `q,r` text can be
+ * rule — the map setting plus the zoom cutoff — and the label text can be
  * unit-tested without a canvas. Returns nothing when labels are toggled off or
  * the zoom is too low for them to be legible; otherwise one label per non-empty
- * hex, placed near the hex's bottom edge so it clears the centred icon.
+ * hex, placed near the hex's bottom edge so it clears the centred icon. The
+ * text is the hex's grid-friendly `col,row` (see {@link labelCoordinates}).
  */
 export function planCoordinateLabels(data: HexerData): CoordinateLabel[] {
     if(!data.mapSettings.displayCoordinates) {
@@ -135,7 +156,8 @@ export function planCoordinateLabels(data: HexerData): CoordinateLabel[] {
         // faction border that hugs the lower edge (~0.86 * size), so it clears
         // both.
         const position = { x: center.x, y: center.y + data.size * 0.67 };
-        labels.push({ text: `${hex.q},${hex.r}`, position });
+        const { col, row } = labelCoordinates(hex, data.mapSettings.hexOrientation);
+        labels.push({ text: `${col},${row}`, position });
     }
     return labels;
 }
