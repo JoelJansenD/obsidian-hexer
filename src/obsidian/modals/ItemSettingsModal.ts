@@ -1,5 +1,6 @@
-import { AbstractInputSuggest, App, Modal, Setting, TFile } from "obsidian";
+import { App, Modal, Setting, TFile } from "obsidian";
 import { ItemSettings, ItemSettingsOptions } from "../../view/ObsidianInterop";
+import FileSuggest from "./FileSuggest";
 
 export default class ItemSettingsModal extends Modal {
 
@@ -52,20 +53,5 @@ export default class ItemSettingsModal extends Modal {
                     });
                 button.buttonEl.dataset.role = 'save-item-settings';
             });
-    }
-}
-
-class FileSuggest extends AbstractInputSuggest<TFile> {
-
-    constructor(private _app: App, inputEl: HTMLInputElement) {
-        super(_app, inputEl);
-    }
-
-    protected getSuggestions(query: string): TFile[] | Promise<TFile[]> {
-        return this._app.vault.getFiles().filter(file => file.name.toLowerCase().includes(query.toLowerCase()));
-    }
-
-    renderSuggestion(value: TFile, el: HTMLElement): void {
-        el.createEl('div', { text: value.name });
     }
 }

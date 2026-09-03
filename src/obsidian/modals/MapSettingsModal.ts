@@ -1,6 +1,7 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Setting, TFile } from "obsidian";
 import { MapSettings } from "../../logic/mapSettings";
 import { DEFAULT_NOTE_CONVENTION, resolveHexNotePath } from "../../logic/hexNote";
+import FileSuggest from "./FileSuggest";
 
 export interface MapSettingsOptions {
     onSave?: (settings: MapSettings) => void;
@@ -84,10 +85,24 @@ export default class MapSettingsModal extends Modal {
         new Setting(this.contentEl)
             .setName('Hex note template')
             .setDesc('Optional note whose contents seed a newly created hex note, with {{col}}/{{row}} substituted. Leave empty for blank notes.')
-            .addText(text => text
-                .setPlaceholder('templates/Hex.md')
-                .setValue(this._settings.noteTemplate)
-                .onChange(value => this._settings.noteTemplate = value));
+            .addSearch(search => {
+                search
+                    .setPlaceholder('Select a template note')
+                    .setValue(this._settings.noteTemplate)
+                    .clearButtonEl.addEventListener('click', () => {
+                        this._settings.noteTemplate = '';
+                        search.setValue('');
+                    });
+
+                const suggest = new FileSuggest(this.app, search.inputEl);
+                suggest.onSelect(file => {
+                    if (file instanceof TFile) {
+                        this._settings.noteTemplate = file.path;
+                        search.setValue(file.path);
+                    }
+                    suggest.close();
+                });
+            });
 
         new Setting(this.contentEl)
             .addButton(button => button
