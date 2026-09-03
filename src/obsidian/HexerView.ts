@@ -1,4 +1,4 @@
-import { Keymap, TextFileView, TFile } from 'obsidian';
+import { Keymap, Notice, TextFileView, TFile } from 'obsidian';
 import Editor, { CommitOptions } from '../view/editor/Editor';
 import { HexerData } from '../logic/HexerData';
 import { EditHistory } from '../logic/EditHistory';
@@ -200,6 +200,9 @@ export class HexerView extends TextFileView {
         }
         const template = this.app.vault.getAbstractFileByPath(trimmed);
         if (!(template instanceof TFile)) {
+            // The note is still created (blank); warn so a typo'd template path
+            // isn't mistaken for an intentionally empty template.
+            new Notice(`Hexer: note template "${trimmed}" not found; creating an empty note.`);
             return '';
         }
         return applyNoteTemplate(await this.app.vault.read(template), tokens);
