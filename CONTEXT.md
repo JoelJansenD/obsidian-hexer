@@ -62,7 +62,7 @@ The two kinds of path. Rivers bend harder than roads; otherwise identical.
 ### Editing
 
 **Mode**:
-Whether the editor is in **View** or **Edit**. View mode shows the map read-only — camera pan/zoom and the action bar only, with no sidebar and no paint-tool cluster, and no editing interactions on the canvas. Edit mode adds the full editing UI. A map always opens in View; the choice is session-only UI state and is never saved to the map or recorded in undo.
+Whether the editor is in **View** or **Edit**. View mode leaves the map data read-only — camera pan/zoom and the action bar only, with no sidebar and no paint-tool cluster, and no painting or editing of hexes, paths, or factions on the canvas — but double-clicking a non-empty hex still opens its note (see **Hex note**). Edit mode adds the full editing UI. A map always opens in View; the choice is session-only UI state and is never saved to the map or recorded in undo.
 _Avoid_: Read/write, preview, source/reading
 
 **Camera**:
@@ -85,6 +85,20 @@ The active editing tool: select, brush, bucket, eraser, or polygon. Selectable o
 **Stroke**:
 A single pointer gesture (press to release). All the edits it produces coalesce into one undo step.
 _Avoid_: Gesture, drag
+
+### Hex notes
+
+**Hex note**:
+The Markdown note a hex opens. Double-clicking a non-empty hex in View mode opens its note (Ctrl+double-click opens it in a new tab), creating it first if it does not yet exist. The note is located by the map's **note convention** rather than stored on the hex, so every hex position resolves to one without being individually authored.
+_Avoid_: Linked note (reserved for the note a faction or path stores directly), page
+
+**Note convention**:
+The map-wide template that computes each hex's note path from its **coordinate label** (`{{col}}`, `{{row}}`). A single convention serves every hex; whether a path resolves from the vault root or relative to the map file, and how coordinates are formatted, are fixed rules of the convention.
+_Avoid_: Naming pattern, filename template
+
+**Note template**:
+An optional vault note whose contents seed a freshly created hex note, with the coordinate tokens substituted. Unset means new hex notes start empty.
+_Avoid_: Scaffold, boilerplate
 
 ### Output
 
