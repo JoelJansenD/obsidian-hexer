@@ -5,6 +5,7 @@ import { ViewMode, PaintTool } from "../../../logic/EditorState";
 import { HexerData, pointToHex } from "../../../logic/HexerData";
 import { ToolEventHandler, ToolStrategy } from "../../../logic/toolStrategies/ToolStrategy";
 import render from "../../render";
+import { buildPrintImage } from "../../print";
 import { ComponentOptions } from "../Editor";
 import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
@@ -25,6 +26,10 @@ export default class EditorCanvas {
     private _listeners = new Map<string, EventListener>();
 
     private _renderRequested = false;
+
+    // True while a print dialog is open, so a second click is ignored rather than
+    // stacking another print window behind the first.
+    private _printing = false;
 
     // Identifies the in-progress pointer gesture. Every commit between a
     // press and its release shares this key so a whole drag becomes one undo
@@ -137,6 +142,7 @@ export default class EditorCanvas {
         this._actionBar = new EditorActionBar(canvasAreaEl, {
             onZoomToFit: () => this.zoomToFit(),
             onToggleMode: () => this._dataOptions.toggleMode(),
+            onPrint: () => { void this.print(); },
         });
 
         // Track pointer gestures independently of the active tool so that
@@ -262,6 +268,27 @@ export default class EditorCanvas {
             this._cameraStrategy.setSpaceHeld(false);
             this.updateCursor();
         });
+    }
+
+    /**
+     * Renders the whole map and opens the OS print dialog. Read-only and
+     * camera-independent, so it works in both View and Edit mode. Builds the print
+     * raster here, then hands it to the Obsidian layer, which prints it from an
+     * isolated window (Electron is off-limits to the view).
+     */
+    public async print() {
+        // A print holds an OS dialog open; ignore further clicks until it returns,
+        // so rapid clicks can't stack up several print windows.
+        if (this._printing) {
+            return;
+        }
+        this._printing = true;
+        try {
+            const image = buildPrintImage(this._dataOptions.getDataClone(), this._canvasEl.ownerDocument);
+            await this._dataOptions.obsidian.print(image);
+        } finally {
+            this._printing = false;
+        }
     }
 
     /** Frames the whole map in the viewport. A camera-only move, like pan and zoom. */

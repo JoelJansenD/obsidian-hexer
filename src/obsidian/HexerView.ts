@@ -5,6 +5,7 @@ import { EditHistory } from '../logic/EditHistory';
 import { parseHexerDocument, serializeHexerDocument } from './frontmatter';
 import ItemSettingsModal from './modals/ItemSettingsModal';
 import { FilePreviewOptions } from '../view/ObsidianInterop';
+import { printMapImage } from './print';
 import MapSettingsModal, { MapSettingsOptions } from './modals/MapSettingsModal';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
@@ -78,6 +79,11 @@ export class HexerView extends TextFileView {
         this.editor?.toggleMode();
     }
 
+    /** Renders the whole map to the OS print dialog. Wired to a plugin command. */
+    print(): void {
+        this.editor?.print();
+    }
+
     /**
      * Restores the previous map state, if any. Wired to a plugin command.
      * A no-op in View mode, where the map is read-only.
@@ -132,7 +138,8 @@ export class HexerView extends TextFileView {
                     openItemSettings: options => new ItemSettingsModal(this.app, options).open(),
                     showFilePreview: options => this.showFilePreview(options),
                     openFile: (filePath, event) => this.openFile(filePath, event),
-                    openMapSettings: options => this.openMapSettings(options)
+                    openMapSettings: options => this.openMapSettings(options),
+                    print: image => printMapImage(image),
                 });
         }
     }
