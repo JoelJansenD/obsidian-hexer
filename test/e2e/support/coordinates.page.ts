@@ -18,9 +18,9 @@ const ZOOM_BELOW_THRESHOLD = 0.4;
  * `fill(Path2D)`, the crosshair `stroke`), so every captured call is a label.
  * `clearRect` runs once at the top of each frame, marking a fresh capture.
  *
- * The Map Settings modal has no UI entry point yet, so the setting and zoom are
- * set on the view's model directly; the assertion is on what the renderer then
- * paints, which is the part that belongs in e2e.
+ * The label toggle and zoom are set on the view's model directly rather than
+ * driven through the Map Settings modal: this suite's assertion is on what the
+ * renderer then paints, which is the part that belongs in e2e.
  */
 class CoordinatesPage {
     /** Enables or disables coordinate labels on the open map. */

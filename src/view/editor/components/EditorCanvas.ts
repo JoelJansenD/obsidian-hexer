@@ -9,6 +9,7 @@ import { buildPrintImage } from "../../print";
 import { ComponentOptions } from "../Editor";
 import EditorActionBar from "./EditorActionBar";
 import EditorTools from "./EditorTools";
+import HexNoteNavigator from "./HexNoteNavigator";
 
 // Maps the strategy's intent-named cursor to the CSS cursor the canvas shows.
 const CAMERA_CURSOR_STYLE: Record<Exclude<CameraCursor, null>, string> = {
@@ -42,6 +43,11 @@ export default class EditorCanvas {
     private _cameraStrategy = new CameraStrategy();
     private _pointerOverCanvas = false;
     private _cameraCleanups: (() => void)[] = [];
+
+    // View mode's canvas gesture: a double-click on a non-empty hex opens its
+    // note. Held separately from the tool-strategy listeners so it survives the
+    // unregister/register churn a tool switch triggers, and is toggled by mode.
+    private _noteNavigator!: HexNoteNavigator;
 
     constructor(private _parentEl: HTMLElement, private _dataOptions: ComponentOptions) {
         this.build();
@@ -92,6 +98,7 @@ export default class EditorCanvas {
      */
     public destroy() {
         this.unregisterEvents();
+        this._noteNavigator.destroy();
         this._canvasEl.removeEventListener('mousedown', this._beginStroke);
         this._canvasEl.removeEventListener('mouseup', this._endStroke);
         for (const cleanup of this._cameraCleanups) {
@@ -114,6 +121,7 @@ export default class EditorCanvas {
     public setMode(mode: ViewMode) {
         this._tools.setVisible(mode === 'edit');
         this._actionBar.setMode(mode);
+        this._noteNavigator.setEnabled(mode === 'view');
     }
 
     /** Highlights the given paint tool in the cluster. */
@@ -144,6 +152,10 @@ export default class EditorCanvas {
             onToggleMode: () => this._dataOptions.toggleMode(),
             onPrint: () => { void this.print(); },
         });
+        this._noteNavigator = new HexNoteNavigator(
+            this._canvasEl,
+            this._dataOptions,
+            () => this._cameraStrategy.isPanning);
 
         // Track pointer gestures independently of the active tool so that
         // strokes keep coalescing across tool changes. A press opens a stroke;

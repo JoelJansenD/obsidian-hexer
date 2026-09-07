@@ -1,3 +1,4 @@
+import { AxialCoordinates } from "../logic/hexagon";
 import { MapSettingsOptions } from "../obsidian/modals/MapSettingsModal";
 import { PrintImage } from "./print";
 
@@ -37,6 +38,16 @@ export interface FilePreviewOptions {
 }
 
 /**
+ * Options for opening (and, if absent, creating) the note a hex maps to.
+ */
+export interface HexNoteOptions {
+    /** Axial coordinate of the double-clicked hex. */
+    coordinate: AxialCoordinates;
+    /** The originating double-click, so a mod-click opens the note in a new tab. */
+    event: MouseEvent;
+}
+
+/**
  * Host-only operations the view delegates back to the Obsidian layer.
  *
  * The view layer must never import from `obsidian` directly. Instead the
@@ -51,6 +62,12 @@ export interface ObsidianInterop {
     showFilePreview: (options: FilePreviewOptions) => void;
     /** Opens the linked note; a mod-click opens it in a new tab. */
     openFile: (filePath: string, event: MouseEvent) => void;
+    /**
+     * Opens the note a hex maps to under the map's note convention, creating it
+     * first (seeded from the note template) when it does not yet exist. A no-op
+     * when the map has no note convention set. See ADR 0013.
+     */
+    openHexNote: (options: HexNoteOptions) => void;
     openMapSettings: (options?: MapSettingsOptions) => void;
     /**
      * Prints the whole-map raster (see {@link buildPrintImage}) by loading it into

@@ -129,6 +129,8 @@ hexer:
     displayHexBorders: true
     displayCrosshair: true
     displayCoordinates: true
+    noteConvention: ""
+    noteTemplate: ""
   camera:
     offset:
       x: 0
