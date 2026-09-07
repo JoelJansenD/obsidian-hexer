@@ -4,3 +4,9 @@
     font-size: var(--font-ui-smaller);
     word-break: break-all;
 }
+
+.hexer-map-name-validation:not(:empty) {
+    margin: -8px 0 16px;
+    color: var(--text-error);
+    font-size: var(--font-ui-smaller);
+}

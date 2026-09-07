@@ -3,9 +3,16 @@ import { expect } from '@wdio/globals';
 import coordinatesPage from '../support/coordinates.page';
 import { STANDARD_HEXES } from '../support/fixture';
 import { CoordinatesContext } from '../support/contexts/coordinates.context';
+import { labelCoordinates } from '../../../src/logic/hexagon';
 
-// The q,r label every seeded, non-empty hex should show when labels are on.
-const EXPECTED_LABELS = STANDARD_HEXES.map(hex => `${hex.q},${hex.r}`).sort();
+// The label every seeded, non-empty hex should show when labels are on. Hexes
+// are labelled with their grid-friendly col,row (not the raw axial q,r), so the
+// expectation runs the same axial→offset transform the renderer does. The
+// fixture map is flat-top (see buildHexerFileContent).
+const EXPECTED_LABELS = STANDARD_HEXES
+    .map(hex => labelCoordinates(hex, 'flat-top'))
+    .map(({ col, row }) => `${col},${row}`)
+    .sort();
 
 Given('coordinate labels are enabled', async function () {
     await coordinatesPage.setDisplayCoordinates(true);

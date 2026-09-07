@@ -1,4 +1,4 @@
-import { App, Modal, Setting, TFile } from "obsidian";
+import { App, ButtonComponent, Modal, Setting, TFile } from "obsidian";
 import { MapSettings } from "../../logic/mapSettings";
 import { DEFAULT_NOTE_CONVENTION, resolveHexNotePath } from "../../logic/hexNote";
 import FileSuggest from "./FileSuggest";
@@ -11,9 +11,14 @@ export interface MapSettingsOptions {
 // concrete path (and its zero-padding) as they type.
 const EXAMPLE_TOKENS = { col: 3, row: 5 };
 
+// Shown when the map name is blank, which is not allowed.
+const NAME_REQUIRED_MESSAGE = 'A map name is required.';
+
 export default class MapSettingsModal extends Modal {
     private readonly _settings: MapSettings;
     private _conventionExampleEl!: HTMLElement;
+    private _nameValidationEl!: HTMLElement;
+    private _saveButton!: ButtonComponent;
 
     constructor(app: App, _initialSettings: MapSettings, private _mapFilePath: string, private _options: MapSettingsOptions = {}) {
         super(app);
@@ -27,22 +32,34 @@ export default class MapSettingsModal extends Modal {
         new Setting(this.contentEl)
             .setName('Map Name')
             .setDesc('This does not rename the file.')
-            .addText(text => text
-                .setValue(this._settings.name)
-                .onChange(value => {
-                    this._settings.name = value.trim();
-                }));
-        
+            .addText(text => {
+                text
+                    .setValue(this._settings.name)
+                    .onChange(value => {
+                        this._settings.name = value.trim();
+                        this.validateName();
+                    });
+                text.inputEl.dataset.hexerSetting = 'map-name';
+            });
+
+        this._nameValidationEl = this.contentEl.createEl('div', {
+            cls: 'hexer-map-name-validation',
+            attr: { 'data-hexer-role': 'map-name-validation' },
+        });
+
         new Setting(this.contentEl)
             .setName('Hex Orientation')
             .setDesc('Select if the hexes are pointy-topped or flat-topped')
-            .addDropdown(dropdown => dropdown
-                .addOption('pointy-top', 'Pointy-topped')
-                .addOption('flat-top', 'Flat-topped')
-                .setValue(this._settings.hexOrientation)
-                .onChange(value => {
-                    this._settings.hexOrientation = value as 'pointy-top' | 'flat-top'
-                }));
+            .addDropdown(dropdown => {
+                dropdown
+                    .addOption('pointy-top', 'Pointy-topped')
+                    .addOption('flat-top', 'Flat-topped')
+                    .setValue(this._settings.hexOrientation)
+                    .onChange(value => {
+                        this._settings.hexOrientation = value as 'pointy-top' | 'flat-top'
+                    });
+                dropdown.selectEl.dataset.hexerSetting = 'hex-orientation';
+            });
         
         new Setting(this.contentEl)
             .setName('Display borders')
@@ -110,15 +127,37 @@ export default class MapSettingsModal extends Modal {
                 .onClick(() => {
                     this.close();
                 }))
-            .addButton(button => button
-                .setButtonText('Save')
-                .setCta()
-                .onClick(() => {
-                    if (this._options.onSave) {
-                        this._options.onSave(this._settings);
-                    }
-                    this.close();
-                }));
+            .addButton(button => {
+                this._saveButton = button;
+                button
+                    .setButtonText('Save')
+                    .setCta()
+                    .onClick(() => {
+                        // Save is disabled while the name is blank; guard anyway so
+                        // a nameless map can never be committed.
+                        if (this._settings.name.length === 0) {
+                            return;
+                        }
+                        if (this._options.onSave) {
+                            this._options.onSave(this._settings);
+                        }
+                        this.close();
+                    });
+                button.buttonEl.dataset.role = 'save-map-settings';
+            });
+
+        // Reflect the loaded name's validity up front, so a map that somehow
+        // arrives without a name shows the message and blocks Save immediately.
+        this.validateName();
+    }
+
+    // A map must have a name. Shows a message and blocks Save while the name is
+    // blank; clears both once a name is entered. `_settings.name` is already
+    // trimmed by the field's onChange, so a whitespace-only name reads as blank.
+    private validateName() {
+        const valid = this._settings.name.length > 0;
+        this._nameValidationEl.setText(valid ? '' : NAME_REQUIRED_MESSAGE);
+        this._saveButton.setDisabled(!valid);
     }
 
     // Reflects the typed convention as a concrete resolved path, so the user can

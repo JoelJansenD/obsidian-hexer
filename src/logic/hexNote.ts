@@ -19,9 +19,10 @@ function formatComponent(value: number, pad: boolean): string {
 }
 
 function substituteTokens(text: string, tokens: LabelCoordinates, pad: boolean): string {
+    // Token matching is case-insensitive, so `{{Col}}`/`{{ROW}}` substitute too.
     return text
-        .replace(/\{\{col\}\}/g, formatComponent(tokens.col, pad))
-        .replace(/\{\{row\}\}/g, formatComponent(tokens.row, pad));
+        .replace(/\{\{col\}\}/gi, formatComponent(tokens.col, pad))
+        .replace(/\{\{row\}\}/gi, formatComponent(tokens.row, pad));
 }
 
 /**
