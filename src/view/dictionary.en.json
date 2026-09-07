@@ -1,5 +1,5 @@
 {
-    "brand.name": "Hexer",
+    "hexer.name": "Hexer",
 
     "command.openView": "Open Hexer view",
     "command.undo": "Undo",

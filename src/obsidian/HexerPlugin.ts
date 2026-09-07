@@ -13,7 +13,7 @@ export class HexerPlugin extends Plugin {
         this.registerView(VIEW_TYPE_HEXER, (leaf) => new HexerView(leaf));
 
         this.registerHoverLinkSource(VIEW_TYPE_HEXER, {
-            display: t('brand.name'),
+            display: t('hexer.name'),
             defaultMod: false,
         });
 

@@ -54,7 +54,7 @@ export class HexerView extends TextFileView {
     }
 
     getDisplayText(): string {
-        return this.file?.basename ?? t('brand.name');
+        return this.file?.basename ?? t('hexer.name');
     }
 
     getIcon(): string {
