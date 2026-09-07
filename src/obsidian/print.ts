@@ -1,5 +1,6 @@
 import { Notice, Platform } from 'obsidian';
 import { PrintImage } from '../view/print';
+import { t } from '../view/dictionary';
 
 // The narrow slices of Electron / Node the print flow touches. Printing loads
 // the map raster into its own hidden BrowserWindow and prints that — a document
@@ -34,7 +35,7 @@ interface NodePath { join(...parts: string[]): string }
  */
 export async function printMapImage({ dataUrl, landscape }: PrintImage): Promise<void> {
     if (!Platform.isDesktopApp) {
-        new Notice('Printing a Hexer map is only available in the desktop app.');
+        new Notice(t('notice.printDesktopOnly'));
         return;
     }
 
@@ -48,7 +49,7 @@ export async function printMapImage({ dataUrl, landscape }: PrintImage): Promise
         os = require('os') as NodeOs;
         path = require('path') as NodePath;
     } catch (error) {
-        new Notice('Could not reach the system print dialog.');
+        new Notice(t('notice.printDialogUnavailable'));
         console.error('Hexer: failed to load the print modules', error);
         return;
     }
@@ -78,7 +79,7 @@ export async function printMapImage({ dataUrl, landscape }: PrintImage): Promise
             );
         });
     } catch (error) {
-        new Notice('Could not print the map.');
+        new Notice(t('notice.printFailed'));
         console.error('Hexer: printing failed', error);
     } finally {
         printWindow?.destroy();

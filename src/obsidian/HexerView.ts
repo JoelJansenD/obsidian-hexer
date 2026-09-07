@@ -9,6 +9,7 @@ import { printMapImage } from './print';
 import MapSettingsModal, { MapSettingsOptions } from './modals/MapSettingsModal';
 import { applyNoteTemplate, resolveHexNotePath } from '../logic/hexNote';
 import { labelCoordinates, LabelCoordinates } from '../logic/hexagon';
+import { t } from '../view/dictionary';
 
 export const VIEW_TYPE_HEXER = 'hexer-view';
 
@@ -53,7 +54,7 @@ export class HexerView extends TextFileView {
     }
 
     getDisplayText(): string {
-        return this.file?.basename ?? 'Hexer';
+        return this.file?.basename ?? t('brand.name');
     }
 
     getIcon(): string {
@@ -199,7 +200,7 @@ export class HexerView extends TextFileView {
         if (!(template instanceof TFile)) {
             // The note is still created (blank); warn so a typo'd template path
             // isn't mistaken for an intentionally empty template.
-            new Notice(`Hexer: note template "${trimmed}" not found; creating an empty note.`);
+            new Notice(t('notice.noteTemplateNotFound', { path: trimmed }));
             return '';
         }
         return applyNoteTemplate(await this.app.vault.read(template), tokens);
