@@ -1,6 +1,7 @@
 import { Plugin, TAbstractFile, TFile, TFolder, ViewState, WorkspaceLeaf } from 'obsidian';
 import { HexerView, VIEW_TYPE_HEXER } from './HexerView';
 import { initialFileContent } from '../logic/HexerData';
+import { t } from '../view/dictionary';
 
 const HEXER_EXTENSION = '.hexer.md';
 
@@ -12,17 +13,17 @@ export class HexerPlugin extends Plugin {
         this.registerView(VIEW_TYPE_HEXER, (leaf) => new HexerView(leaf));
 
         this.registerHoverLinkSource(VIEW_TYPE_HEXER, {
-            display: 'Hexer',
+            display: t('hexer.name'),
             defaultMod: false,
         });
 
-        this.addRibbonIcon('hexagon', 'Open Hexer', () => {
+        this.addRibbonIcon('hexagon', t('plugin.ribbonTooltip'), () => {
             void this.activateView();
         });
 
         this.addCommand({
             id: 'open-hexer-view',
-            name: 'Open Hexer view',
+            name: t('command.openView'),
             callback: () => {
                 void this.activateView();
             },
@@ -34,14 +35,14 @@ export class HexerPlugin extends Plugin {
 
         this.addCommand({
             id: 'hexer-undo',
-            name: 'Undo',
+            name: t('command.undo'),
             hotkeys: [{ modifiers: ['Mod'], key: 'z' }],
             checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.undo()),
         });
 
         this.addCommand({
             id: 'hexer-redo',
-            name: 'Redo',
+            name: t('command.redo'),
             hotkeys: [
                 { modifiers: ['Mod', 'Shift'], key: 'z' },
                 { modifiers: ['Mod'], key: 'y' },
@@ -51,7 +52,7 @@ export class HexerPlugin extends Plugin {
 
         this.addCommand({
             id: 'hexer-print',
-            name: 'Print map',
+            name: t('command.printMap'),
             checkCallback: (checking) => this.runOnActiveView(checking, (view) => view.print()),
         });
 
@@ -59,7 +60,7 @@ export class HexerPlugin extends Plugin {
             this.app.workspace.on('file-menu', (menu, file) => {
                 if (file instanceof TFolder) {
                     menu.addItem((item) => {
-                        item.setTitle('New Hexer file')
+                        item.setTitle(t('plugin.fileMenu.newFile'))
                             .setIcon('hexagon')
                             .onClick(() => { void this.createHexerFile(file); });
                     });
@@ -67,13 +68,13 @@ export class HexerPlugin extends Plugin {
 
                 if (file instanceof TFile && file.path.endsWith(HEXER_EXTENSION)) {
                     menu.addItem((item) => {
-                        item.setTitle('Open in Hexer')
+                        item.setTitle(t('plugin.fileMenu.openInHexer'))
                             .setIcon('hexagon')
                             .onClick(() => { void this.openInHexer(file); });
                     });
 
                     menu.addItem((item) => {
-                        item.setTitle('Open as Markdown')
+                        item.setTitle(t('plugin.fileMenu.openAsMarkdown'))
                             .setIcon('file-text')
                             .onClick(() => { void this.openAsMarkdown(file); });
                     });

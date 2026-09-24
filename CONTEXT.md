@@ -106,6 +106,15 @@ _Avoid_: Scaffold, boilerplate
 Producing a clean, whole-map image for physical printing or PDF, handed to the operating system's print dialog (which doubles as Save-as-PDF). The render always covers the entire map regardless of the camera, and always drops the crosshair (a pure cursor/origin guide) while keeping map content (terrain, icons, factions, paths). Coordinate labels and grid borders each follow their current display toggle. A read-only action available in both View and Edit mode.
 _Avoid_: Export, Screenshot, Download
 
+### Copy
+
+**Dictionary**:
+A language's complete set of user-facing display strings — labels, tooltips, modal titles, notices, command names, and the default names new items are seeded with — held as one flat JSON file (`dictionary.<lang>.json`) keyed by dotted, camelCase keys (e.g. `sidebar.rivers.label`). The **base dictionary** is English; it is the source of truth for which keys exist. Additional languages are added as further files and may omit keys, falling back to the base. The UI never holds an inline literal: it resolves every string through a key. Lives on the `view` side of the layer boundary (reachable by both `view` and `obsidian`); `logic` never uses it. Does not cover non-displayed identifiers (CSS classes, `data-*` test hooks).
+_Avoid_: Lexicon, strings file, messages, copy deck
+
+**t**:
+The resolver the UI calls at every display site — `t(key)` or `t(key, params)` — returning the string for that key from the active dictionary, falling back to the base (English) dictionary, and throwing if the key exists in neither. `{placeholder}` tokens in a value are filled from `params` (a `Record<string, string>`); an unfilled placeholder is left as its literal `{token}`. The active language is chosen by a `getActiveLanguage()` seam that returns `'en'` for now.
+
 ### Colour
 
 **Active colour**:

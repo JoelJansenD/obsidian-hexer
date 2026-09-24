@@ -9,6 +9,7 @@
  * (rather than as a confusing downstream assertion) when it never engages.
  */
 export async function enterEditMode(id: string): Promise<void> {
+    const editSelector = `[data-item-id="${id}"] [data-role="edit-item"]`;
     await browser.waitUntil(async () => {
         const row = browser.$(`[data-item-id="${id}"]`);
         if (!(await row.isExisting())) {
@@ -18,12 +19,20 @@ export async function enterEditMode(id: string): Promise<void> {
             return true;
         }
 
-        // In view mode the edit control is present; once edit mode engages it is
-        // replaced by the save control, so this stops clicking on its own.
-        const editButton = browser.$(`[data-item-id="${id}"] [data-role="edit-item"]`);
-        if (await editButton.isClickable()) {
-            await editButton.click();
-        }
+        // Dispatch the click in-page rather than as a geometric WebDriver click.
+        // Entering edit mode expands the sidebar section, whose content animates
+        // open (grid-template-rows 0fr->1fr under overflow:hidden); in headless CI
+        // that animation can stay in flight — or stall — long enough that the edit
+        // button is clipped by the section. A coordinate click then lands on the
+        // .hexer-sidebar-section behind it ("element click intercepted"), and
+        // isClickable() stays false so a gated click never even fires — the row
+        // times out having "never entered edit mode". A dispatched DOM click fires
+        // the row's handler regardless of layout; the data-editing check above
+        // still gates on the real outcome, and the edit control is replaced by the
+        // save control once edit mode engages, so the query no-ops from then on.
+        await browser.execute((selector: string) => {
+            (document.querySelector(selector) as HTMLElement | null)?.click();
+        }, editSelector);
         return false;
     }, {
         timeout: 10000,

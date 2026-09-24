@@ -8,6 +8,7 @@ import { HEXER_ICONS } from "../../../../logic/icon";
 import PathSidebarSection from "./PathSidebarSection";
 import { FactionSidebarSection } from "./FactionSidebarSection";
 import EditorListSidebarSection from "./EditorListSidebarSection";
+import { t } from "../../../dictionary";
 
 export default class EditorSidebar {
     private _sections = new Map<Layer, EditorSidebarSection>();
@@ -75,7 +76,7 @@ export default class EditorSidebar {
         const iconEl = buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-icon' });
         iconEl.appendChild(createElement(Settings, { height: 16, width: 16 }));
 
-        buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-label', text: 'Map Settings' });
+        buttonEl.createEl('div', { cls: 'hexer-sidebar-config-button-label', text: t('sidebar.mapSettings') });
 
         buttonEl.addEventListener('click', () => {
             this._componentOptions.obsidian.openMapSettings({
@@ -92,10 +93,10 @@ export default class EditorSidebar {
 
     private buildFactions(sidebarEl: HTMLElement) {
         const factionSection = new FactionSidebarSection(sidebarEl, this._componentOptions, {
-            addLabel: 'New faction',
+            addLabel: t('sidebar.factions.add'),
             addRole: 'add-faction',
-            newItemName: 'New faction',
-            label: 'Factions',
+            newItemName: t('defaults.newFaction'),
+            label: t('sidebar.factions.label'),
             layer: 'faction',
             icon: Shield,
             onSelect: () => this.select('faction'),
@@ -107,7 +108,7 @@ export default class EditorSidebar {
         const iconSection = new EditorSidebarSection(sidebarEl, {
             icon: Shapes,
             layer: 'icon',
-            label: 'Icons',
+            label: t('sidebar.icons.label'),
             onSelect: () => this.select('icon'),
         });
 
@@ -171,10 +172,10 @@ export default class EditorSidebar {
         return new PathSidebarSection(sidebarEl, this._componentOptions, {
             icon: Droplets,
             layer: 'river',
-            label: 'Rivers',
-            addLabel: 'New river',
+            label: t('sidebar.rivers.label'),
+            addLabel: t('sidebar.rivers.add'),
             addRole: 'add-river',
-            newItemName: 'New river',
+            newItemName: t('defaults.newRiver'),
             getPaths: data => data.rivers,
             onSelect: () => this.select('river'),
         });
@@ -184,10 +185,10 @@ export default class EditorSidebar {
         return new PathSidebarSection(sidebarEl, this._componentOptions, {
             icon: Route,
             layer: 'road',
-            label: 'Roads',
-            addLabel: 'New road',
+            label: t('sidebar.roads.label'),
+            addLabel: t('sidebar.roads.add'),
             addRole: 'add-road',
-            newItemName: 'New road',
+            newItemName: t('defaults.newRoad'),
             getPaths: data => data.roads,
             onSelect: () => this.select('road'),
         });
@@ -197,7 +198,7 @@ export default class EditorSidebar {
         const terrainSection = new EditorSidebarSection(sidebarEl, {
             icon: Mountain,
             layer: 'terrain',
-            label: 'Terrain',
+            label: t('sidebar.terrain.label'),
             onSelect: () => this.select('terrain'),
         });
         

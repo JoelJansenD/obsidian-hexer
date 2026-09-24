@@ -1,6 +1,7 @@
 import { App, ButtonComponent, Modal, Setting, TFile } from "obsidian";
 import { MapSettings } from "../../logic/mapSettings";
 import { DEFAULT_NOTE_CONVENTION, resolveHexNotePath } from "../../logic/hexNote";
+import { t } from "../../view/dictionary";
 import FileSuggest from "./FileSuggest";
 
 export interface MapSettingsOptions {
@@ -10,9 +11,6 @@ export interface MapSettingsOptions {
 // The coordinate the note-convention preview resolves, so the user sees a
 // concrete path (and its zero-padding) as they type.
 const EXAMPLE_TOKENS = { col: 3, row: 5 };
-
-// Shown when the map name is blank, which is not allowed.
-const NAME_REQUIRED_MESSAGE = 'A map name is required.';
 
 export default class MapSettingsModal extends Modal {
     private readonly _settings: MapSettings;
@@ -27,11 +25,11 @@ export default class MapSettingsModal extends Modal {
     }
 
     private build() {
-        this.setTitle('Map Settings');
+        this.setTitle(t('mapSettings.title'));
 
         new Setting(this.contentEl)
-            .setName('Map Name')
-            .setDesc('This does not rename the file.')
+            .setName(t('mapSettings.name.label'))
+            .setDesc(t('mapSettings.name.desc'))
             .addText(text => {
                 text
                     .setValue(this._settings.name)
@@ -48,12 +46,12 @@ export default class MapSettingsModal extends Modal {
         });
 
         new Setting(this.contentEl)
-            .setName('Hex Orientation')
-            .setDesc('Select if the hexes are pointy-topped or flat-topped')
+            .setName(t('mapSettings.orientation.label'))
+            .setDesc(t('mapSettings.orientation.desc'))
             .addDropdown(dropdown => {
                 dropdown
-                    .addOption('pointy-top', 'Pointy-topped')
-                    .addOption('flat-top', 'Flat-topped')
+                    .addOption('pointy-top', t('mapSettings.orientation.pointyTop'))
+                    .addOption('flat-top', t('mapSettings.orientation.flatTop'))
                     .setValue(this._settings.hexOrientation)
                     .onChange(value => {
                         this._settings.hexOrientation = value as 'pointy-top' | 'flat-top'
@@ -62,29 +60,29 @@ export default class MapSettingsModal extends Modal {
             });
         
         new Setting(this.contentEl)
-            .setName('Display borders')
-            .setDesc('Display or hide the default borders between each hex')
+            .setName(t('mapSettings.borders.label'))
+            .setDesc(t('mapSettings.borders.desc'))
             .addToggle(toggle => toggle
                 .setValue(this._settings.displayHexBorders)
                 .onChange(value => this._settings.displayHexBorders = value));
         
         new Setting(this.contentEl)
-            .setName('Display crosshair')
-            .setDesc('Display or hide the crosshair drawn at the center of the map')
+            .setName(t('mapSettings.crosshair.label'))
+            .setDesc(t('mapSettings.crosshair.desc'))
             .addToggle(toggle => toggle
                 .setValue(this._settings.displayCrosshair)
                 .onChange(value => this._settings.displayCrosshair = value));
 
         new Setting(this.contentEl)
-            .setName('Display coordinates')
-            .setDesc('Display or hide the q,r coordinate label on each non-empty hex')
+            .setName(t('mapSettings.coordinates.label'))
+            .setDesc(t('mapSettings.coordinates.desc'))
             .addToggle(toggle => toggle
                 .setValue(this._settings.displayCoordinates)
                 .onChange(value => this._settings.displayCoordinates = value));
 
         new Setting(this.contentEl)
-            .setName('Hex note convention')
-            .setDesc(`Path a hex opens on double-click in View mode. Use {{col}} and {{row}}; a leading / anchors at the vault root, otherwise it is relative to this map. Leave empty for the default (${DEFAULT_NOTE_CONVENTION}).`)
+            .setName(t('mapSettings.noteConvention.label'))
+            .setDesc(t('mapSettings.noteConvention.desc', { default: DEFAULT_NOTE_CONVENTION }))
             .addText(text => text
                 .setPlaceholder(DEFAULT_NOTE_CONVENTION)
                 .setValue(this._settings.noteConvention)
@@ -100,11 +98,11 @@ export default class MapSettingsModal extends Modal {
         this.updateConventionExample();
 
         new Setting(this.contentEl)
-            .setName('Hex note template')
-            .setDesc('Optional note whose contents seed a newly created hex note, with {{col}}/{{row}} substituted. Leave empty for blank notes.')
+            .setName(t('mapSettings.noteTemplate.label'))
+            .setDesc(t('mapSettings.noteTemplate.desc'))
             .addSearch(search => {
                 search
-                    .setPlaceholder('Select a template note')
+                    .setPlaceholder(t('mapSettings.noteTemplate.placeholder'))
                     .setValue(this._settings.noteTemplate)
                     .clearButtonEl.addEventListener('click', () => {
                         this._settings.noteTemplate = '';
@@ -123,14 +121,14 @@ export default class MapSettingsModal extends Modal {
 
         new Setting(this.contentEl)
             .addButton(button => button
-                .setButtonText('Cancel')
+                .setButtonText(t('mapSettings.cancel'))
                 .onClick(() => {
                     this.close();
                 }))
             .addButton(button => {
                 this._saveButton = button;
                 button
-                    .setButtonText('Save')
+                    .setButtonText(t('mapSettings.save'))
                     .setCta()
                     .onClick(() => {
                         // Save is disabled while the name is blank; guard anyway so
@@ -156,7 +154,7 @@ export default class MapSettingsModal extends Modal {
     // trimmed by the field's onChange, so a whitespace-only name reads as blank.
     private validateName() {
         const valid = this._settings.name.length > 0;
-        this._nameValidationEl.setText(valid ? '' : NAME_REQUIRED_MESSAGE);
+        this._nameValidationEl.setText(valid ? '' : t('mapSettings.name.required'));
         this._saveButton.setDisabled(!valid);
     }
 
@@ -164,6 +162,6 @@ export default class MapSettingsModal extends Modal {
     // see the vault-root/relative rule and the coordinate zero-padding at a glance.
     private updateConventionExample() {
         const path = resolveHexNotePath(this._settings.noteConvention, EXAMPLE_TOKENS, this._mapFilePath);
-        this._conventionExampleEl.setText(`Example — hex col 3, row 5 opens: ${path}`);
+        this._conventionExampleEl.setText(t('mapSettings.noteConvention.example', { path }));
     }
 }

@@ -1,5 +1,6 @@
 import { App, Modal, Setting, TFile } from "obsidian";
 import { ItemSettings, ItemSettingsOptions } from "../../view/ObsidianInterop";
+import { t } from "../../view/dictionary";
 import FileSuggest from "./FileSuggest";
 
 export default class ItemSettingsModal extends Modal {
@@ -12,7 +13,7 @@ export default class ItemSettingsModal extends Modal {
         this.settings = { ..._options.settings };
 
         new Setting(this.contentEl)
-            .setName('Name')
+            .setName(t('itemSettings.name'))
             .addText(text => {
                 text
                     .setValue(this.settings.name)
@@ -21,10 +22,10 @@ export default class ItemSettingsModal extends Modal {
             });
 
         new Setting(this.contentEl)
-            .setName('File')
+            .setName(t('itemSettings.file'))
             .addSearch(search => {
                 search
-                    .setPlaceholder('Select a file to link')
+                    .setPlaceholder(t('itemSettings.filePlaceholder'))
                     .setValue(this.settings.filePath || '')
                     .clearButtonEl.addEventListener('click', () => {
                         this.settings.filePath = null;
@@ -45,7 +46,7 @@ export default class ItemSettingsModal extends Modal {
         new Setting(this.contentEl)
             .addButton(button => {
                 button
-                    .setButtonText('Save')
+                    .setButtonText(t('itemSettings.save'))
                     .setCta()
                     .onClick(() => {
                         this._options.onSave?.(this.settings);

@@ -1,5 +1,6 @@
 import { createElement, Eye, IconNode, Pencil, Printer, Scan } from "lucide";
 import { ViewMode } from "../../../logic/EditorState";
+import { DictionaryKey, t } from "../../dictionary";
 
 /** Callbacks for the global actions the bar exposes. */
 export interface ActionBarOptions {
@@ -14,9 +15,9 @@ const TOGGLE_ICON: Record<ViewMode, IconNode> = {
     view: Pencil,
     edit: Eye,
 };
-const TOGGLE_LABEL: Record<ViewMode, string> = {
-    view: 'Edit',
-    edit: 'View',
+const TOGGLE_LABEL: Record<ViewMode, DictionaryKey> = {
+    view: 'actionBar.toggleToEdit',
+    edit: 'actionBar.toggleToView',
 };
 
 /**
@@ -35,7 +36,7 @@ export default class EditorActionBar {
     public setMode(mode: ViewMode) {
         this._toggleButton.empty();
         this._toggleButton.appendChild(createElement(TOGGLE_ICON[mode], { width: 18, height: 18 }));
-        this._toggleButton.setAttribute('aria-label', TOGGLE_LABEL[mode]);
+        this._toggleButton.setAttribute('aria-label', t(TOGGLE_LABEL[mode]));
     }
 
     private build() {
@@ -52,7 +53,7 @@ export default class EditorActionBar {
         const fitButton = barEl.createEl('div', {
             cls: 'hexer-action-bar-button',
             // Obsidian renders a hover tooltip for elements carrying an aria-label.
-            attr: { 'aria-label': 'Zoom to fit' },
+            attr: { 'aria-label': t('actionBar.zoomToFit') },
         });
         fitButton.appendChild(createElement(Scan, { width: 18, height: 18 }));
         fitButton.addEventListener('click', () => this._options.onZoomToFit());
@@ -61,7 +62,7 @@ export default class EditorActionBar {
         // shows in both View and Edit mode.
         const printButton = barEl.createEl('div', {
             cls: 'hexer-action-bar-button',
-            attr: { 'aria-label': 'Print' },
+            attr: { 'aria-label': t('actionBar.print') },
         });
         printButton.appendChild(createElement(Printer, { width: 18, height: 18 }));
         printButton.addEventListener('click', () => this._options.onPrint());
