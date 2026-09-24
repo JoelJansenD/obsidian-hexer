@@ -3,7 +3,7 @@
     "name": "Hexer",
     "version": "0.1.0",
     "minAppVersion": "1.0.0",
-    "description": "Draw and edit hex maps inside a note.",
+    "description": "Create your own hex maps inside Obsidian.",
     "author": "JoelJansenD",
     "authorUrl": "https://github.com/JoelJansenD",
     "isDesktopOnly": false
