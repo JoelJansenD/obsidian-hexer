@@ -20,7 +20,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "e2e": "wdio run ./wdio.conf.ts tsConfigPath=./tsconfig.e2e.json"
+    "e2e": "wdio run ./wdio.conf.ts tsConfigPath=./tsconfig.e2e.json",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

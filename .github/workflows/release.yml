@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Release
+
+# Obsidian pulls a plugin from a GitHub release whose tag is exactly the
+# manifest version, with no "v" prefix — so the tag is what triggers a release.
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and draft release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: "npm"
+
+      # A tag that disagrees with the manifest produces a release Obsidian
+      # silently ignores, so refuse to build one.
+      - name: Verify the tag matches manifest.json
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          manifest_version=$(node -p "require('./manifest.json').version")
+          if [ "$tag" != "$manifest_version" ]; then
+            echo "::error::Tag $tag does not match manifest.json version $manifest_version. Run 'npm version' to bump both together."
+            exit 1
+          fi
+          min_app_version=$(node -p "require('./manifest.json').minAppVersion")
+          recorded=$(node -p "require('./versions.json')['$tag'] ?? ''")
+          if [ "$recorded" != "$min_app_version" ]; then
+            echo "::warning::versions.json has no entry mapping $tag to minAppVersion $min_app_version; users on older Obsidian versions get no fallback."
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test
+
+      # Drafted rather than published: the maintainer reviews the generated
+      # notes and the attached files, then publishes. Obsidian only sees
+      # published releases.
+      - name: Draft the release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --draft \
+            --generate-notes \
+            main.js manifest.json styles.css
