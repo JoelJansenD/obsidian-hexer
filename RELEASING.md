@@ -66,7 +66,9 @@ branch and the release matching its version. Before submitting, the repository
 must satisfy all of this:
 
 - [ ] **Public repository** — the directory cannot read a private repo.
-- [ ] **`README.md`** at the root, describing what the plugin is and how to use it.
+- [ ] **`README.md`** at the root, describing what the plugin is and how to
+      use it. Present, but still a placeholder — flesh out the usage guide
+      before submitting, since the directory's review reads it.
 - [x] **`LICENSE`** at the root (GPL-3.0).
 - [x] **`manifest.json`** at the root of `main`, matching the latest published release.
 - [x] **`id`** — lowercase letters and hyphens only, must **not** contain
