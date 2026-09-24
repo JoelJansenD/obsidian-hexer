@@ -6,5 +6,5 @@
     "description": "Create your own hex maps inside Obsidian.",
     "author": "JoelJansenD",
     "authorUrl": "https://github.com/JoelJansenD",
-    "isDesktopOnly": false
+    "isDesktopOnly": true
 }
