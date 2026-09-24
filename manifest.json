@@ -1,9 +1,9 @@
 {
-    "id": "obsidian-hexer",
-    "name": "Obsidian Hexer",
+    "id": "hexer",
+    "name": "Hexer",
     "version": "0.1.0",
     "minAppVersion": "1.0.0",
-    "description": "A hex map editor plugin for Obsidian.",
+    "description": "Draw and edit hex maps inside a note.",
     "author": "JoelJansenD",
     "authorUrl": "https://github.com/JoelJansenD",
     "isDesktopOnly": false

@@ -55,9 +55,9 @@ alone and release a new patch instead — Obsidian caches releases by version.
 ## Installing a release by hand
 
 Until the plugin is in the community directory, testers install it by dropping
-the three release files into `<vault>/.obsidian/plugins/<plugin-id>/` and
-enabling it in **Settings → Community plugins**. The folder name must match the
-`id` in `manifest.json`.
+the three release files into `<vault>/.obsidian/plugins/hexer/` and enabling it
+in **Settings → Community plugins**. The folder name must match the `id` in
+`manifest.json`.
 
 ## Submitting to the community plugin directory (one time)
 
@@ -67,21 +67,21 @@ must satisfy all of this:
 
 - [ ] **Public repository** — the directory cannot read a private repo.
 - [ ] **`README.md`** at the root, describing what the plugin is and how to use it.
-- [ ] **`LICENSE`** at the root. ✔ (GPL-3.0)
-- [ ] **`manifest.json`** at the root of `main`, matching the latest published release. ✔
-- [ ] **`id`** — lowercase letters and hyphens only, must **not** contain
-      `obsidian`, must not end in `plugin`. Currently `obsidian-hexer`, which
-      fails this check.
-- [ ] **`name`** — short, Basic Latin, no variation of "Obsidian", not the word
-      "Plugin", not a core plugin's name. Currently `Obsidian Hexer`, which
-      fails this check.
-- [ ] **`description`** — one line about what the plugin does, without
+- [x] **`LICENSE`** at the root (GPL-3.0).
+- [x] **`manifest.json`** at the root of `main`, matching the latest published release.
+- [x] **`id`** — lowercase letters and hyphens only, must **not** contain
+      `obsidian`, must not end in `plugin`. Now `hexer`.
+- [x] **`name`** — short, Basic Latin, no variation of "Obsidian", not the word
+      "Plugin", not a core plugin's name. Now `Hexer`.
+- [x] **`description`** — one line about what the plugin does, without
       restating that it is an Obsidian plugin.
 - [ ] **A published release** whose tag equals the manifest version, with
       `main.js`, `manifest.json` and `styles.css` attached.
 
-Changing `id` renames the folder the plugin lives in inside every vault, so do
-it **before** the first public release, not after.
+The `id` moved from `obsidian-hexer` to `hexer` before 0.1.0 for exactly this
+reason: it names the folder the plugin lives in inside every vault, so changing
+it after a public release breaks every existing install. Renaming it means
+renaming the development vault's folder to `.obsidian/plugins/hexer` too.
 
 Then: sign in at [community.obsidian.md](https://community.obsidian.md) with
 your Obsidian account, link the GitHub account that owns the repo, and add the

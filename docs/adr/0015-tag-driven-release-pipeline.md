@@ -43,6 +43,11 @@ three files — is therefore satisfied by construction rather than by care.
 - No build provenance attestation, which Obsidian's template includes:
   `actions/attest` needs a public repository (or Advanced Security). Worth
   adding in the same change that makes the repo public.
-- Listing in the community directory additionally needs a public repo, a
-  `README.md`, and an `id`/`name` without "Obsidian" in them. `RELEASING.md`
-  carries that checklist; none of it blocks cutting releases on GitHub.
+- Obsidian's directory rejects an `id` containing "obsidian" or a `name`
+  containing a variation of it, so the plugin was renamed `obsidian-hexer` ->
+  `hexer` and "Obsidian Hexer" -> "Hexer" before the first release: the `id`
+  names the plugin's folder in every vault, and changing it after a public
+  release breaks every existing install. The UI already called itself "Hexer".
+- What still stands between this and a directory listing is a public repo and a
+  `README.md`. `RELEASING.md` carries the checklist; neither blocks cutting
+  releases on GitHub.

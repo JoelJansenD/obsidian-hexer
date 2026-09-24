@@ -1,6 +1,6 @@
 # Credits
 
-Obsidian Hexer is licensed under the [GPL-3.0](LICENSE) license. It builds on the
+Hexer is licensed under the [GPL-3.0](LICENSE) license. It builds on the
 open source projects listed below. The licenses of these projects require that
 their copyright and permission notices are retained, so they are reproduced here
 in full.
@@ -15,7 +15,7 @@ These projects are compiled into the distributed `main.js`.
 - Source: <https://github.com/lucide-icons/lucide>
 - License: ISC
 
-Obsidian Hexer uses the Lucide icons `brush`, `check`, `chevron-down`,
+Hexer uses the Lucide icons `brush`, `check`, `chevron-down`,
 `droplets`, `eraser`, `mountain`, `mouse-pointer-2`, `paint-bucket`,
 `pencil-line`, `pentagon`, `plus`, `route` and `shapes`.
 
@@ -80,7 +80,7 @@ Game-icons.net icons are contributed by many different authors, and CC BY 3.0
 requires each author to be credited individually. The table below lists every
 game-icons.net icon shipped with this plugin and its author. All of them are
 used under CC BY 3.0 and some have been modified (recoloured and/or resized) for
-use in Obsidian Hexer.
+use in Hexer.
 
 | Icon | Author |
 | --- | --- |
