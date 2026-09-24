@@ -19,8 +19,10 @@ Obsidian installs a plugin from a **GitHub release whose tag is exactly the `man
    git push --follow-tags
    ```
 
-5. The **Release** workflow (`.github/workflows/release.yml`) picks up the tag, re-checks it against `manifest.json`, builds, runs the unit tests, and creates a **draft** release with the three files attached.
-6. Open the draft on GitHub, edit the generated notes, and **publish** it. Obsidian only ever sees published releases.
+5. The **Release** workflow (`.github/workflows/release.yml`) picks up the tag, re-checks it against `manifest.json`, builds, runs the unit tests, publishes the release with the three files attached, and then re-reads the release to confirm all three actually arrived. Give it about a minute; the run's summary links the release and lists its assets.
+6. Edit the generated notes on the release if you want to say more than the commit list does.
+
+**Never build a release by hand from the tag page.** Creating a release in the GitHub UI from an existing tag gives you a release with no plugin files on it — GitHub's two "Source code" archives are generated for every tag and are not the assets Obsidian needs. If a release came out wrong, delete it and re-cut (below) so the workflow is the only thing that ever produces one.
 
 ### The very first release (0.1.0)
 
@@ -35,7 +37,9 @@ Use `npm version` for every release after that.
 
 ### If something goes wrong
 
-The workflow only drafts; nothing is public until you publish. To redo a draft, delete it along with its tag (`gh release delete <version> --cleanup-tag`), fix the problem, and push the tag again. Once a version is *published*, leave it alone and release a new patch instead — Obsidian caches releases by version.
+The workflow publishes as soon as it finishes, so a bad release is briefly live. Before the plugin is listed in the community directory that costs nothing: delete the release along with its tag (`gh release delete <version> --cleanup-tag`), fix the problem, and push the tag again. **After** it is listed, leave a published version alone and ship a new patch instead — Obsidian caches releases by version, and users who already updated will not see a replaced one.
+
+If the run fails at **Verify the attached assets**, the release exists but is short a file. Delete it and re-cut rather than uploading the missing file by hand, so the release always matches a build the workflow made.
 
 ## Installing a release by hand
 

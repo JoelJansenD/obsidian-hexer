@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   release:
-    name: Build and draft release
+    name: Build and publish release
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -52,15 +52,39 @@ jobs:
       - name: Unit tests
         run: npm test
 
-      # Drafted rather than published: the maintainer reviews the generated
-      # notes and the attached files, then publishes. Obsidian only sees
-      # published releases.
-      - name: Draft the release
+      # Published, not drafted. A draft does not appear on its own tag page —
+      # that page shows only GitHub's generated source archives — so a draft
+      # reads as a release that lost its assets, and invites hand-building a
+      # replacement from the tag that really does have none. Notes are
+      # generated here and can be edited afterwards.
+      - name: Publish the release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "$TAG" \
             --title "$TAG" \
-            --draft \
             --generate-notes \
             main.js manifest.json styles.css
+
+      # Obsidian reads exactly these three files off the release, so a release
+      # missing one is worse than no release at all: prove they arrived.
+      - name: Verify the attached assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          attached=$(gh release view "$TAG" --json assets --jq '[.assets[].name] | sort | join(" ")')
+          echo "Attached: $attached"
+          for f in main.js manifest.json styles.css; do
+            case " $attached " in
+              *" $f "*) ;;
+              *) echo "::error::$f is missing from release $TAG"; exit 1 ;;
+            esac
+          done
+          url=$(gh release view "$TAG" --json url --jq .url)
+          {
+            echo "### Released \`$TAG\`"
+            echo
+            echo "$url"
+            echo
+            echo "Assets: $attached"
+          } >> "$GITHUB_STEP_SUMMARY"
